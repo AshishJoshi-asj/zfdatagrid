@@ -53,7 +53,7 @@ class Bvb_Grid_DataGrid {
      *
      * @var Zend_Db_Select
      */
-    private $_select = false;
+    protected $_select = false;
 
     /**
      * Bool to check if the query has already been executed
@@ -3276,7 +3276,7 @@ class Bvb_Grid_DataGrid {
      * @param object $object
      * @return array
      */
-    function object2array($data) {
+    static function object2array($data) {
 
         if (! is_object($data) && ! is_array($data))
             return $data;

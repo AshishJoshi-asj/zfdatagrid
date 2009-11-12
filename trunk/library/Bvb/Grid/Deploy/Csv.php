@@ -35,15 +35,24 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
 
 
     /*
-    * @param array $data
-    */
+     *
+     * Optimize performance by setting best value for $this->setPagination(?); 
+     * and setting options:
+     * set_time_limit
+     * memory_limit
+     * download: send data to directly to user 
+     * save: save the file
+     * 
+     * @param array $data
+     */
     function __construct($db, $title, $dir, $options = array('download')) {
 
         if (! in_array ( 'csv', $this->export )) {
             echo $this->__ ( "You dont' have permission to export the results to this format" );
             die ();
         }
-        
+
+        $this->setPagination ( 5000 );        
         $this->dir = rtrim ( $dir, "/" ) . "/";
         $this->title = $title;
         $this->options = $options;
@@ -110,39 +119,72 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
     
     }
 
-
-    function deploy() {
-
-        $grid = '';
-        $this->setPagination ( 0 );
+    function csvSendData()
+    {
         
+    }
+    /**
+     * Depending on settings store to file and/or directly upload 
+     */
+    protected function csvAddData($data)
+    {
+        if ($this->downloadData) {
+            // send first headers
+            echo $data;
+            flush();
+            ob_flush();
+        }
+        if ($this->storeData) {
+            // open file handler
+            fwrite($this->outFile, $data);            
+        }        
+    } 
+    function deploy() {
+        // apply options
+        if (isset($this->options['set_time_limit'])) {
+            // script needs time to proces huge amount of data (important)
+            set_time_limit($this->options['set_time_limit']);
+        }
+        if (isset($this->options['memory_limit'])) {
+            // adjust memory_limit if needed (not very important)         
+            ini_set('memory_limit', $this->options['memory_limit']);
+        }
+        // decide if we should store data to file or send directly to user
+        $this->downloadData = in_array ('download', $this->options);
+        $this->storeData = in_array ('save', $this->options);
+        
+        // prepare data 
         parent::deploy ();
         
-        $grid .= self::buildTitltesCsv ( parent::buildTitles () );
-        $grid .= self::buildGridCsv ( parent::buildGrid () );
-        $grid .= self::buildSqlexpCsv ( parent::buildSqlExp () );
-        
-
-        file_put_contents ( $this->dir . $this->title . ".csv", $grid );
-        
-
-        if (in_array ( 'download', $this->options )) {
+        if ($this->downloadData) {
+            // send first headers
             header ( 'Content-type: text/plain' );
             header ( 'Content-Disposition: attachment; filename="' . $this->title . '.csv"' );
-            readfile ( $this->dir . $this->title . '.csv' );
+        }
+        if ($this->storeData) {
+            // open file handler
+            $this->outFile = fopen($this->dir . $this->title . ".csv", "w");            
+        }
+       
+        // export header
+        $this->csvSendData(self::buildTitltesCsv ( parent::buildTitles () ));
+        $i=0;
+        do {
+            $i += $this->pagination;
+            $this->csvSendData(self::buildGridCsv(parent::buildGrid()));
+            $this->csvSendData(self::buildSqlexpCsv(parent::buildSqlExp()));
+            // get next data
+            $this->_select->limit($this->pagination, $i);
+            $stmt = $this->_db->query($this->_select);
+            $this->_result = $stmt->fetchAll();
+        } while(count($this->_result));
+        
+        if ($this->storeData) {
+            // close file handler
+            fclose($this->outFile);            
         }
         
-
-        if (! in_array ( 'save', $this->options )) {
-            unlink ( $this->dir . $this->title . '.csv' );
-        }
-        
-        die ();
-    
+        return true;    
     }
 
 }
-
-
-
-
