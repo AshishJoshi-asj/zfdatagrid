@@ -119,10 +119,6 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
     
     }
 
-    function csvSendData()
-    {
-        
-    }
     /**
      * Depending on settings store to file and/or directly upload 
      */
@@ -167,12 +163,12 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
         }
        
         // export header
-        $this->csvSendData(self::buildTitltesCsv ( parent::buildTitles () ));
+        $this->csvAddData(self::buildTitltesCsv ( parent::buildTitles () ));
         $i=0;
         do {
             $i += $this->pagination;
-            $this->csvSendData(self::buildGridCsv(parent::buildGrid()));
-            $this->csvSendData(self::buildSqlexpCsv(parent::buildSqlExp()));
+            $this->csvAddData(self::buildGridCsv(parent::buildGrid()));
+            $this->csvAddData(self::buildSqlexpCsv(parent::buildSqlExp()));
             // get next data
             $this->_select->limit($this->pagination, $i);
             $stmt = $this->_db->query($this->_select);
