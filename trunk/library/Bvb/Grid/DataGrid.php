@@ -2124,17 +2124,18 @@ class Bvb_Grid_DataGrid {
              */
             $is = 0;
             $integralFields = array_keys ( $this->removeAsFromFields () );
-            
-            foreach ( $fields as $campos ) {
-                
+            $fullFields = array_values($this->data ['fields']);
+
+			foreach ( $fields as $campos ) {
+
                 $campos = stripos ( $campos, ' AS ' ) ? substr ( $campos, stripos ( $campos, ' AS ' ) + 3 ) : $campos;
                 $campos = trim ( $campos );
-                
-                if (isset ( $this->data ['fields'] [$fields_duble [$is]] ['eval'] )) {
+
+                if (isset ( $fullFields [$is] ['eval'] )) {
                     $finalDados = is_object ( $dados ) ? get_object_vars ( $dados ) : $dados;
-                    
-                    $evalf = str_replace ( $search, $this->reset_keys ( $this->map_array ( $finalDados, 'prepare_output' ) ), $this->data ['fields'] [$fields_duble [$is]] ['eval'] );
-                    $new_value = eval ( 'return ' . $evalf . ';' );
+
+                    $evalf = str_replace ( $search, $this->reset_keys ( $this->map_array ( $finalDados, 'prepare_output' ) ), $fullFields [$is] ['eval'] );
+					$new_value = eval ( 'return ' . $evalf . ';' );
                 
                 } else {
                     if ($this->_adapter == 'db') {
@@ -2154,25 +2155,24 @@ class Bvb_Grid_DataGrid {
                 }
                 
                 //[PT]Aplicar o formato da célula
-                if (isset ( $this->data ['fields'] [$fields_duble [$is]] ['format'] )) {
+                if (isset ( $fullFields [$is] ['format'] )) {
                     
-                    $new_value = $this->applyFormat ( $new_value, $this->data ['fields'] [$fields_duble [$is]] ['format'], $this->data ['fields'] [$fields_duble [$is]] ['format'] [1] );
+                    $new_value = $this->applyFormat ( $new_value, $fullFields [$is] ['format'], $fullFields [$is] ['format'] [1] );
                 }
                 
-
-                if (isset ( $this->data ['fields'] [$fields_duble [$is]] ['decorator'] )) {
-                    
+                if (isset ( $fullFields [$is] ['decorator'] )) {
                     $finalDados = is_object ( $dados ) ? get_object_vars ( $dados ) : $dados;
-                    $new_value = str_replace ( $search, $this->reset_keys ( $this->map_array ( $finalDados, 'prepare_output' ) ), $this->data ['fields'] [$fields_duble [$is]] ['decorator'] );
+					// replace old value with new_value
+					$finalDados[$fields_duble [$is]] = $new_value;
+                    $new_value = str_replace ( $search, $this->reset_keys ( $this->map_array ( $finalDados, 'prepare_output' ) ), $fullFields [$is] ['decorator'] );
                 }
                 
 
-                if (! isset ( $this->data ['fields'] [$fields_duble [$is]] ['hide'] )) {
-                    $fieldClass = isset ( $this->data ['fields'] [$fields_duble [$is]] ['class'] ) ? $this->data ['fields'] [$fields_duble [$is]] ['class'] : '';
+                if (! isset ( $fullFields [$is] ['hide'] )) {
+                    $fieldClass = isset ( $fullFields [$is]  ['class'] ) ? $fullFields [$is] ['class'] : '';
                     $class = isset ( $class ) ? $class : '';
                     $return [$i] [] = @array ('class' => $class . " " . $fieldClass, 'value' => stripslashes ( $new_value ), 'field' => $integralFields [$is] );
-                }
-                
+				}
 
                 $is ++;
             
