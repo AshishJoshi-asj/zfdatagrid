@@ -32,6 +32,21 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
     protected $options = array ();
 
     protected $output = 'csv';
+    
+    /**
+     * Set true if data should be downloaded
+     */
+    protected $downloadData = null;
+
+    /**
+     * Set true if data should be stored
+     */
+    protected $storeData = null;
+    
+    /**
+     * Storing file
+     */
+    protected $outFile = null;
 
 
     /*
@@ -146,9 +161,9 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
             ini_set('memory_limit', $this->options['memory_limit']);
         }
         // decide if we should store data to file or send directly to user
-        $this->downloadData = in_array ('download', $this->options);
-        $this->storeData = in_array ('save', $this->options);
-        
+        $this->downloadData = in_array('download', $this->options);
+        $this->storeData = in_array('save', $this->options);
+
         // prepare data 
         parent::deploy ();
         
