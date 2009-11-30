@@ -23,18 +23,39 @@
 
 class Bvb_Grid_Formatter_Date
 {
-    public $locale = 'en_US';
+    protected $locale = null;
+    protected $date_format = null;
+    protected $type = null;
     
-    function __construct($loc)
+    function __construct($options=array())
     {
-        $this->locale = $loc;
+        if ($options instanceof Zend_Locale) {
+            $this->locale = $options;
+        } elseif (is_string($options)) {
+            $this->date_format = $options; 
+        } else {
+            foreach ($options as $k=>$v) {
+                switch ($k) {
+                    case 'locale':
+                        $this->locale = $v;                        
+                        break;
+                    case 'date_format':
+                        $this->date_format = $v;
+                        break;
+                    case 'type':
+                        $this->type = $v;
+                        break;
+                    default:
+                        throw new Exception("Unknown option '$k'.");
+                }
+            }
+        }
     }
 
     function format($value)
     {
-        $date = new Zend_Date ( $value );
-        $date->setLocale($this->locale);
-        return $date->toString ();
+        $date = new Zend_Date($value);
+        return $date->toString($this->date_format, $this->type, $this->locale);
     }
 
 }
