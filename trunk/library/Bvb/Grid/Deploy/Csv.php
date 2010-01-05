@@ -169,7 +169,7 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
         
         if ($this->downloadData) {
             // send first headers
-            header ( 'Content-type: text/plain' );
+            header ( 'Content-type: text/plain; charset=utf-8'.$this->charEncoding );
             header ( 'Content-Disposition: attachment; filename="' . $this->title . '.csv"' );
         }
         if ($this->storeData) {
