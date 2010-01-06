@@ -265,13 +265,6 @@ class Bvb_Grid_DataGrid {
 	protected $_finalFields;
 	
 	/**
-	 * colspan to apply
-	 *
-	 * @var unknown_type
-	 */
-	public $_colspan;
-	
-	/**
 	 * Number of hidden fields
 	 * used to calculate the colspan
 	 *
@@ -759,18 +752,6 @@ class Bvb_Grid_DataGrid {
 	}
 	
 	/**
-	 * Define which allowed types of exportation 
-	 *
-	 * @param array $var
-	 * @return $this
-	 */
-	function export(array $var) {
-		
-		$this->export = $var;
-		return $this;
-	}
-	
-	/**
 	 * Get the table name using the field name.
 	 * This happens when we are using joins, and the field
 	 * has a table sufix.
@@ -890,7 +871,6 @@ class Bvb_Grid_DataGrid {
 		
 		return $return;
 	}
-	
 	
 	/**
 	 *  The allowed fields from a table
@@ -1024,6 +1004,16 @@ class Bvb_Grid_DataGrid {
 	 */
 	function buildSearchType($filtro, $key, $field) {
 		
+		$columns = $this->_select->getPart ( 'columns' );
+		
+		foreach ( $columns as $value ) {
+			
+			if ($key == $value [0] . '.' . $value [2] && strpos ( $key, '.' ) !== false) {
+				$field = $value [1]->__toString ();
+			}
+		
+		}
+		
 		$fieldsSemAsFinal = $this->removeAsFromFields ();
 		if (@$fieldsSemAsFinal [$key] ['searchType'] != "") {
 			$op = @$fieldsSemAsFinal [$key] ['searchType'];
@@ -1125,15 +1115,11 @@ class Bvb_Grid_DataGrid {
 				} else {
 					$oldKey = $key;
 					if (@$fieldsSemAsFinal [$key] ['searchField'] != "") {
-						
 						$key = $this->replaceAsString ( $fieldsSemAsFinal [$key] ['searchField'] );
 					}
-					if (@array_key_exists ( 'sqlexp', $this->data ['fields'] [$key] )) {
-						$this->buildSearchType ( $filtro, $oldKey, $key );
-					} else {
-						$this->buildSearchType ( $filtro, $oldKey, $key );
-						$valor_filters [$key] = $filtro;
-					}
+					
+					$this->buildSearchType ( $filtro, $oldKey, $key );
+					$valor_filters [$key] = $filtro;
 				}
 			
 			}
@@ -1260,7 +1246,7 @@ class Bvb_Grid_DataGrid {
 		}
 		
 		// Remove the action e controller keys, they are not necessary (in fact they aren't part of url)
-		if (array_key_exists ( 'ajax', $this->info )) {
+		if (array_key_exists ( 'ajax', $this->info ) && $this->info ['ajax'] !== false) {
 			return $params ['module'] . "/" . $params ['controller'] . $action . $url . "/gridmod/ajax";
 		} else {
 			return $this->_baseUrl . "/" . $params ['module'] . "/" . $params ['controller'] . $action . $url;
@@ -1303,6 +1289,7 @@ class Bvb_Grid_DataGrid {
 		} else {
 			$data = array_keys ( $this->_fieldsNoAs );
 		}
+		
 		$tcampos = count ( $data );
 		
 		for($i = 0; $i < count ( $this->extra_fields ); $i ++) {
@@ -1312,7 +1299,10 @@ class Bvb_Grid_DataGrid {
 		}
 		
 		for($i = 0; $i < $tcampos; $i ++) {
-			if (! isset ( $this->data ['fields'] [$this->_fields [$i]] ['hide'] ) || $this->data ['fields'] [$this->_fields [$i]] ['hide'] == 0) {
+			
+			$nf = reset ( explode ( ' ', $this->_fields [$i] ) );
+			
+			if (! isset ( $this->data ['fields'] [$nf] ['hide'] ) || $this->data ['fields'] [$nf] ['hide'] == 0) {
 				
 				if (@array_key_exists ( $data [$i], $this->filters )) {
 					if (isset ( $this->filters [$data [$i]] ['decorator'] ) && is_array ( $this->filters [$data [$i]] )) {
@@ -1331,6 +1321,7 @@ class Bvb_Grid_DataGrid {
 				$return [] = array ('type' => 'extraField', 'class' => $this->template ['classes'] ['filter'], 'position' => 'right' );
 			}
 		}
+		
 		return $return;
 	}
 	
@@ -2238,7 +2229,7 @@ class Bvb_Grid_DataGrid {
 			return $filters;
 		} elseif ($this->_adapter == 'db') {
 			//Não forneceu dados, temos que ir buscá-los todos às tabelas
-			$titulos = array_combine ( array_keys ( $this->data ['fields'] ), array_keys ( $this->data ['fields'] ) );
+			$titulos = array_combine ( array_keys ( $this->_fieldsNoAs ), array_keys ( $this->_fieldsNoAs ) );
 		}
 		
 		if (isset ( $this->data ['hide'] ) && is_array ( $this->data ['hide'] )) {
@@ -2263,7 +2254,6 @@ class Bvb_Grid_DataGrid {
 				}
 			}
 		}
-		
 		return $titulos;
 	}
 	
@@ -2408,8 +2398,8 @@ class Bvb_Grid_DataGrid {
 		// Make sure they exists on the table
 		$this->filters = self::validateFilters ( $this->filters );
 		
-		//[PT]O colspan a ser aplicado em tabelas
-		$this->_colspan = $this->colspan ();
+		//colspan to apply
+		$this->colspan ();
 		return true;
 	}
 	
@@ -2715,8 +2705,8 @@ class Bvb_Grid_DataGrid {
 							$selectZendDb->reset ( Zend_Db_Select::LIMIT_COUNT );
 							$selectZendDb->reset ( Zend_Db_Select::LIMIT_OFFSET );
 						}
-						$selectZendDb->reset ( Zend_Db_Select::COLUMNS );
 						$selectZendDb->reset ( Zend_Db_Select::GROUP );
+						$selectZendDb->reset ( Zend_Db_Select::ORDER );
 						$selectZendDb->columns ( array ('TOTAL' => new Zend_Db_Expr ( "COUNT(*)" ) ) );
 						
 						$stmt = $selectZendDb->query ();
@@ -2749,6 +2739,7 @@ class Bvb_Grid_DataGrid {
 			} else {
 				
 				$stmt = $this->_db->query ( $this->_select );
+				
 				$result = $stmt->fetchAll ();
 				
 				if ($this->_forceLimit === false) {
@@ -2758,8 +2749,8 @@ class Bvb_Grid_DataGrid {
 						$selectZendDb->reset ( Zend_Db_Select::LIMIT_COUNT );
 						$selectZendDb->reset ( Zend_Db_Select::LIMIT_OFFSET );
 					}
-					$selectZendDb->reset ( Zend_Db_Select::COLUMNS );
 					$selectZendDb->reset ( Zend_Db_Select::GROUP );
+					$selectZendDb->reset ( Zend_Db_Select::ORDER );
 					$selectZendDb->columns ( array ('TOTAL' => new Zend_Db_Expr ( "COUNT(*)" ) ) );
 					
 					$stmt = $selectZendDb->query ();
@@ -3133,7 +3124,13 @@ class Bvb_Grid_DataGrid {
 				$nn = $key;
 			}
 			
-			$finalFilters [$nkey] = array ();
+			if (isset ( $filters [$key] ['values'] )) {
+				$finalFilters [$nkey] ['values'] = $filters [$key] ['values'];
+			}
+			
+			if (! isset ( $finalFilters [$nkey] )) {
+				$finalFilters [$nkey] = array ();
+			}
 			
 			if (isset ( $filters [$key] ['distinct'] )) {
 				$finalFilters [$nkey] ['distinct'] ['name'] = $nn;
@@ -3278,6 +3275,7 @@ class Bvb_Grid_DataGrid {
 		
 		if ($this->_select->getPart ( Zend_Db_Select::LIMIT_COUNT ) > 0) {
 			$this->_forceLimit = $this->_select->getPart ( Zend_Db_Select::LIMIT_COUNT );
+			$this->setPagination ( $this->_forceLimit );
 		}
 		
 		foreach ( $from as $key => $tables ) {
