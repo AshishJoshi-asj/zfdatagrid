@@ -6,7 +6,7 @@ class JqgridController extends Zend_Controller_Action
         $db = Zend_Registry::get ( 'db' );
         
         $select = $db->select()
-            ->from('city')
+            ->from('City')
             ->order('Name')
         ;
         
