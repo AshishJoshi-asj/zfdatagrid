@@ -1,4 +1,10 @@
 <?php
+/** Zend_Json */
+require_once 'Zend/Json.php';
+
+/** Zend_Controller_Front */
+require_once 'Zend/Controller/Front.php';
+
 // TODO see also http://www.datatables.net/examples/ and http://www.flexigrid.info/
 class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
 {
@@ -16,20 +22,29 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      */
     private $_defaultOptions = array(
         'datatype' =>"local",
-        'height' => 250,
+        'height' => 'auto',
         'autowidth' => true,
         'rownumbers' => true,
         'gridview' => true,
-        'multiselect' => true,
-        'viewrecords' => true, 	
-        'viewsortcols' => true, 	     	
+        'multiselect' => false,
+        'viewrecords' => true,     	
         'imgpath' => "themes/basic/images",
         'caption' => '', 	
         'loadError' => 'function(xhr,st,err) { if (xhr.status!=200) {alert(xhr.statusText);} }',   
     );
     
     private $_options = array();
-    
+    /**
+     * List of commands to execute after the jqGrid object is initiated
+     *  
+     * @var array
+     */
+    private $_postCommands = array();
+    /**
+     * List of custon buttons to be shown on navigation bar
+     * 
+     * @var array
+     */
     private $_buttons = array();
     
     /**
@@ -40,7 +55,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
     function __construct ($db = false)
     {
         parent::__construct($db);       
-
+        // TODO move this to prepareOptions ?
         // change parameters from jqGrid to fit Bvb_Grid_DataGrid
         // setPagination
         if (isset($this->ctrlParams ['rows'])) {
@@ -66,7 +81,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
             $flts = new stdClass();
             foreach ($this->ctrlParams as $filter=>$val)
             $flts->$filter = $val;
-            $this->ctrlParams ['filters'] = urlencode(Zend_Json::encode($flts));                       
+            $this->ctrlParams ['filters'] = urlencode(Zend_Json::encode($flts));
         }
     }
     /**
@@ -78,6 +93,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      */
     function ajax($gridId)
     {
+        $this->setId($gridId);
         // if request is Ajax we should only return data
         if (false!==$gridId && $this->isAjaxRequest()) {
             // prepare data          
@@ -85,7 +101,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
             // set data in JSON format
             $response = Zend_Controller_Front::getInstance()->getResponse();
             $response->setHeader('Content-Type', 'application/json');
-            $response->setBody($this->buildJson());
+            $response->setBody($this->renderPartData());
             // send logged messages to FirePHP
             Zend_Wildfire_Channel_HttpHeaders::getInstance()->flush();
             // send the response now and end request processing
@@ -103,6 +119,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      */
     public function setJsOptions(array $options)
     {
+        // TODO bad name, use the same as in ZendX_Jquery
         $this->_options = $this->_defaultOptions;
         
         $methods = get_class_methods($this);
@@ -124,13 +141,13 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      */
     protected function addExportButtons(array $types)
     {
+        // TODO not ok links
         foreach ($types as $export=>$url) {
-            $this->addButton(
+            $this->jqgAddNavButton(
                 array(
                     'caption' => $export,
                     'buttonicon' => "ui-icon-extlink",
-                    // TODO use expression
-                    'onClickButton' => <<<JS
+                    'onClickButton' => new Zend_Json_Expr(<<<JS
 function() { 
     newwindow = window.open("$url",'$export Export',''); 
     if (window.focus) {
@@ -139,162 +156,94 @@ function() {
     return false; 
 }
 JS
-                    ,
+                    ),
                     'position' => "last"
                 )
             );
         }
     }
-
-    /**
-     * Add grid button
-     *
-     * @param array $options options for JqGrid custom button
-     * 
-     * @return void
-     */
-    public function addButton(array $options)
-    {
-        $button = '{';
-        foreach ($options as $name => $value) {
-            if (in_array($name, array('onClickButton'))) {
-                // parameters that can be js function
-                $button .= '"'.$name.'": '.$value.','. PHP_EOL;
-            } elseif (is_array($value)) {
-                $button .= '"'.$name.'": '.Zend_Json::encode($value).','. PHP_EOL;
-            } elseif (is_bool($value)) {
-                $button .= '"'.$name.'":'.($value ? 'true':'false').','. PHP_EOL;
-            } else {
-                $button .= '"'.$name . '": "' . addslashes($value) . '",' . PHP_EOL;
-            }
-        }
-        $button = substr($button, 0, -(strlen(PHP_EOL)+1));
-        $button .= '}';
-        $this->_buttons[] = $button;
-    }
-    
     /**
      * Build grid. Will output HTML definition for grid and add js/css to view.
      * 
      * @return string output this sting to place in view where you want to display the grid
      */
     function deploy()
-    {
-        $html = "";        
+    {      
         // prepare internal Bvb data
         parent::deploy();
         // prepare access to view
         $view = $this->getView();
         // defines ID property of html tags related to this jqGrid
-        $id = "1";
-        // build URL where to receive data from
-        $url = $view->serverUrl(true) . "?q=$id";
-        // build definition of columns
-        $colDefs = $this->buildJqColumns();
-        // add export buttons
-        $this->addExportButtons($this->export);        
-        // prepare default values ...
-        $rowNum = $this->pagination; 
-        // prepare first part of data
-        $data = $this->buildJson();        
-
+        $id = $this->getId();
+        
         // initialize jQuery
-        $view->jQuery()
-            ->enable()        
-            ->uiEnable()
-            ->addStylesheet($this->_jqgridLibPath . "/css/ui.jqgrid.css")
-            // TODO locale should be configurable
-            ->addJavascriptFile($this->_jqgridLibPath . '/js/i18n/grid.locale-en.js')
-            ->addJavascriptFile($this->_jqgridLibPath . '/js/jquery.jqGrid.min.js');
-
-        // initialize table with jQuery
-        $this->_options += $this->_defaultOptions;
-        
-        
-        $x = Zend_Json::encode($this->_options, false, array('enableJsonExprFinder' => true));
-
-        // add filter toolbar to grid - $grid->noFilters(1);
-        $filterToolbar = (isset($this->info['noFilters']) ? $this->info['noFilters'] : false) ? "" : ".filterToolbar()";
-        // TODO dissable sorting on columns - $grid->noOrder(1);        
-        
-        $options = <<<EOF
-{
-url: "$url",
-pager: jQuery('#jqgrid_pager_$id'),
-$colDefs,
-rowNum:$rowNum,
-EOF;
-        foreach ($this->_options as $name => $value) {
-            if (in_array($name, array('loadError'))) {
-                // parameters that can be js function
-                $options .= '"'.$name.'": '.$value.','. PHP_EOL;
-            } elseif (is_array($value)) {
-                $options .= '"'.$name.'": '.Zend_Json::encode($value).','. PHP_EOL;
-            } elseif (is_bool($value)) {
-                $options .= '"'.$name.'":'.($value ? 'true':'false').','. PHP_EOL;
-            } else {
-                $options .= '"'.$name . '": "' . addslashes($value) . '",' . PHP_EOL;
-            }
-        }
-        $options = substr($options, 0, -(strlen(PHP_EOL)+1));
-        $options .= '}';
-        
-        $buttons = '';
-        if (true) {
-            $buttons = <<<JS
-.navButtonAdd('#jqgrid_pager_$id', {
-    caption:"Quick Search",
-    title:"Toggle Search Toolbar", 
-    buttonicon :'ui-icon-pin-s', 
-    onClickButton:function(){ $(this)[0].toggleToolbar(); } 
-});
-JS;
-        }
-        foreach ($this->_buttons as $button) {
-            $buttons .= ".navButtonAdd('#jqgrid_pager_$id',$button)";
-        }
-        
-        $js = <<<EOF
-var myData = $data;     
-jQuery("#jqgrid_$id").jqGrid(
-$options
-)
-.navGrid('#jqgrid_pager_$id',{edit:false,add:false,del:false})
-	$filterToolbar
-    $buttons;
-jQuery("#jqgrid_$id")
-	.setGridParam({datatype:"json"})[0]
-	.addJSONData(myData);
-EOF;
-
-        $view->jQuery()->addOnLoad($js);
-        // return html part of grid 
-        $html = <<<HTML
-<table id="jqgrid_$id" class="scroll" cellpadding="0" cellspacing="0">
-    <tr><td></td></tr>
-</table>
-<div id="jqgrid_pager_$id" class="scroll"></div>
-HTML;
-        return $html;
+        $this->jqInit();
+        // prepare options used to build jqGrid element
+        $this->prepareOptions();
+        // build definition of columns, which will manipulate _options
+        $this->_options['colModel'] = $this->jqgGetColumnModel();
+        // build final JavaScript code and return HTML code to display
+        $this->jqAddOnLoad($this->renderPartJavascript());
+        return $this->renderPartHtml();      
     }
-    
     /**
-     * Use to detect if we should return plain JSON data or full table definition
-     *
-     * @return boolean
-     */    
-    protected function isAjaxRequest()
-    {
-        return Zend_Controller_Front::getInstance()->getRequest()->isXmlHttpRequest() 
-            || isset($this->ctrlParams['_search']);
-    }
-    
-    /**
-     * Pack data into JSON format
+     * Return javascript part of grid
      * 
      * @return string
      */
-    function buildJson()
+    public function renderPartJavascript()
+    {
+        // prepare first part of data
+        $data = $this->renderPartData();        
+        // convert options to javascript
+        $options = self::encodeJson($this->_options);
+        // ! this should be the last commands (it is not chainable anymore)
+        foreach ($this->_buttons as $btn) {
+            $this->_postCommands[] = sprintf("navButtonAdd('#%s', %s)", $this->jqgGetIdPager(), self::encodeJson($btn));
+        }
+        $this->_postCommands[] = 'setGridParam({datatype:"json"})';
+        $this->_postCommands[] = 'jqGrid()[0].addJSONData(myData)';        
+
+        // combine the post commands into JavaScrip string
+        if (count($this->_postCommands)) {
+            $postCommands = '.' . implode("\n.", $this->_postCommands);
+        }
+        // build javascript text
+        $idtable = $this->jqgGetIdTable();        
+        $js = <<<EOF
+var myData = $data;     
+jQuery("#$idtable").jqGrid(
+$options
+)
+$postCommands
+;
+EOF;
+        // TODO add users javascript code, something like ready event
+        return $js;
+    }
+    /**
+     * Return html part of grid
+     * 
+     * @return string
+     */
+    public function renderPartHtml()
+    {
+        $idtable = $this->jqgGetIdTable();
+        $idpager = $this->jqgGetIdPager();
+        $html = <<<HTML
+<table id="$idtable" class="scroll" cellpadding="0" cellspacing="0">
+    <tr><td></td></tr>
+</table>
+<div id="$idpager" class="scroll"></div>
+HTML;
+        return $html;
+    }
+    /**
+     * Return data in JSON format
+     * 
+     * @return string
+     */
+    function renderPartData()
     {
         // clarify the values
         $page = $this->ctrlParams ['page']; // get the requested page 
@@ -322,15 +271,127 @@ HTML;
         $data->total = $totalPages; 
         $data->records = $count;     
         return Zend_Json::encode($data); 
+    }    
+    /**
+     * Consolidate all settings to know how to render the grid
+     * 
+     * Options are set on grid level by:
+     * 1. javascript options passed to jqGrid (?)
+     * 2. special Bvb_Grid_Deploy_JqGrid options (jqg array)
+     * 3. standard Bvb settings
+     * 
+     * Options are set on column level by:
+     * 1. javascript options passed to columns (?)
+     * 2. special Bvb_Grid_Deploy_JqGrid options (jqg array)
+     * 3. standard Bvb settings
+     * 4. formaters (?) 
+     */
+    public function prepareOptions()
+    {
+        $id = $this->getId();
+        // build URL where to receive data from
+        $url = $this->getView()->serverUrl(true) . "?q=$id";
+        
+        // initialize table with default options
+        ////////////////////////////////////////
+        $this->_options += $this->_defaultOptions;
+        // prepare navigation 
+        $this->_postCommands[] = sprintf("navGrid('#%s',{edit:false,add:false,del:false})", $this->jqgGetIdPager());
+        
+        // override with options explicitly set by user
+        ///////////////////////////////////////////////
+       
+        // override with options defined on Bvb_Grid_DataGrid level
+        ///////////////////////////////////////////////////////////
+        $this->_options['url'] = $url;
+        $this->_options['pager'] = new Zend_Json_Expr(sprintf("jQuery('#%s')", $this->jqgGetIdPager()));
+        $this->_options['rowNum'] = $this->pagination;
+
+        if (!$this->getInfo('noFilters', false)) {
+            // add filter toolbar to grid - if not set $grid->noFilters(1);            
+            $this->_postCommands[] = 'filterToolbar()';
+            $this->jqgAddNavButton(array(
+                'caption' => $this->__("Quick Search"),
+                'title' => $this->__("Toggle Search Toolbar"), 
+                'buttonicon' => 'ui-icon-pin-s', 
+                'onClickButton' => new Zend_Json_Expr("function(){ $(this)[0].toggleToolbar(); }")        
+            ));
+        }
+
+        if (!$this->getInfo('noOrder', false)) {
+            // enable sorting on columns - if not set $grid->noOrder(1);            
+
+        }                
+        // add export buttons
+        $this->addExportButtons($this->export);       
+        
+
     }
     /**
-     * Create column definition compatible with jqGrid
-     * 
-     * @return unknown_type
-     */
-    function buildJqColumns()
+     * Encode Json that may include javascript expressions.
+     *
+     * Take care of using the Zend_Json_Encoder to alleviate problems with the json_encode
+     * magic key mechanism as of now.
+     *
+     * @see Zend_Json::encode
+     * @param  mixed $value
+     * @return mixed
+     */    
+    public static function encodeJson($value)
     {
-        $cols = array();
+        return Zend_Json::encode($value, false, array('enableJsonExprFinder' => true));
+    }
+    /**
+     *  Loads jQuery related libraries needed to display jqGrid.
+     * 
+     *  ZendX_Jquery is used as default, but this could be overriden.
+     * 
+     *  @return Bvb_Grid_Deploy_JqGrid
+     */
+    public function jqInit()
+    {
+        $this->_view->jQuery()
+            ->enable()        
+            ->uiEnable()
+            ->addStylesheet($this->_jqgridLibPath . "/css/ui.jqgrid.css")
+            // TODO locale should be configurable
+            ->addJavascriptFile($this->_jqgridLibPath . '/js/i18n/grid.locale-en.js')
+            ->addJavascriptFile($this->_jqgridLibPath . '/js/jquery.jqGrid.min.js');
+        return $this;
+    }    
+    /**
+     * Add JavaScript code to be executed when jQuery ready event
+     * 
+     * ZendX_Jquery is used as default, but this could be overriden. 
+     * 
+     * @param string $js
+     * 
+     * @return Bvb_Grid_Deploy_JqGrid
+     */
+    public function jqAddOnLoad($js)
+    {
+        $this->_view->jQuery()->addOnLoad($js);
+        return $this;        
+    }
+    /////////////////////
+    /**
+     * Add action button to navigation bar  
+     * 
+     * @param array $button options for JqGrid custom button
+     * 
+     * @return Bvb_Grid_Deploy_JqGrid
+     */
+    public function jqgAddNavButton($button)
+    {
+        $this->_buttons[] = $button; 
+        return $this;
+    }
+    /**
+     * 
+     */
+    public function jqgGetColumnModel()
+    {
+        $model = array();
         
         //BVB grid options
         $skipOptions = array('title','sqlexp','hide', 'hRow','eval', 'class', 'searchType', 'format');
@@ -340,8 +401,8 @@ HTML;
         
         reset($this->data['fields']);
         foreach ($titles as $title) {
-            $options = '{"name":"'.$title['name'].'", "label":"'.$title['value'].'", ';
-            foreach (current($this->data['fields']) as $name =>$value) {
+            $options = array("name" => $title['name'], "label" => $title['value']);
+/*            foreach (current($this->data['fields']) as $name =>$value) {
                 if ( in_array($name, $skipOptions)) {
                     continue ;
                 }
@@ -358,24 +419,55 @@ HTML;
             }
             $options = substr($options, 0, -1);
             $options = rtrim($options, ', ');
-            $options .= '}';
-            $cols[] = $options;
+            $options .= '}';*/
+            $model[] = $options;
             next($this->data['fields']);
         } 
-        $cols = implode(",", $cols);
-        return 'colModel:[' . $cols . ']';
+        return $model;
     }
-    
+    /**
+     * Return ID for pager HTML element 
+     */
+    public function jqgGetIdPager()
+    {
+        return "jqgrid_pager_" . $this->getId();
+    }
+    /**
+     * Return ID for pager HTML element 
+     */
+    public function jqgGetIdTable()
+    {
+        return "jqgrid_" . $this->getId();
+    }
     ///////////////////////////////////////////////// Following functions could go to Bvb_Grid_DataGrid
+    /////////////////////////////////////////////////
+    // @codingStandardsIgnoreStart    
+    /**
+     * Not defined in Bvb_Grid_DataGrid, but used there
+     *   
+     * @var string
+     */
+    protected $output = 'jqgrid';
+    // @codingStandardsIgnoreEnd 
+    /**
+     * @see Bvb_Grid_DataGrid::$export
+     */
+    public $export = array();    
     /**
      * @var Zend_View_Interface
      */    
     protected $_view = null;
     /**
+     * Ajax ID
+     * @var string
+     */
+    protected $_id = null;
+    /**
      * Set view object
      *
      * @param  Zend_View_Interface $view
-     * @return Zend_Form
+     * 
+     * @return Bvb_Grid_Deploy_JqGrid
      */
     public function setView(Zend_View_Interface $view = null)
     {
@@ -400,18 +492,48 @@ HTML;
 
         return $this->_view;
     }
-    // @codingStandardsIgnoreStart    
     /**
-     * Not defined in Bvb_Grid_DataGrid, but used there
-     *   
-     * @var string
-     */
-    protected $output = 'jqgrid';
-    // @codingStandardsIgnoreEnd 
-
+     * Use to detect if we should return plain JSON data or full table definition
+     *
+     * @return boolean
+     */    
+    protected function isAjaxRequest()
+    {
+        return Zend_Controller_Front::getInstance()->getRequest()->isXmlHttpRequest() 
+            || isset($this->ctrlParams['_search']);
+    }
     /**
-     * @see Bvb_Grid_DataGrid::$export
+     * 
+     * @return string
      */
-    public $export = array();
-    
+    public function getId()
+    {
+        return "1";
+    }
+    /**
+     * 
+     * @param string $id
+     * 
+     * @return Bvb_Grid_Deploy_JqGrid 
+     */
+    public function setId($id)
+    {
+        $this->_id = $id;
+        return $this;
+    }
+    /**
+     * Return variable stored in info. Return default if value is not stored.  
+     *
+     * @param string $param
+     * @param mixed  $default
+     * 
+     * @return mixed
+     */    
+    public function getInfo($param, $default = false) {
+        if (isset($this->info[$param])) {
+            return $this->info[$param];
+        } else {
+            return $default;
+        }
+    }          
 }

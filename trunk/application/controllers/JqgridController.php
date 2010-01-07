@@ -5,15 +5,18 @@ class JqgridController extends Zend_Controller_Action
     {
         $db = Zend_Registry::get ( 'db' );
         
-        $select = $db->select('title_pag')
-            ->from('city' /*, array('ID', 'Name', 'ident', 'days_after')*/)
+        $select = $db->select()
+            ->from('city')
             ->order('Name')
         ;
         
         $grid1 = new Bvb_Grid_Deploy_JqGrid( $db, 'Grid Example', 'media/temp', array ('download' ) );
         $grid1->query($select);
 
-        $grid1->updateColumn('title_pag', array('title' => 'Division name','width' => '260'));
+        $grid1->updateColumn('ID', array('title' => '#ID','width' => '20'));        
+        $grid1->updateColumn('Name', array('title' => 'City name','width' => '260'));
+        //$grid1->noFilters(1);        
+        //$grid1->noOrder(1);
         
         $grid1->ajax('divisions');
         
