@@ -30,22 +30,36 @@ class JqgridController extends Zend_Controller_Action
         $this->view->g1 = $grid1->deploy($this->view);       
         $this->view->g1_html = $grid1_html->deploy($this->view);        
     }
+    
+    public function g1ActionBar($id) {
+        $helper = new Zend_View_Helper_Url();
+        $actions = array(
+            array('url'=>$helper->url(array('action'=>'do', 'what'=>'view', 'id'=>$id)), 'caption'=>'View', 'class'=>'ui-icon ui-icon-zoomin'),        
+            array('url'=>$helper->url(array('action'=>'do', 'what'=>'edit', 'id'=>$id)), 'caption'=>'Edit', 'class'=>'ui-icon ui-icon-pencil'),
+            array('url'=>$helper->url(array('action'=>'do', 'what'=>'delete', 'id'=>$id)), 'caption'=>'Delete', 'class'=>'ui-icon ui-icon-cancel')            
+        );
+        return Bvb_Grid_Deploy_JqGrid::formatterActionBar($actions);
+    }
 
     function configG1($grid)
     {
-        /////////////////// 1. define select
+        ////////////////// 1. define select
         $select = $this->db->select()
             ->from('City')
             ->order('Name')
             ->columns(array('IsBig'=>new Zend_Db_Expr('IF(Population>500000,1,0)')))
-            // TODO big problem ->columns(array('test'=>'ID'))
+            // TODO big problem             
+            // ->columns(array('_action'=>new Zend_Db_Expr('ID')))            
+            // ->columns(array('test'=>'ID'))
         ;
         $grid->query($select);
 
-        /////////////////// 2. update column options
+        ////////////////// 2. update column options
         ////////////////// see Bvb documentation
         ////////////////// and for jqg array see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:colmodel_options           
-        $grid->updateColumn('ID', array('title'=>'#ID','width'=>20, 'hide'=>true));        
+        //$grid->updateColumn('ID', array('title'=>'#ID','width'=>20, 'hide'=>true));
+        $grid->updateColumn('ID', array('title'=>'Action','width'=>40, 'callback'=>array('function'=>array($this,'g1ActionBar'), 'params'=>array('{{ID}}'))));        
+        //$grid->updateColumn('_action', array('callback'=>array('function'=>array($this,'g1ActionIcons'))));
         $grid->updateColumn('Name', array('title'=>'City name','width'=>260));
         $grid->updateColumn('Population', array(
             'jqg' => array(
@@ -64,20 +78,20 @@ class JqgridController extends Zend_Controller_Action
             )
         ));
 
-        /////////////////// 3. set Bvb grid behaviour        
+        ////////////////// 3. set Bvb grid behaviour        
         //$grid->noFilters(1);        
         //$grid->noOrder(1);
         
-        /////////////////// 4. set jqGrid options 
-        /////////////////// for setJqgOptions see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:options
-        /////////////////// see also other Bvb_Grid_Deploy_JqGrid::setJqg*() and Bvb_Grid_Deploy_JqGrid::jqg*() methods    
+        ////////////////// 4. set jqGrid options 
+        ////////////////// for setJqgOptions see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:options
+        ////////////////// see also other Bvb_Grid_Deploy_JqGrid::setJqg*() and Bvb_Grid_Deploy_JqGrid::jqg*() methods    
         $grid->setJqgOptions(array(
             'forceFit'=>true,
             'viewrecords'=>false,
         ));
         $grid->setJqgOnInit('console.log("jqGrid initiated ! If data are remote they are not loaded at this point.");');
         
-        /////////////////// 5. set ajax ID and process response if requested 
+        ////////////////// 5. set ajax ID and process response if requested 
         $grid->ajax(get_class($grid));
     }
 }

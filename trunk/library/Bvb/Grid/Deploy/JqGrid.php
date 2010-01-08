@@ -629,4 +629,13 @@ HTML;
     {
         $this->_logger->log($message, $priority);
     }
+    
+    public static function formatterActionBar($actions)
+    {
+        $html = "";
+        foreach ($actions as $a) {      
+            $html .= sprintf('<a href="%s" class="%s" style="float:left;"><span>%s</span></a>', $a['url'], $a['class'], $a['caption']);
+        }
+        return $html;
+    }
 }
