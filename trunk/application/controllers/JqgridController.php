@@ -15,6 +15,11 @@ class JqgridController extends Zend_Controller_Action
      */
     function codeAction()
     {
+    }
+    function doAction()
+    {
+        print_r($this->getRequest()->getParams());
+        die();
     }    
     function indexAction()
     {
