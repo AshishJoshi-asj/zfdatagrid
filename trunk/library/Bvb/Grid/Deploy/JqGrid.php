@@ -21,7 +21,6 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      * @var array
      */
     private $_defaultOptions = array(
-        'datatype' =>"local",
         'height' => 'auto',
         'autowidth' => true,
         'rownumbers' => true,
@@ -54,6 +53,8 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      */
     function __construct ($db = false)
     {
+        $this->initLogger();
+        
         parent::__construct($db);       
         // TODO move this to prepareOptions ?
         // change parameters from jqGrid to fit Bvb_Grid_DataGrid
@@ -79,9 +80,11 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
         if ( isset($this->ctrlParams ['_search']) && $this->ctrlParams ['_search']) {
             // TODO support search operators
             $flts = new stdClass();
-            foreach ($this->ctrlParams as $filter=>$val)
-            $flts->$filter = $val;
-            $this->ctrlParams ['filters'] = urlencode(Zend_Json::encode($flts));
+            foreach ($this->ctrlParams as $filter=>$val) {
+                $flts->$filter = $val;
+            }
+            $this->ctrlParams['filters'] = urlencode(Zend_Json::encode($flts));
+            //print_r($this->ctrlParams['filters']);die;            
         }
     }
     /**
@@ -100,7 +103,9 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
             parent::deploy();
             // set data in JSON format
             $response = Zend_Controller_Front::getInstance()->getResponse();
-            $response->setHeader('Content-Type', 'application/json');
+            if (!self::$debug) {
+                $response->setHeader('Content-Type', 'application/json');
+            }
             $response->setBody($this->renderPartData());
             // send logged messages to FirePHP
             Zend_Wildfire_Channel_HttpHeaders::getInstance()->flush();
@@ -120,7 +125,8 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
     public function setJsOptions(array $options)
     {
         // TODO bad name, use the same as in ZendX_Jquery
-        $this->_options = $this->_defaultOptions;
+        // TODO also dangerouse that it will call set functions for general Bvb class
+        $this->_options = array(); //$this->_defaultOptions;
         
         $methods = get_class_methods($this);
         foreach ($options as $key => $value) {
@@ -193,21 +199,27 @@ JS
      */
     public function renderPartJavascript()
     {
-        // prepare first part of data
-        $data = $this->renderPartData();        
-        // convert options to javascript
-        $options = self::encodeJson($this->_options);
         // ! this should be the last commands (it is not chainable anymore)
         foreach ($this->_buttons as $btn) {
             $this->_postCommands[] = sprintf("navButtonAdd('#%s', %s)", $this->jqgGetIdPager(), self::encodeJson($btn));
         }
-        $this->_postCommands[] = 'setGridParam({datatype:"json"})';
-        $this->_postCommands[] = 'jqGrid()[0].addJSONData(myData)';        
-
+        if (true) {
+            // first data will be loaded via ajax call  
+            $data = array();
+            $this->_options['datatype'] = "json";
+        } else {
+            // set first data without ajax request
+            $data = $this->renderPartData();
+            $this->_options['datatype'] = "local";            
+            $this->_postCommands[] = 'setGridParam({datatype:"json"})';                
+            $this->_postCommands[] = 'jqGrid()[0].addJSONData(myData)';        
+        }
         // combine the post commands into JavaScrip string
         if (count($this->_postCommands)) {
             $postCommands = '.' . implode("\n.", $this->_postCommands);
         }
+        // convert options to javascript
+        $options = self::encodeJson($this->_options);
         // build javascript text
         $idtable = $this->jqgGetIdTable();        
         $js = <<<EOF
@@ -318,9 +330,9 @@ HTML;
             ));
         }
 
-        if (!$this->getInfo('noOrder', false)) {
-            // enable sorting on columns - if not set $grid->noOrder(1);            
-
+        if ($this->getInfo('noOrder', false)) {
+            // dissable sorting on columns - if set $grid->noOrder(1);            
+            $this->_options['viewsortcols'] = array(false,'vertical',false); 
         }                
         // add export buttons
         $this->addExportButtons($this->export);       
@@ -394,35 +406,51 @@ HTML;
         $model = array();
         
         //BVB grid options
-        $skipOptions = array('title','sqlexp','hide', 'hRow','eval', 'class', 'searchType', 'format');
+        $skipOptions = array(
+            'title',     // handled in parent::buildTitles()
+            'hide',      // handled in parent::buildTitles()
+            'sqlexp',
+            'hRow',
+            'eval', 
+            'class', 
+            'searchType', 
+            'format',
+            'jqg' // we handle this separately
+        );
         
-        $titles = parent::buildTitles();
+        $titles = $this->buildTitles();
+        // TODO need fix of #101
+        $fields = $this->removeAsFromFields();
+/*        $this->log($this->data['fields']);
+        $fields = $this->removeAsFromFields();
+        $this->log($fields);
+        $this->log($titles);*/        
 
-        
-        reset($this->data['fields']);
-        foreach ($titles as $title) {
+        foreach ($titles as $key=>$title) {
+            // basic options
             $options = array("name" => $title['name'], "label" => $title['value']);
-/*            foreach (current($this->data['fields']) as $name =>$value) {
-                if ( in_array($name, $skipOptions)) {
-                    continue ;
+            // add defined options
+            if (isset($fields[$key])) {
+                foreach ($fields[$key] as $name=>$value) {
+                    if ( in_array($name, $skipOptions)) {
+                        continue ;
+                    }
+                    $options[$name] = $value;
                 }
-                if (in_array($name, array('unformat'))) {
-                    // parameters that can be js function
-                    $options .= '"'.$name.'": '.$value.',';
-                } elseif (is_array($value)) {
-                    $options .= '"'.$name.'": '.Zend_Json::encode($value).',';
-                } elseif (is_bool($value)) {
-                    $options .= '"'.$name.'":'.($value ? 'true':'false').',';
-                } else {
-                    $options .= '"'.$name . '": "' . addslashes($value) . '",';
+                if (isset($fields[$key]['jqg'])) {
+                    // we apply jqg options after all other options
+                    // see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:colmodel_options
+                    foreach ($fields[$key]['jqg'] as $name=>$value) {
+                        $options[$name] = $value;
+                    }
                 }
+            } else {
+                $this->log("why there is no key $key in fields ?");
             }
-            $options = substr($options, 0, -1);
-            $options = rtrim($options, ', ');
-            $options .= '}';*/
+            // add field to model
             $model[] = $options;
-            next($this->data['fields']);
         } 
+
         return $model;
     }
     /**
@@ -430,14 +458,14 @@ HTML;
      */
     public function jqgGetIdPager()
     {
-        return "jqgrid_pager_" . $this->getId();
+        return "jqg_pager_" . $this->getId();
     }
     /**
      * Return ID for pager HTML element 
      */
     public function jqgGetIdTable()
     {
-        return "jqgrid_" . $this->getId();
+        return "jqg_" . $this->getId();
     }
     ///////////////////////////////////////////////// Following functions could go to Bvb_Grid_DataGrid
     /////////////////////////////////////////////////
@@ -461,7 +489,19 @@ HTML;
      * Ajax ID
      * @var string
      */
-    protected $_id = null;
+    protected $_id = 0;
+    /**
+     * 
+     * @var unknown_type
+     */
+    protected $_logger = null;
+    /**
+     * Set to true if you want to debug this class
+     * 
+     * @var unknown_type
+     */
+    public static $debug = false;
+    
     /**
      * Set view object
      *
@@ -508,7 +548,7 @@ HTML;
      */
     public function getId()
     {
-        return "1";
+        return $this->_id;
     }
     /**
      * 
@@ -535,5 +575,21 @@ HTML;
         } else {
             return $default;
         }
-    }          
+    }
+
+    protected function initLogger()
+    {
+        if (self::$debug) {
+            // send messages to FirePHP
+            $writter = new Zend_Log_Writer_Firebug();
+        } else {
+            // we need to have at least dummy instance of Zend_Log            
+            $writter = new Zend_Log_Writer_Null();    
+        }
+        $this->_logger = new Zend_Log($writter);
+    }
+    protected function log($message, $priority = 7)
+    {
+        $this->_logger->log($message, $priority);
+    }
 }
