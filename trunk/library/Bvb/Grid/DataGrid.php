@@ -21,7 +21,7 @@
 
 class Bvb_Grid_DataGrid {
 	
-	const VERSION = 0.5;
+	const VERSION = "0.5.1";
 	
 	/**
 	 * Char encoding
@@ -362,6 +362,10 @@ class Bvb_Grid_DataGrid {
 	 */
 	protected $_forceLimit = false;
 	
+	protected $_view;
+	
+	private $_clientFecthMode = null;
+	
 	/**
 	 *  The __construct function receives the db adapter. All information related to the
 	 *  URL is also processed here
@@ -372,7 +376,7 @@ class Bvb_Grid_DataGrid {
 	 */
 	function __construct($db = false) {
 		
-		if (! $db instanceof Zend_Db_Adapter_Abstract) {
+		/*	if (! $db instanceof Zend_Db_Adapter_Abstract) {
 			$this->setAdapter ( 'array' );
 		} else {
 			//Iniciate adapter
@@ -382,6 +386,8 @@ class Bvb_Grid_DataGrid {
 			$this->_select = $this->_db->select ();
 		
 		}
+		*/
+		$this->_view = Zend_Controller_Action_HelperBroker::getStaticHelper ( 'viewRenderer' );
 		
 		//Get the controller params and baseurl to use with filters
 		$this->ctrlParams = Zend_Controller_Front::getInstance ()->getRequest ()->getParams ();
@@ -460,9 +466,7 @@ class Bvb_Grid_DataGrid {
 	 * @param string $adapter
 	 */
 	private function setAdapter($adapter) {
-		
 		$this->_adapter = strtolower ( $adapter ) != 'db' ? 'array' : 'db';
-		
 		return $this;
 	}
 	
@@ -782,7 +786,7 @@ class Bvb_Grid_DataGrid {
 		}
 		
 		if (strpos ( $field, '.' ) === false && $this->getAdapter () == 'db') {
-			$field = $this->data ['tableAlias'] . '.' . $field;
+			#	$field = $this->data ['tableAlias'] . '.' . $field;
 		}
 		
 		if ($this->_allFieldsAdded == false) {
@@ -1007,9 +1011,14 @@ class Bvb_Grid_DataGrid {
 		$columns = $this->_select->getPart ( 'columns' );
 		
 		foreach ( $columns as $value ) {
-			
-			if ($key == $value [0] . '.' . $value [2] && strpos ( $key, '.' ) !== false) {
-				$field = $value [1]->__toString ();
+			if ($key == $value [2]) {
+				if(is_object($value[1]))
+				{
+					$field = $value [1]->__toString ();
+				}else{
+					$field = $value[0].'.'.$value [1];
+				}
+				break;
 			}
 		
 		}
@@ -1018,6 +1027,7 @@ class Bvb_Grid_DataGrid {
 		if (@$fieldsSemAsFinal [$key] ['searchType'] != "") {
 			$op = @$fieldsSemAsFinal [$key] ['searchType'];
 		}
+		
 		$op = @strtolower ( $op );
 		
 		if (substr ( $filtro, 0, 1 ) == '=') {
@@ -1216,7 +1226,7 @@ class Bvb_Grid_DataGrid {
 		
 		if (count ( $this->params ) > 0) {
 			//User as defined its own params (probably using routes)
-			$myParams = array ('comm', 'order', 'filters', 'add', 'edit' );
+			$myParams = array ('comm', 'order', 'filters', 'add', 'edit', 'export' );
 			$newParams = $this->params;
 			foreach ( $myParams as $value ) {
 				if (strlen ( $params [$value] ) > 0) {
@@ -1617,6 +1627,8 @@ class Bvb_Grid_DataGrid {
 		
 		if ($this->getAdapter () == 'db') {
 			//check if we need to load  fields for filters
+			
+
 			if (@is_array ( $this->filters [$valor] ['distinct'] )) {
 				$this->filters [$valor] ['distinct'] ['field'] = @$this->replaceAsString ( $this->filters [$valor] ['distinct'] ['field'] );
 				$this->filters [$valor] ['distinct'] ['name'] = @$this->replaceAsString ( $this->filters [$valor] ['distinct'] ['name'] );
@@ -1684,55 +1696,69 @@ class Bvb_Grid_DataGrid {
 			
 			$hRow = isset ( $this->data ['fields'] [$value] ['hRow'] ) ? $this->data ['fields'] [$value] ['hRow'] : '';
 			
-			if( (!isset($this->data ['fields'] [$value] ['hide'] ) || $this->data ['fields'] [$value] ['hide']==0) && $hRow != 1  )
-			{
+			if ((! isset ( $this->data ['fields'] [$value] ['hide'] ) || $this->data ['fields'] [$value] ['hide'] == 0) && $hRow != 1) {
 				$help_javascript .= "filter_" . $value . ",";
 			}
 		}
 		
 		if (@$options ['noFilters'] != 1) {
 			$help_javascript = str_replace ( ".", "bvbdot", $help_javascript );
-			$onchange = "onchange=\"gridChangeFilters('$help_javascript','$url');\"";
+			$attr ['onChange'] = "gridChangeFilters('$help_javascript','$url');";
 		}
 		$opcoes = $this->filters [$campo];
 		
 		if (strlen ( @$opcoes ['style'] ) > 1) {
-			$opt = " style=\"{$opcoes['style']}\"  ";
+			$attr ['style'] = $opcoes ['style'];
 		} else {
-			$opt = " style=\"width:95%\"  ";
+			$attr ['style'] = " width:95% ";
 		}
 		
+		$attr ['id'] = "filter_" . str_replace ( ".", "bvbdot", $campo );
+		
+		$selected = null;
 		if (@is_array ( $opcoes ['values'] )) {
 			
 			$tipo = 'invalid';
+			$values = array ();
+			$values [''] = '--' . $this->__ ( 'All' ) . '--';
+			
 			$avalor = $opcoes ['values'];
-			$valor = "<select name=\"$campo\" $opt $onchange id=\"filter_" . $this->replaceDots ( $campo ) . "\"  >";
-			$valor .= "<option value=\"\">--" . $this->__ ( 'All' ) . "--</option>";
+			
 			foreach ( $avalor as $key => $value ) {
-				$selected = isset ( $this->_filtersValues [$campo] ) && $this->_filtersValues [$campo] == $key ? "selected" : "";
+				if (isset ( $this->_filtersValues [$campo] ) && $this->_filtersValues [$campo] == $key) {
+					$selected = $key;
+				}
 				
-				$valor .= "<option value=\"" . stripslashes ( $key ) . "\" $selected >" . stripslashes ( $value ) . "</option>";
+				$values [$this->_view->view->escape ( $key )] = $this->_view->view->escape ( $value );
 			}
-			$valor .= "</select>";
+			
+			$valor = $this->_view->view->formSelect ( $campo, $selected, $attr, $values );
+		
 		}
 		
 		switch ($tipo) {
 			case 'invalid' :
 				break;
 			case 'enum' :
+				$values = array ();
+				$values [''] = '--' . $this->__ ( 'All' ) . '--';
 				$avalor = explode ( ",", substr ( $enum, 4 ) );
-				$valor = "<select  id=\"filter_" . str_replace ( ".", "bvbdot", $campo ) . "\" $opt $onchange name=\"\">";
-				$valor .= "<option value=\"\">--" . $this->__ ( 'All' ) . "--</option>";
+				
 				foreach ( $avalor as $value ) {
 					$value = substr ( $value, 1 );
 					$value = substr ( $value, 0, - 1 );
-					$selected = @$this->_filtersValues [$campo] == $value ? "selected" : "";
-					$valor .= "<option value=\"$value\" $selected >" . ucfirst ( $value ) . "</option>";
+					
+					if (isset ( $this->_filtersValues [$campo] ) && $this->_filtersValues [$campo] == $value) {
+						$selected = $value;
+					}
+					$values [$this->_view->view->escape ( $value )] = $this->_view->view->escape ( $value );
 				}
-				$valor .= "</select>";
+				
+				$valor = $this->_view->view->formSelect ( $campo, $selected, $attr, $values );
+				
 				break;
 			default :
-				$valor = "<input type=\"text\" $onchange id=\"filter_" . @str_replace ( ".", "bvbdot", $campo ) . "\"   class=\"input_p\" value=\"" . @$this->_filtersValues [$campo] . "\" $opt>";
+				$valor = $this->_view->view->formText ( $campo, $this->_view->view->escape ( @$this->_filtersValues [$campo] ), $attr );
 				break;
 		}
 		
@@ -1884,11 +1910,6 @@ class Bvb_Grid_DataGrid {
 					$new_value = htmlspecialchars ( $new_value );
 				}
 				
-				if (isset ( $this->data ['fields'] [$fields_duble [$is]] ['eval'] ) && $this->getAdapter () == 'db') {
-					
-					$this->data ['fields'] [$fields_duble [$is]] ['eval'] = preg_replace ( "/{{([a-z0-9_-]+}})/si", "{{" . $this->data ['table'] . ".\\1", $this->data ['fields'] [$fields_duble [$is]] ['eval'] );
-				
-				}
 				if (isset ( $this->data ['fields'] [$fields_duble [$is]] ['eval'] )) {
 					
 					$evalf = str_replace ( $search, $this->reset_keys ( $this->map_array ( $finalDados, 'prepare_output' ) ), $this->data ['fields'] [$fields_duble [$is]] ['eval'] );
@@ -1903,12 +1924,15 @@ class Bvb_Grid_DataGrid {
 					}
 					
 					$toReplace = $this->data ['fields'] [$fields_duble [$is]] ['callback'] ['params'];
-					
-					array_walk ( $toReplace, array ('self', 'insertTableName' ), array ($this->data ['table'] ) );
-					
 					if (is_array ( $toReplace )) {
+						
+						#array_walk ( $toReplace, array ('self', 'insertTableName' ), array ($this->data ['table'] ) );
+						
+
 						$replace = $this->reset_keys ( $this->map_array ( $finalDados, 'prepare_output' ) );
 						array_walk_recursive ( $toReplace, array ($this, 'replaceSpecialTags' ), array ('find' => $search, 'replace' => $replace ) );
+					} else {
+						$toReplace = arr;
 					}
 					
 					$new_value = call_user_func_array ( $this->data ['fields'] [$fields_duble [$is]] ['callback'] ['function'], $toReplace );
@@ -1938,7 +1962,7 @@ class Bvb_Grid_DataGrid {
 					$finalDados [$varEnd] = $new_value;
 					
 					if ($this->getAdapter () == 'db') {
-						$this->data ['fields'] [$fields_duble [$is]] ['decorator'] = preg_replace ( "/{{([a-z0-9_-]+}})/si", "{{" . $this->data ['table'] . ".\\1", $this->data ['fields'] [$fields_duble [$is]] ['decorator'] );
+						#$this->data ['fields'] [$fields_duble [$is]] ['decorator'] = preg_replace ( "/{{([a-z0-9_-]+}})/si", "{{" . $this->data ['table'] . ".\\1", $this->data ['fields'] [$fields_duble [$is]] ['decorator'] );
 					}
 					$new_value = str_replace ( $search, $this->reset_keys ( $this->map_array ( $finalDados, 'prepare_output' ) ), $this->data ['fields'] [$fields_duble [$is]] ['decorator'] );
 				}
@@ -1961,17 +1985,9 @@ class Bvb_Grid_DataGrid {
 					if ($value ['position'] == 'right') {
 						$fi = is_object ( $dados ) ? get_object_vars ( $dados ) : $dados;
 						
-						if (isset ( $value ['eval'] ) && $this->getAdapter () == 'db') {
-							$value ['eval'] = preg_replace ( "/{{([a-z0-9_-]+}})/si", "{{" . $this->data ['table'] . ".\\1", $value ['eval'] );
-						}
-						
 						if (isset ( $value ['eval'] )) {
 							$evalf = str_replace ( $search, $fi, $value ['eval'] );
 							$new_value = eval ( 'return ' . $evalf );
-						}
-						
-						if (isset ( $value ['decorator'] ) && $this->getAdapter () == 'db') {
-							$value ['decorator'] = preg_replace ( "/{{([a-z0-9_-]+}})/si", "{{" . $this->data ['table'] . ".\\1", $value ['decorator'] );
 						}
 						
 						if (isset ( $value ['decorator'] )) {
@@ -2689,7 +2705,6 @@ class Bvb_Grid_DataGrid {
 			
 			$this->getQuery ();
 			$this->getQueryCount ();
-			
 			$this->buildColumns ();
 			
 			if ($this->cache ['use'] == 1) {
@@ -2708,6 +2723,7 @@ class Bvb_Grid_DataGrid {
 							$selectZendDb->reset ( Zend_Db_Select::LIMIT_OFFSET );
 						}
 						$selectZendDb->reset ( Zend_Db_Select::GROUP );
+						$selectZendDb->reset ( Zend_Db_Select::COLUMNS );
 						$selectZendDb->reset ( Zend_Db_Select::ORDER );
 						$selectZendDb->reset ( Zend_Db_Select::COLUMNS );
 						$selectZendDb->columns ( array ('TOTAL' => new Zend_Db_Expr ( "COUNT(*)" ) ) );
@@ -2753,6 +2769,7 @@ class Bvb_Grid_DataGrid {
 						$selectZendDb->reset ( Zend_Db_Select::LIMIT_OFFSET );
 					}
 					$selectZendDb->reset ( Zend_Db_Select::GROUP );
+					$selectZendDb->reset ( Zend_Db_Select::COLUMNS );
 					$selectZendDb->reset ( Zend_Db_Select::ORDER );
 					$selectZendDb->reset ( Zend_Db_Select::COLUMNS );					
 					$selectZendDb->columns ( array ('TOTAL' => new Zend_Db_Expr ( "COUNT(*)" ) ) );
@@ -2864,6 +2881,7 @@ class Bvb_Grid_DataGrid {
 		
 		}
 		
+		$this->_db->setFetchMode ( $this->_clientFecthMode );
 		return;
 	}
 	
@@ -3106,24 +3124,21 @@ class Bvb_Grid_DataGrid {
 		$filters = $this->object2array ( $filters );
 		$filters = $filters ['_filters'];
 		
+		/*
 		$finalFilters = array ();
 		
 		foreach ( $filters as $key => $filter ) {
 			
-			if (strpos ( $key, '.' ) === false) {
-				$nkey = $this->data ['tableAlias'] . '.' . $key;
-			} else {
-				$nkey = $key;
-			}
+			$nkey = $key;
 			
 			if (isset ( $filters [$key] ['distinct'] ['field'] ) && strpos ( $filters [$key] ['distinct'] ['field'], '.' ) === false) {
-				$nf = $this->data ['tableAlias'] . '.' . $filters [$key] ['distinct'] ['field'];
+				$nf = $filters [$key] ['distinct'] ['field'];
 			} else {
 				$nf = $key;
 			}
 			
 			if (isset ( $filters [$key] ['distinct'] ['name'] ) && strpos ( $filters [$key] ['distinct'] ['name'], '.' ) === false) {
-				$nn = $this->data ['tableAlias'] . '.' . $filters [$key] ['distinct'] ['name'];
+				$nn = $filters [$key] ['distinct'] ['name'];
 			} else {
 				$nn = $key;
 			}
@@ -3142,8 +3157,9 @@ class Bvb_Grid_DataGrid {
 			}
 		
 		}
+		*/
 		
-		$this->filters = $finalFilters;
+		$this->filters = $filters;
 	
 	}
 	
@@ -3228,7 +3244,7 @@ class Bvb_Grid_DataGrid {
 				
 				foreach ( $tableFields as $field ) {
 					$title = ucfirst ( $field );
-					$this->updateColumn ( $value [0] . '.' . $field, array ('title' => $title ) );
+					$this->updateColumn ( $field, array ('title' => $title, 'field' => $value [0] . '.' . $field ) );
 				}
 			
 			} else {
@@ -3238,13 +3254,13 @@ class Bvb_Grid_DataGrid {
 				
 				if (is_object ( $value [1] )) {
 					$title = $value [2];
-					$this->updateColumn ( $value [0] . '.' . $value [2] . ' as ' . $value [2], array ('title' => $title ) );
+					$this->updateColumn ( $value [2], array ('title' => $title, 'field' => $value [0] . '.' . $value [2] ) );
 				} elseif (strlen ( $value [2] ) > 0) {
 					$title = $value [2];
-					$this->updateColumn ( $value [0] . '.' . $value [1] . ' as ' . $value [2], array ('title' => $title ) );
+					$this->updateColumn ( $value [2], array ('title' => $title, 'field' => $value [0] . '.' . $value [1] ) );
 				} else {
 					$title = ucfirst ( $value [1] );
-					$this->updateColumn ( $value [0] . '.' . $value [1], array ('title' => $title ) );
+					$this->updateColumn ( $value [1], array ('title' => $title, 'field' => $value [0] ) );
 				}
 			
 			}
@@ -3254,7 +3270,7 @@ class Bvb_Grid_DataGrid {
 		foreach ( array_keys ( $this->data ['fields'] ) as $key ) {
 			$reset = explode ( ' ', trim ( $key ) );
 			$alias = explode ( '.', trim ( end ( $reset ) ) );
-			$fieldsNoAS [reset ( $reset )] = end ( $alias );
+			$fieldsNoAS [end ( $alias )] = reset ( $reset );
 		}
 		
 		$this->_fieldsNoAs = $fieldsNoAS;
@@ -3268,6 +3284,14 @@ class Bvb_Grid_DataGrid {
 	 * @return bool
 	 */
 	function query(Zend_Db_Select $select) {
+		
+		$this->_db = $select->getAdapter ();
+		$this->setAdapter ( 'db' );
+		
+		$this->_clientFecthMode = $this->_db->getFetchMode ();
+		$this->_db->setFetchMode ( Zend_Db::FETCH_OBJ );
+		//Instanciate the Zend_Db_Select object
+		$this->_select = $this->_db->select ();
 		
 		$this->_selectZendDb = true;
 		

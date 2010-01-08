@@ -60,6 +60,8 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
         $this->initLogger();
         
         parent::__construct($db);
+        // TODO fix for property with same name in Bvb_Grid_DataGrid
+        $this->_view = null;
         // see http://code.google.com/p/zfdatagrid/issues/detail?id=94
         if (false!==$tableCaption) {
             // set caption to grid
@@ -198,7 +200,7 @@ JS
      * @return string output this sting to place in view where you want to display the grid
      */
     function deploy()
-    {      
+    {
         // prepare internal Bvb data
         parent::deploy();
         // prepare access to view
@@ -399,7 +401,7 @@ HTML;
      */
     public function jqInit()
     {
-        $this->_view->jQuery()
+        $this->getView()->jQuery()
             ->enable()        
             ->uiEnable()
             ->addStylesheet($this->_jqgridLibPath . "/css/ui.jqgrid.css")
@@ -419,7 +421,7 @@ HTML;
      */
     public function jqAddOnLoad($js)
     {
-        $this->_view->jQuery()->addOnLoad($js);
+        $this->getView()->jQuery()->addOnLoad($js);
         return $this;        
     }
     /////////////////////

@@ -32,8 +32,8 @@ class JqgridController extends Zend_Controller_Action
         $this->configG1($grid1_html);
         
         // pass grids to view and deploy() them there 
-        $this->view->g1 = $grid1->deploy($this->view);       
-        $this->view->g1_html = $grid1_html->deploy($this->view);        
+        $this->view->g1 = $grid1->deploy();       
+        $this->view->g1_html = $grid1_html->deploy();        
     }
     
     public function g1ActionBar($id) {
