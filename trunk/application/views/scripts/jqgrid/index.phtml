@@ -3,11 +3,6 @@
 $this->doctype('XHTML1_TRANSITIONAL');
 $this->setEncoding('UTF-8');
 $this->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=UTF-8');
-// enable JQuery
-ZendX_JQuery::enableView($this);
-// we have to deploy before HTML header is constructed if not using Zend_Layout
-$g1 = $this->g1->deploy($this);
-$g1_html = $this->g1_html->deploy($this);
 ?>
 <?= $this->doctype() . PHP_EOL ?>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -38,8 +33,8 @@ $g1_html = $this->g1_html->deploy($this);
 <h1>Bvb JqGrid Examples</h1>
 
 <h2>JqGrid</h2>
-<?=$g1;?>
+<?=$this->g1;?>
 
 <h2>HTML Table</h2>
-<?=$g1_html;?>
+<?=$this->g1_html;?>
 </body></html>

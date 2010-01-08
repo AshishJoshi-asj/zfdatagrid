@@ -5,35 +5,46 @@ class JqgridController extends Zend_Controller_Action
     {
         $this->db = Zend_Registry::get ( 'db' );
         // enable debug
-        Bvb_Grid_Deploy_JqGrid::$debug = true; 
+        Bvb_Grid_Deploy_JqGrid::$debug = true;
+        // enable JQuery - should be part of bootstrap
+        ZendX_JQuery::enableView($this->view);
     }
     function indexAction()
     {
-        $grid1 = new Bvb_Grid_Deploy_JqGrid($this->db, 'jqGrid Example', 'media/temp', array('download'));
+        // construct JqGrid and let it configure
+        $grid1 = new Bvb_Grid_Deploy_JqGrid($this->db, 'jqGrid Example');
         $this->configG1($grid1);
         
-        $grid1_html = new Bvb_Grid_Deploy_Table($this->db, 'HTML Grid Example', 'media/temp', array('download'));
+        // construct HTML Table Grid and let it configure in the same way
+        $grid1_html = new Bvb_Grid_Deploy_Table($this->db, 'HTML Grid Example');
         $this->configG1($grid1_html);
         
-        $this->view->g1 = $grid1;       
-        $this->view->g1_html = $grid1_html;        
+        // pass grids to view and deploy() them there 
+        $this->view->g1 = $grid1->deploy($this->view);       
+        $this->view->g1_html = $grid1_html->deploy($this->view);        
     }
 
     function configG1($grid)
     {
+        /////////////////// 1. define select
         $select = $this->db->select()
             ->from('City')
             ->order('Name')
             ->columns(array('IsBig'=>new Zend_Db_Expr('IF(Population>500000,1,0)')))
             // TODO big problem ->columns(array('test'=>'ID'))
         ;
-        
         $grid->query($select);
 
+        /////////////////// 2. update column options
+        ////////////////// see Bvb documentation
+        ////////////////// and for jqg array see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:colmodel_options           
         $grid->updateColumn('ID', array('title'=>'#ID','width'=>20, 'hide'=>true));        
         $grid->updateColumn('Name', array('title'=>'City name','width'=>260));
         $grid->updateColumn('Population', array(
-            'jqg' => array('formatter'=>'integer', 'align'=>'right')
+            'jqg' => array(
+                'formatter'=>'integer', 
+                'align'=>'right'
+            )
         ));
         $grid->updateColumn('IsBig', array(
             'width'=>40,
@@ -44,11 +55,21 @@ class JqgridController extends Zend_Controller_Action
                 'stype'=>'select',
                 'searchoptions'=>array('defaultValue'=>'1', 'value'=>array(0=>'No', 1=>'Yes'))
             )
-        ));        
+        ));
+
+        /////////////////// 3. set Bvb grid behaviour        
         //$grid->noFilters(1);        
         //$grid->noOrder(1);
-        $grid->setJsOptions(array('forceFit'=>true));
         
+        /////////////////// 4. set jqGrid options 
+        /////////////////// for setJqgOptions see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:options
+        /////////////////// see also other Bvb_Grid_Deploy_JqGrid::setJqg*() and Bvb_Grid_Deploy_JqGrid::jqg*() methods    
+        $grid->setJqgOptions(array(
+            'forceFit'=>true,
+            'viewrecords'=>false,
+        ));
+        
+        /////////////////// 5. set ajax ID and process response if requested 
         $grid->ajax(get_class($grid));
     }
 }

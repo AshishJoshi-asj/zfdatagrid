@@ -21,6 +21,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      * @var array
      */
     private $_defaultOptions = array(
+        'mtype' => 'POST', // GET will not work because of our parsing
         'height' => 'auto',
         'autowidth' => true,
         'rownumbers' => true,
@@ -51,11 +52,17 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      * 
      * @param Zend_Db $db false if Zend_Db will not be used
      */
-    function __construct ($db = false)
+    function __construct ($db = false, $tableCaption = false)
     {
         $this->initLogger();
         
-        parent::__construct($db);       
+        parent::__construct($db);
+        // see http://code.google.com/p/zfdatagrid/issues/detail?id=94
+        if (false!==$tableCaption) {
+            // set caption to grid
+            $this->_defaultOptions['caption'] = $tableCaption; 
+        } 
+        
         // TODO move this to prepareOptions ?
         // change parameters from jqGrid to fit Bvb_Grid_DataGrid
         // setPagination
@@ -117,12 +124,12 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
     /**
      * Set jQuery Grid options
      * 
-     * @param array $options set JqGrid options (@see http://www.trirand.com/jqgridwiki)  
+     * @param array $options set JqGrid options (@see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:options)  
      * 
      * @return void
      *
      */
-    public function setJsOptions(array $options)
+    public function setJqgOptions(array $options)
     {
         // TODO bad name, use the same as in ZendX_Jquery
         // TODO also dangerouse that it will call set functions for general Bvb class
@@ -243,10 +250,10 @@ EOF;
         $idtable = $this->jqgGetIdTable();
         $idpager = $this->jqgGetIdPager();
         $html = <<<HTML
-<table id="$idtable" class="scroll" cellpadding="0" cellspacing="0">
+<table id="$idtable">
     <tr><td></td></tr>
 </table>
-<div id="$idpager" class="scroll"></div>
+<div id="$idpager"></div>
 HTML;
         return $html;
     }
@@ -256,7 +263,7 @@ HTML;
      * @return string
      */
     function renderPartData()
-    {
+    {      
         // clarify the values
         $page = $this->ctrlParams ['page']; // get the requested page 
         $limit = $this->pagination; // get how many rows we want to have into the grid 
@@ -270,6 +277,7 @@ HTML;
                 $d[] = $val['value'];
             }
             $cell = new stdClass();
+            // TODO how to add PK as ID into JSON data ?            
             $cell->cell = $d;
             $data->rows[] = $cell;       
         }
@@ -281,7 +289,8 @@ HTML;
         }         
         $data->page = $page; 
         $data->total = $totalPages; 
-        $data->records = $count;     
+        $data->records = $count;
+            
         return Zend_Json::encode($data); 
     }    
     /**
@@ -296,7 +305,9 @@ HTML;
      * 1. javascript options passed to columns (?)
      * 2. special Bvb_Grid_Deploy_JqGrid options (jqg array)
      * 3. standard Bvb settings
-     * 4. formaters (?) 
+     * 4. formaters (?)
+     * 
+     * @return void
      */
     public function prepareOptions()
     {
@@ -336,8 +347,6 @@ HTML;
         }                
         // add export buttons
         $this->addExportButtons($this->export);       
-        
-
     }
     /**
      * Encode Json that may include javascript expressions.
