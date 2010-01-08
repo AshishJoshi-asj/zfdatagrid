@@ -15,7 +15,6 @@ class JqgridController extends Zend_Controller_Action
      */
     function codeAction()
     {
-        
     }    
     function indexAction()
     {
@@ -76,6 +75,7 @@ class JqgridController extends Zend_Controller_Action
             'forceFit'=>true,
             'viewrecords'=>false,
         ));
+        $grid->setJqgOnInit('console.log("jqGrid initiated ! If data are remote they are not loaded at this point.");');
         
         /////////////////// 5. set ajax ID and process response if requested 
         $grid->ajax(get_class($grid));

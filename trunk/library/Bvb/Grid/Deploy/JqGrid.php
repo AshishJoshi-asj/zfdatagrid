@@ -35,7 +35,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
     
     private $_jqgOptions = array();
     
-    private $_jqgOnInit = array(1);
+    private $_jqgOnInit = array();
     
     /**
      * List of commands to execute after the jqGrid object is initiated
@@ -149,6 +149,20 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
         }
     }
     /**
+     * Will add passed javascript code inside anonymouse function.
+     * 
+     * Following variables are accessible in that function:
+     * this  - jqgrid DOM object
+     * grid  - jqGrid object  
+     * pager - navigation bar object 
+     * 
+     * @param string $javaScript javascript will be included into funcion 
+     */
+    public function setJqgOnInit($javaScript)
+    {
+        $this->_jqgOnInit[] = $javaScript;
+    }
+    /**
      * Add export action buttons to grid
      *  
      * @param array $types names of deploy classes
@@ -243,11 +257,12 @@ $postCommands
 EOF;
         // TODO add users javascript code, something like ready event
         if (count($this->_jqgOnInit)>0) {
+            $cmds = implode(PHP_EOL, $this->_jqgOnInit);
             $js .= PHP_EOL . <<<JS
 jQuery("#$idtable").each(function () {
     var grid = $(this).jqGrid();
     var pager = grid.navGrid('#$idpager');
-    console.log(grid);
+    $cmds
 });
 JS;
         }
