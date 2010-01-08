@@ -9,6 +9,14 @@ class JqgridController extends Zend_Controller_Action
         // enable JQuery - should be part of bootstrap
         ZendX_JQuery::enableView($this->view);
     }
+    /**
+     * Show the source code for this controller
+     *
+     */
+    function codeAction()
+    {
+        
+    }    
     function indexAction()
     {
         // construct JqGrid and let it configure

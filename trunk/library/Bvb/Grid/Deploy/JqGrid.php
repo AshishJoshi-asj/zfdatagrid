@@ -20,7 +20,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      * 
      * @var array
      */
-    private $_defaultOptions = array(
+    private $_jqgDefaultOptions = array(
         'mtype' => 'POST', // GET will not work because of our parsing
         'height' => 'auto',
         'autowidth' => true,
@@ -33,7 +33,10 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
         'loadError' => 'function(xhr,st,err) { if (xhr.status!=200) {alert(xhr.statusText);} }',   
     );
     
-    private $_options = array();
+    private $_jqgOptions = array();
+    
+    private $_jqgOnInit = array(1);
+    
     /**
      * List of commands to execute after the jqGrid object is initiated
      *  
@@ -60,7 +63,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
         // see http://code.google.com/p/zfdatagrid/issues/detail?id=94
         if (false!==$tableCaption) {
             // set caption to grid
-            $this->_defaultOptions['caption'] = $tableCaption; 
+            $this->_jqgDefaultOptions['caption'] = $tableCaption; 
         } 
         
         // TODO move this to prepareOptions ?
@@ -133,7 +136,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
     {
         // TODO bad name, use the same as in ZendX_Jquery
         // TODO also dangerouse that it will call set functions for general Bvb class
-        $this->_options = array(); //$this->_defaultOptions;
+        $this->_jqgOptions = array(); //$this->_jqgDefaultOptions;
         
         $methods = get_class_methods($this);
         foreach ($options as $key => $value) {
@@ -141,7 +144,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
             if (in_array($method, $methods)) {
                 $this->$method($value);
             } else {
-                $this->_options[$key] = $value;
+                $this->_jqgOptions[$key] = $value;
             }
         }
     }
@@ -194,7 +197,7 @@ JS
         // prepare options used to build jqGrid element
         $this->prepareOptions();
         // build definition of columns, which will manipulate _options
-        $this->_options['colModel'] = $this->jqgGetColumnModel();
+        $this->_jqgOptions['colModel'] = $this->jqgGetColumnModel();
         // build final JavaScript code and return HTML code to display
         $this->jqAddOnLoad($this->renderPartJavascript());
         return $this->renderPartHtml();      
@@ -213,11 +216,11 @@ JS
         if (true) {
             // first data will be loaded via ajax call  
             $data = array();
-            $this->_options['datatype'] = "json";
+            $this->_jqgOptions['datatype'] = "json";
         } else {
             // set first data without ajax request
             $data = $this->renderPartData();
-            $this->_options['datatype'] = "local";            
+            $this->_jqgOptions['datatype'] = "local";            
             $this->_postCommands[] = 'setGridParam({datatype:"json"})';                
             $this->_postCommands[] = 'jqGrid()[0].addJSONData(myData)';        
         }
@@ -226,9 +229,10 @@ JS
             $postCommands = '.' . implode("\n.", $this->_postCommands);
         }
         // convert options to javascript
-        $options = self::encodeJson($this->_options);
+        $options = self::encodeJson($this->_jqgOptions);
         // build javascript text
-        $idtable = $this->jqgGetIdTable();        
+        $idtable = $this->jqgGetIdTable();
+        $idpager = $this->jqgGetIdPager();        
         $js = <<<EOF
 var myData = $data;     
 jQuery("#$idtable").jqGrid(
@@ -238,6 +242,15 @@ $postCommands
 ;
 EOF;
         // TODO add users javascript code, something like ready event
+        if (count($this->_jqgOnInit)>0) {
+            $js .= PHP_EOL . <<<JS
+jQuery("#$idtable").each(function () {
+    var grid = $(this).jqGrid();
+    var pager = grid.navGrid('#$idpager');
+    console.log(grid);
+});
+JS;
+        }
         return $js;
     }
     /**
@@ -317,7 +330,7 @@ HTML;
         
         // initialize table with default options
         ////////////////////////////////////////
-        $this->_options += $this->_defaultOptions;
+        $this->_jqgOptions += $this->_jqgDefaultOptions;
         // prepare navigation 
         $this->_postCommands[] = sprintf("navGrid('#%s',{edit:false,add:false,del:false})", $this->jqgGetIdPager());
         
@@ -326,9 +339,9 @@ HTML;
        
         // override with options defined on Bvb_Grid_DataGrid level
         ///////////////////////////////////////////////////////////
-        $this->_options['url'] = $url;
-        $this->_options['pager'] = new Zend_Json_Expr(sprintf("jQuery('#%s')", $this->jqgGetIdPager()));
-        $this->_options['rowNum'] = $this->pagination;
+        $this->_jqgOptions['url'] = $url;
+        $this->_jqgOptions['pager'] = new Zend_Json_Expr(sprintf("jQuery('#%s')", $this->jqgGetIdPager()));
+        $this->_jqgOptions['rowNum'] = $this->pagination;
 
         if (!$this->getInfo('noFilters', false)) {
             // add filter toolbar to grid - if not set $grid->noFilters(1);            
@@ -343,7 +356,7 @@ HTML;
 
         if ($this->getInfo('noOrder', false)) {
             // dissable sorting on columns - if set $grid->noOrder(1);            
-            $this->_options['viewsortcols'] = array(false,'vertical',false); 
+            $this->_jqgOptions['viewsortcols'] = array(false,'vertical',false); 
         }                
         // add export buttons
         $this->addExportButtons($this->export);       
