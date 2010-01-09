@@ -101,7 +101,7 @@ class JqgridController extends Zend_Controller_Action
         $grid->setJqgOptions(array(
             'forceFit'=>true,
             'viewrecords'=>false,
-            'idname'=>'IDx'
+            'idname'=>'ID'
         ));
         $grid->setJqgOnInit('console.log("jqGrid initiated ! If data are remote they are not loaded at this point.");');
         

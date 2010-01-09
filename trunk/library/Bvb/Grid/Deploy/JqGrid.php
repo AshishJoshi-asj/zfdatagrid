@@ -156,7 +156,6 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      * Following variables are accessible in that function:
      * this  - jqgrid DOM object
      * grid  - jqGrid object  
-     * pager - navigation bar object 
      * 
      * @param string $javaScript javascript will be included into funcion 
      */
@@ -262,8 +261,7 @@ EOF;
             $cmds = implode(PHP_EOL, $this->_jqgOnInit);
             $js .= PHP_EOL . <<<JS
 jQuery("#$idtable").each(function () {
-    var grid = $(this).jqGrid();
-    var pager = grid.navGrid('#$idpager');
+    var grid = jQuery(this).jqGrid();
     $cmds
 });
 JS;
@@ -365,7 +363,7 @@ HTML;
         ////////////////////////////////////////
         $this->_jqgOptions += $this->_jqgDefaultOptions;
         // prepare navigation 
-        $this->_postCommands[] = sprintf("navGrid('#%s',{edit:false,add:false,del:false})", $this->jqgGetIdPager());
+        $this->_postCommands[] = sprintf("navGrid('#%s',{edit:false,add:false,del:false,search:true})", $this->jqgGetIdPager());
         
         // override with options explicitly set by user
         ///////////////////////////////////////////////
@@ -380,10 +378,10 @@ HTML;
             // add filter toolbar to grid - if not set $grid->noFilters(1);            
             $this->_postCommands[] = 'filterToolbar()';
             $this->jqgAddNavButton(array(
-                'caption' => $this->__("Quick Search"),
+                'caption' => $this->__("Toggle Search"),
                 'title' => $this->__("Toggle Search Toolbar"), 
                 'buttonicon' => 'ui-icon-pin-s', 
-                'onClickButton' => new Zend_Json_Expr("function(){ $(this)[0].toggleToolbar(); }")        
+                'onClickButton' => new Zend_Json_Expr("function(){ jQuery(this)[0].toggleToolbar(); }")        
             ));
         }
 
