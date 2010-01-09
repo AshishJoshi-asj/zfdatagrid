@@ -52,19 +52,27 @@ class JqgridController extends Zend_Controller_Action
         $select = $this->db->select()
             ->from('City')
             ->order('Name')
-            ->columns(array('IsBig'=>new Zend_Db_Expr('IF(Population>500000,1,0)')))
-            // TODO big problem             
-            // ->columns(array('_action'=>new Zend_Db_Expr('ID')))            
-            // ->columns(array('test'=>'ID'))
+            ->columns(array('IsBig'=>new Zend_Db_Expr('IF(Population>500000,1,0)')))           
+            ->columns(array('_action'=>'ID'))            
         ;
         $grid->query($select);
 
         ////////////////// 2. update column options
         ////////////////// see Bvb documentation
         ////////////////// and for jqg array see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:colmodel_options           
-        //$grid->updateColumn('ID', array('title'=>'#ID','width'=>20, 'hide'=>true));
-        $grid->updateColumn('ID', array('title'=>'Action','width'=>40, 'callback'=>array('function'=>array($this,'g1ActionBar'), 'params'=>array('{{ID}}'))));        
-        //$grid->updateColumn('_action', array('callback'=>array('function'=>array($this,'g1ActionIcons'))));
+        $grid->updateColumn('ID', array(
+            'title'=>'#ID', 
+            'hide'=>true,
+        ));
+        $grid->updateColumn('_action', array(
+            'title'=>'Action',
+            'width'=>50,       
+            'callback'=>array(
+                'function'=>array($this,'g1ActionBar'), 
+                'params'=>array('{{ID}}')
+            ),
+            'jqg'=>array('fixed'=>true)
+        ));        
         $grid->updateColumn('Name', array('title'=>'City name','width'=>260));
         $grid->updateColumn('Population', array(
             'jqg' => array(
@@ -93,6 +101,7 @@ class JqgridController extends Zend_Controller_Action
         $grid->setJqgOptions(array(
             'forceFit'=>true,
             'viewrecords'=>false,
+            'idname'=>'IDx'
         ));
         $grid->setJqgOnInit('console.log("jqGrid initiated ! If data are remote they are not loaded at this point.");');
         

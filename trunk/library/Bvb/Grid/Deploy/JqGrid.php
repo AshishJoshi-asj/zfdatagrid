@@ -298,18 +298,34 @@ HTML;
         $page = $this->ctrlParams ['page']; // get the requested page 
         $limit = $this->pagination; // get how many rows we want to have into the grid 
         $count =  $this->_totalRecords;
+        // decide if we should pass PK as ID
+        $passPk = false;
+        if (isset($this->_jqgOptions['idname']) && count($this->_result)>0) {
+            $pkName = $this->_jqgOptions['idname'];
+            if (isset($this->_result[0]->$pkName)) {
+                // only if that field exists
+                $passPk = true;
+            } else {
+                $this->log("field '$pkName' defined as jqg>idname option does not exists in result set", Zend_Log::WARN);
+            }
+        }
         // build rows
         $data = new stdClass();
         $data->rows = array();
-        foreach (parent::buildGrid() as $row) {
+        foreach (parent::buildGrid() as $i=>$row) {
+            $dataRow = new stdClass();
+            // collect data for cells
             $d = array();
             foreach ( $row as $key=>$val ) {
                 $d[] = $val['value'];
             }
-            $cell = new stdClass();
-            // TODO how to add PK as ID into JSON data ?            
-            $cell->cell = $d;
-            $data->rows[] = $cell;       
+            if ($passPk) {
+                // set PK to row
+                // TODO works only if buildGrid() results are in same order as $this->_result  
+                $dataRow->id = $this->_result[$i]->$pkName;
+            }                      
+            $dataRow->cell = $d;
+            $data->rows[] = $dataRow;       
         }
         // set some other information
         if ($count >0) {
