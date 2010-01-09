@@ -20,7 +20,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      * 
      * @var array
      */
-    private $_jqgDefaultOptions = array(
+    protected $_jqgDefaultOptions = array(
         'mtype' => 'POST', // GET will not work because of our parsing
         'height' => 'auto',
         'autowidth' => true,
@@ -53,9 +53,9 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
     /**
      * Constructor
      * 
-     * @param Zend_Db $db false if Zend_Db will not be used
+     * @param strring|boolean $gridCaption caption shown over grid, FALSE to hide the title bar
      */
-    function __construct ($tableCaption = false)
+    function __construct ($gridCaption = false)
     {
         $this->initLogger();
         
@@ -65,7 +65,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
         // see http://code.google.com/p/zfdatagrid/issues/detail?id=94
         if (false!==$tableCaption) {
             // set caption to grid
-            $this->_jqgDefaultOptions['caption'] = $tableCaption; 
+            $this->_jqgDefaultOptions['caption'] = $gridCaption; 
         }
         // prepare request parameters sent by jqGrid
         $this->ctrlParams = array();
@@ -129,11 +129,14 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      * this  - jqgrid DOM object
      * grid  - jqGrid object  
      * 
-     * @param string $javaScript javascript will be included into funcion 
+     * @param string $javaScript javascript will be included into funcion
+     * 
+     * @return Bvb_Grid_Deploy_JqGrid 
      */
     public function setJqgOnInit($javaScript)
     {
         $this->_jqgOnInit[] = $javaScript;
+        return $this;
     }
     /**
      * Add export action buttons to grid
@@ -164,6 +167,7 @@ JS
                 )
             );
         }
+        return $this;
     }
     /**
      * Build grid. Will output HTML definition for grid and add js/css to view.
@@ -276,7 +280,10 @@ HTML;
                 // only if that field exists
                 $passPk = true;
             } else {
-                $this->log("field '$pkName' defined as jqg>idname option does not exists in result set", Zend_Log::WARN);
+                $this->log(
+                    "field '$pkName' defined as jqg>idname option does not exists in result set", 
+                    Zend_Log::WARN
+                );
             }
         }
         // build rows
@@ -335,7 +342,10 @@ HTML;
         ////////////////////////////////////////
         $this->_jqgOptions += $this->_jqgDefaultOptions;
         // prepare navigation 
-        $this->_postCommands[] = sprintf("navGrid('#%s',{edit:false,add:false,del:false,search:true,view:true})", $this->jqgGetIdPager());
+        $this->_postCommands[] = sprintf(
+            "navGrid('#%s',{edit:false,add:false,del:false,search:false,view:true})", 
+            $this->jqgGetIdPager()
+        );
         
         // override with options explicitly set by user
         ///////////////////////////////////////////////
@@ -349,12 +359,14 @@ HTML;
         if (!$this->getInfo('noFilters', false)) {
             // add filter toolbar to grid - if not set $grid->noFilters(1);            
             $this->_postCommands[] = 'filterToolbar()';
-            $this->jqgAddNavButton(array(
-                'caption' => $this->__("Toggle Search"),
-                'title' => $this->__("Toggle Search Toolbar"), 
-                'buttonicon' => 'ui-icon-pin-s', 
-                'onClickButton' => new Zend_Json_Expr("function(){ jQuery(this)[0].toggleToolbar(); }")        
-            ));
+            $this->jqgAddNavButton(
+                array(
+                    'caption' => $this->__("Toggle Search"),
+                    'title' => $this->__("Toggle Search Toolbar"), 
+                    'buttonicon' => 'ui-icon-pin-s', 
+                    'onClickButton' => new Zend_Json_Expr("function(){ jQuery(this)[0].toggleToolbar(); }")        
+                )
+            );
         }
 
         if ($this->getInfo('noOrder', false)) {
@@ -370,8 +382,10 @@ HTML;
      * Take care of using the Zend_Json_Encoder to alleviate problems with the json_encode
      * magic key mechanism as of now.
      *
-     * @see Zend_Json::encode
-     * @param  mixed $value
+     * @param mixed $value value to encode
+     * 
+     * @see Zend_Json::encode 
+     * 
      * @return mixed
      */    
     public static function encodeJson($value)
@@ -401,7 +415,7 @@ HTML;
      * 
      * ZendX_Jquery is used as default, but this could be overriden. 
      * 
-     * @param string $js
+     * @param string $js javascipt code to add
      * 
      * @return Bvb_Grid_Deploy_JqGrid
      */
@@ -424,7 +438,9 @@ HTML;
         return $this;
     }
     /**
+     * Return colModel property for jqGrid
      * 
+     * @return array
      */
     public function jqgGetColumnModel()
     {
@@ -474,14 +490,18 @@ HTML;
         return $model;
     }
     /**
-     * Return ID for pager HTML element 
+     * Return ID for pager HTML element
+     * 
+     * @return string
      */
     public function jqgGetIdPager()
     {
         return "jqg_pager_" . $this->getId();
     }
     /**
-     * Return ID for pager HTML element 
+     * Return ID for pager HTML element
+     * 
+     * @return string  
      */
     public function jqgGetIdTable()
     {
@@ -525,7 +545,7 @@ HTML;
     /**
      * Set view object
      *
-     * @param  Zend_View_Interface $view
+     * @param Zend_View_Interface $view view object to use
      * 
      * @return Bvb_Grid_Deploy_JqGrid
      */
@@ -545,7 +565,7 @@ HTML;
     public function getView()
     {
         if (null === $this->_view) {
-            require_once 'Zend/Controller/Action/HelperBroker.php';
+            include_once 'Zend/Controller/Action/HelperBroker.php';
             $viewRenderer = Zend_Controller_Action_HelperBroker::getStaticHelper('viewRenderer');
             $this->setView($viewRenderer->view);
         }
@@ -574,7 +594,7 @@ HTML;
     /**
      * Set value used to build HTML element ID attributes
      * 
-     * @param string $id
+     * @param string $id text to apply as part of jqGrid HTML element IDs
      * 
      * @return Bvb_Grid_Deploy_JqGrid 
      */
@@ -586,12 +606,13 @@ HTML;
     /**
      * Return variable stored in info. Return default if value is not stored.  
      *
-     * @param string $param
-     * @param mixed  $default
+     * @param string $param   parameter name
+     * @param mixed  $default default falue
      * 
      * @return mixed
      */    
-    public function getInfo($param, $default = false) {
+    public function getInfo($param, $default = false)
+    {
         if (isset($this->info[$param])) {
             return $this->info[$param];
         } else {
@@ -637,7 +658,9 @@ HTML;
      * - sort order
      * - search filters
      *  
-     * @param unknown_type $params
+     * @param array $params parameters to conver, request parameters will be used of not set
+     * 
+     * @return void
      */
     protected function convertRequestParams($params=null)
     {
@@ -683,7 +706,12 @@ HTML;
                 // Toolbar Searching
                 // see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:toolbar_searching&s[]=searchoptions
                 $flts = new stdClass();
-                $filteredFields = array_diff_key($params, array_flip(array('q', 'nd', 'rows', 'page', 'sidx', 'sord', '_search', 'module', 'controller', 'action')));
+                $filteredFields = array_diff_key(
+                    $params, 
+                    array_flip(
+                        array('q', 'nd', 'rows', 'page', 'sidx', 'sord', '_search', 'module', 'controller', 'action')
+                    )
+                );
                 foreach ($filteredFields as $filter=>$val) {
                     $flts->$filter = $val;
                 }
@@ -696,7 +724,9 @@ HTML;
      * 
      * Very first implementation. Could support more types, for example Zend_Navigation object.
      * 
-     * @param mixed $actions
+     * @param mixed $actions definition of links to action, see JqgridController
+     * 
+     * @return string
      */
     public static function formatterActionBar($actions)
     {
@@ -706,7 +736,12 @@ HTML;
                 // TODO if we pass link to image to show instead of text
             } else {
                 // will show text or icon if CSS class is styled
-                $html .= sprintf('<a href="%s" class="%s" style="float:left;"><span>%s</span></a>', $a['url'], $a['class'], $a['caption']);
+                $html .= sprintf(
+                    '<a href="%s" class="%s" style="float:left;"><span>%s</span></a>', 
+                    $a['url'], 
+                    $a['class'], 
+                    $a['caption']
+                );
             }
         }
         return $html;
