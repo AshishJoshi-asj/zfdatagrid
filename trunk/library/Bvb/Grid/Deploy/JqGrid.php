@@ -39,7 +39,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
     
     /**
      * List of commands to execute after the jqGrid object is initiated
-     *  
+     *
      * @var array
      */
     private $_postCommands = array();
@@ -66,44 +66,16 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
         if (false!==$tableCaption) {
             // set caption to grid
             $this->_jqgDefaultOptions['caption'] = $tableCaption; 
-        } 
-        
-        // TODO move this to prepareOptions ?
-        // change parameters from jqGrid to fit Bvb_Grid_DataGrid
-        // setPagination
-        if (isset($this->ctrlParams ['rows'])) {
-            $this->setPagination($this->ctrlParams['rows']);
         }
-        // start
-        if (isset($this->ctrlParams['page'])) {
-            $page = $this->ctrlParams['page'];
-        } else {
-            $this->ctrlParams['page'] = 1;
-            $page = 1;
-        }
-        $this->ctrlParams['start'] = $this->pagination * ($page-1);
-        // order
-        $sidx = isset($this->ctrlParams['sidx']) ? $this->ctrlParams['sidx'] : ""; 
-        $sord = isset($this->ctrlParams['sord']) ? $this->ctrlParams['sord'] : "asc";
-        if ($sidx!=="") {
-            $this->ctrlParams ['order'] = $sidx . '_' . strtoupper($sord);
-        }
-        // filters
-        if ( isset($this->ctrlParams ['_search']) && $this->ctrlParams ['_search']) {
-            // TODO support search operators
-            $flts = new stdClass();
-            foreach ($this->ctrlParams as $filter=>$val) {
-                $flts->$filter = $val;
-            }
-            $this->ctrlParams['filters'] = urlencode(Zend_Json::encode($flts));
-            //print_r($this->ctrlParams['filters']);die;            
-        }
+        // prepare request parameters sent by jqGrid
+        $this->ctrlParams = array();
+        $this->convertRequestParams();
     }
     /**
      * Call this in controller (before any output) to dispatch Ajax requests.
      * 
      * @param string $gridId ID to recognize the request from multiple tables ajax request will be ignored if FALSE
-     *  
+     *
      * @return void
      */
     function ajax($gridId)
@@ -363,7 +335,7 @@ HTML;
         ////////////////////////////////////////
         $this->_jqgOptions += $this->_jqgDefaultOptions;
         // prepare navigation 
-        $this->_postCommands[] = sprintf("navGrid('#%s',{edit:false,add:false,del:false,search:true})", $this->jqgGetIdPager());
+        $this->_postCommands[] = sprintf("navGrid('#%s',{edit:false,add:false,del:false,search:true,view:true})", $this->jqgGetIdPager());
         
         // override with options explicitly set by user
         ///////////////////////////////////////////////
@@ -407,11 +379,11 @@ HTML;
         return Zend_Json::encode($value, false, array('enableJsonExprFinder' => true));
     }
     /**
-     *  Loads jQuery related libraries needed to display jqGrid.
+     * Loads jQuery related libraries needed to display jqGrid.
      * 
-     *  ZendX_Jquery is used as default, but this could be overriden.
+     * ZendX_Jquery is used as default, but this could be overriden.
      * 
-     *  @return Bvb_Grid_Deploy_JqGrid
+     * @return Bvb_Grid_Deploy_JqGrid
      */
     public function jqInit()
     {
@@ -474,11 +446,6 @@ HTML;
         $titles = $this->buildTitles();
         // TODO need fix of #101
         $fields = $this->removeAsFromFields();
-/*        $this->log($this->data['fields']);
-        $fields = $this->removeAsFromFields();
-        $this->log($fields);
-        $this->log($titles);*/        
-
         foreach ($titles as $key=>$title) {
             // basic options
             $options = array("name" => $title['name'], "label" => $title['value']);
@@ -596,6 +563,7 @@ HTML;
             || isset($this->ctrlParams['_search']);
     }
     /**
+     * Return value used to build HTML element ID attributes
      * 
      * @return string
      */
@@ -604,6 +572,7 @@ HTML;
         return $this->_id;
     }
     /**
+     * Set value used to build HTML element ID attributes
      * 
      * @param string $id
      * 
@@ -629,7 +598,11 @@ HTML;
             return $default;
         }
     }
-
+    /**
+     * Create Zend_Log object used to debug Bvb classes
+     *  
+     * @return Bvb_Grid_Deploy_JqGrid
+     */
     protected function initLogger()
     {
         if (self::$debug) {
@@ -640,17 +613,101 @@ HTML;
             $writter = new Zend_Log_Writer_Null();    
         }
         $this->_logger = new Zend_Log($writter);
+        return $this;
     }
+    /**
+     * Log message. Per default the message will be sent to FirePHP.
+     * 
+     * @param string $message  message to log
+     * @param int    $priority one of Zend_Log constances, Zend_Log::DEBUG is default
+     *
+     * @return Bvb_Grid_Deploy_JqGrid 
+     */
     protected function log($message, $priority = 7)
     {
         $this->_logger->log($message, $priority);
+        return $this;
     }
-    
+    /**
+     * Handle parameters send from frontend. 
+     * 
+     * They could contain:
+     * - number of rows to be shown on page
+     * - first row to show on page
+     * - sort order
+     * - search filters
+     *  
+     * @param unknown_type $params
+     */
+    protected function convertRequestParams($params=null)
+    {
+        if (is_null($params)) {
+            $params = Zend_Controller_Front::getInstance()->getRequest()->getParams();
+        }
+        
+        // we try to convert jqGrid request to be Bvb ctrlParms compatible
+        //////////////////////////////////////////////////////////////////
+        
+        // number of rows to be shown on page, could be changed in jqGrid 
+        if (isset($params['rows'])) {
+            $this->setPagination($params['rows']);
+        }
+
+        // first row to display
+        if (isset($params['page'])) {
+            $page = $params['page'];
+        } else {
+            $page = 1;
+        }
+        $this->ctrlParams['page'] = $page;        
+        $this->ctrlParams['start'] = $this->pagination * ($page-1);
+        
+        // sort order
+        $sidx = isset($params['sidx']) ? $params['sidx'] : ""; 
+        $sord = isset($params['sord']) ? $params['sord'] : "asc";
+        if ($sidx!=="") {
+            $this->ctrlParams['order'] = $sidx . '_' . strtoupper($sord);
+        }
+        
+        // filters
+        // TODO it would be great to have some methods to define more complicated filters
+        if (isset($params['_search']) && $params['_search']) {
+            if (isset($params['filters'])) {
+                // TODO Advanced searching
+                // see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:advanced_searching&s[]=multiplesearch
+                // http://www.ong.agimondo.it/extras/jq/search_adv.php
+            } elseif (isset($params['searchField'])) {
+                // TODO Single searching format
+                // see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:singe_searching&s[]=multiplesearch
+            } else {
+                // Toolbar Searching
+                // see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:toolbar_searching&s[]=searchoptions
+                $flts = new stdClass();
+                $filteredFields = array_diff_key($params, array_flip(array('q', 'nd', 'rows', 'page', 'sidx', 'sord', '_search', 'module', 'controller', 'action')));
+                foreach ($filteredFields as $filter=>$val) {
+                    $flts->$filter = $val;
+                }
+                $this->ctrlParams['filters'] = urlencode(Zend_Json::encode($flts));           
+            }           
+        }
+    }
+    /**
+     * Function to format action links 
+     * 
+     * Very first implementation. Could support more types, for example Zend_Navigation object.
+     * 
+     * @param mixed $actions
+     */
     public static function formatterActionBar($actions)
     {
         $html = "";
-        foreach ($actions as $a) {      
-            $html .= sprintf('<a href="%s" class="%s" style="float:left;"><span>%s</span></a>', $a['url'], $a['class'], $a['caption']);
+        foreach ($actions as $a) {
+            if (isset($a['img'])) {
+                // TODO if we pass link to image to show instead of text
+            } else {
+                // will show text or icon if CSS class is styled
+                $html .= sprintf('<a href="%s" class="%s" style="float:left;"><span>%s</span></a>', $a['url'], $a['class'], $a['caption']);
+            }
         }
         return $html;
     }
