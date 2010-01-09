@@ -55,11 +55,11 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      * 
      * @param Zend_Db $db false if Zend_Db will not be used
      */
-    function __construct ($db = false, $tableCaption = false)
+    function __construct ($tableCaption = false)
     {
         $this->initLogger();
         
-        parent::__construct($db);
+        parent::__construct();
         // TODO fix for property with same name in Bvb_Grid_DataGrid
         $this->_view = null;
         // see http://code.google.com/p/zfdatagrid/issues/detail?id=94

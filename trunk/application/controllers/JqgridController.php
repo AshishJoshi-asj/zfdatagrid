@@ -24,11 +24,11 @@ class JqgridController extends Zend_Controller_Action
     function indexAction()
     {
         // construct JqGrid and let it configure
-        $grid1 = new Bvb_Grid_Deploy_JqGrid($this->db, 'jqGrid Example');
+        $grid1 = new Bvb_Grid_Deploy_JqGrid('jqGrid Example');
         $this->configG1($grid1);
         
         // construct HTML Table Grid and let it configure in the same way
-        $grid1_html = new Bvb_Grid_Deploy_Table($this->db, 'HTML Grid Example');
+        $grid1_html = new Bvb_Grid_Deploy_Table();
         $this->configG1($grid1_html);
         
         // pass grids to view and deploy() them there 
