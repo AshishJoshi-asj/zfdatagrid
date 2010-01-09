@@ -63,7 +63,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
         // TODO fix for property with same name in Bvb_Grid_DataGrid
         $this->_view = null;
         // see http://code.google.com/p/zfdatagrid/issues/detail?id=94
-        if (false!==$tableCaption) {
+        if (false!==$gridCaption) {
             // set caption to grid
             $this->_jqgDefaultOptions['caption'] = $gridCaption; 
         }
