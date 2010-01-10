@@ -10,10 +10,10 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
 {
     /**
      * URL path to place where JqGrid library resides
-     * TODO add static variable which will initialize this
-     * TODO build get/set methods
+     * 
+     * @var string
      */
-    protected $_jqgridLibPath = "/public/scripts/jqgrid";
+    public static $jqgridLibPath = "/public/scripts/jqgrid";
         
     /**
      * Default options for JqGrid 
@@ -139,6 +139,16 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
         return $this;
     }
     /**
+     * Removes all javascript code added by calls to setJqgOnInit()
+     *   
+     * @return Bvb_Grid_Deploy_JqGrid   
+     */
+    public function clearJqgOnInit()
+    {
+        $this->_jqgOnInit[] = array();
+        return $this;
+    }
+    /**
      * Add export action buttons to grid
      *  
      * @param array $types names of deploy classes
@@ -232,7 +242,7 @@ $options
 $postCommands
 ;
 EOF;
-        // TODO add users javascript code, something like ready event
+        // add users javascript code (something like ready event)
         if (count($this->_jqgOnInit)>0) {
             $cmds = implode(PHP_EOL, $this->_jqgOnInit);
             $js .= PHP_EOL . <<<JS
@@ -404,10 +414,10 @@ HTML;
         $this->getView()->jQuery()
             ->enable()        
             ->uiEnable()
-            ->addStylesheet($this->_jqgridLibPath . "/css/ui.jqgrid.css")
+            ->addStylesheet($this->jqgridLibPath . "/css/ui.jqgrid.css")
             // TODO locale should be configurable
-            ->addJavascriptFile($this->_jqgridLibPath . '/js/i18n/grid.locale-en.js')
-            ->addJavascriptFile($this->_jqgridLibPath . '/js/jquery.jqGrid.min.js');
+            ->addJavascriptFile($this->jqgridLibPath . '/js/i18n/grid.locale-en.js')
+            ->addJavascriptFile($this->jqgridLibPath . '/js/jquery.jqGrid.min.js');
         return $this;
     }    
     /**

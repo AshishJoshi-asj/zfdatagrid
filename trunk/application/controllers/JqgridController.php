@@ -92,11 +92,11 @@ class JqgridController extends Zend_Controller_Action
             )
         ));
 
-        ////////////////// 3. set Bvb grid behaviour        
+        ////////////////// 3. configure Bvb grid behaviour        
         //$grid->noFilters(1);        
         //$grid->noOrder(1);
         
-        ////////////////// 4. set jqGrid options 
+        ////////////////// 4. configure jqGrid options 
         ////////////////// for setJqgOptions see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:options
         ////////////////// see also other Bvb_Grid_Deploy_JqGrid::setJqg*() and Bvb_Grid_Deploy_JqGrid::jqg*() methods    
         $grid->setJqgOptions(array(
@@ -147,11 +147,11 @@ class JqgridController extends Zend_Controller_Action
             'hide'=>true,
         ));
         $grid->updateColumn('_action', array(
-            'order'=>1, 
+            'order'=>1,
             'title'=>'Action',
-            'width'=>50,       
+            'width'=>50,
             'callback'=>array(
-                'function'=>array($this,'g1ActionBar'), 
+                'function'=>array($this,'g1ActionBar'),
                 'params'=>array('{{ID}}')
             ),
             'jqg'=>array('fixed'=>true)
@@ -190,6 +190,5 @@ class JqgridController extends Zend_Controller_Action
         
         ////////////////// 5. set ajax ID and process response if requested 
         $grid->ajax(get_class($grid));
-        
     }    
 }
