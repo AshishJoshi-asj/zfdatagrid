@@ -36,7 +36,7 @@ class JqgridController extends Zend_Controller_Action
         $this->view->g1_html = $grid1_html->deploy();        
     }
     
-    public function g1ActionBar($id) {
+    public function g1ActionBar($id=0) {
         $helper = new Zend_View_Helper_Url();
         $actions = array(
             array('url'=>$helper->url(array('action'=>'do', 'what'=>'view', 'id'=>$id)), 'caption'=>'View', 'class'=>'ui-icon ui-icon-zoomin'),        
@@ -87,7 +87,7 @@ class JqgridController extends Zend_Controller_Action
                 'formatter'=>'checkbox', 
                 'align'=>'center',
                 'stype'=>'select',
-                'searchoptions'=>array('defaultValue'=>'1', 'value'=>array(0=>'No', 1=>'Yes'))
+                'searchoptions'=>array('defaultValue'=>'1', 'value'=>array(null=>'All', 0=>'No', 1=>'Yes'))
             )
         ));
 
