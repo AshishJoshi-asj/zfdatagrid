@@ -266,8 +266,7 @@ class Bvb_Grid_Deploy_Table extends Bvb_Grid_DataGrid {
 		}
 		
 		//Check if the request method is POST
-		if (Zend_Controller_Front::getInstance ()->getRequest ()->isPost () &&
-		      Zend_Controller_Front::getInstance()->getRequest()->getParam('_form_edit')==1) {
+		if (Zend_Controller_Front::getInstance ()->getRequest ()->isPost () && Zend_Controller_Front::getInstance ()->getRequest ()->getParam ( '_form_edit' ) == 1) {
 			
 			$param = Zend_Controller_Front::getInstance ()->getRequest ();
 			
@@ -705,9 +704,15 @@ class Bvb_Grid_Deploy_Table extends Bvb_Grid_DataGrid {
 		
 		if (isset ( $this->ctrlParams ['filters'] ) || isset ( $this->ctrlParams ['order'] )) {
 			
-			$url = $this->getUrl ( 'filters' );
+			$url = $this->getUrl ( 'filters','nofilters' );
 			$url2 = $this->getUrl ( 'order' );
-			$url3 = $this->getUrl ( array ('filters', 'order' ) );
+			$url3 = $this->getUrl ( array ('filters', 'order','nofilters' ) );
+			
+			if(is_array($this->_defaultFilters))
+			{
+				$url .= '/nofilters/1';
+				$url3 .= '/nofilters/1';
+			}
 			
 			$this->temp ['table']->hasExtraRow = 1;
 			
@@ -837,8 +842,13 @@ class Bvb_Grid_Deploy_Table extends Bvb_Grid_DataGrid {
 		$grid = $this->temp ['table']->titlesStart ();
 		
 		if ($orderField === null) {
-			//Lets get the default order using in the query (Zend_Db)
-			$queryOrder = $this->_select->getPart ( 'order' );
+			
+			if ($this->getAdapter () == "db") {
+				//Lets get the default order using in the query (Zend_Db)
+				$queryOrder = $this->_select->getPart ( 'order' );
+			}else{
+				$queryOrder = null;
+			}
 			if (is_array ( $queryOrder )) {
 				$finalQueryOrder = array ();
 				foreach ( $queryOrder as $value ) {
@@ -966,7 +976,6 @@ class Bvb_Grid_Deploy_Table extends Bvb_Grid_DataGrid {
 			}
 		}
 		
-		
 		//Get table desc to known to field type
 		$table = parent::getDescribeTable ( $this->data ['table'], $fieldRaw );
 		
@@ -990,7 +999,7 @@ class Bvb_Grid_Deploy_Table extends Bvb_Grid_DataGrid {
 		
 		@$options = $this->info [$mod] ['fields'] [$field];
 		
-		$selected  =null;
+		$selected = null;
 		
 		//If the field as options
 		$attr = array ();
@@ -1041,8 +1050,6 @@ class Bvb_Grid_Deploy_Table extends Bvb_Grid_DataGrid {
 					$values [$key] = $value;
 				}
 				
-				
-				
 				$valor = $view->formSelect ( $fieldRaw, $selected, $attr, $avalor );
 			
 			}
@@ -1067,7 +1074,9 @@ class Bvb_Grid_Deploy_Table extends Bvb_Grid_DataGrid {
 				$values = array ();
 				
 				foreach ( $avalor as $value ) {
-					if( $value == "'" . $inicial_value . "'"){$selected=$inicial_value;}
+					if ($value == "'" . $inicial_value . "'") {
+						$selected = $inicial_value;
+					}
 					$value = substr ( $value, 1 );
 					$value = substr ( $value, 0, - 1 );
 					$values [$value] = $value;
@@ -1098,7 +1107,7 @@ class Bvb_Grid_Deploy_Table extends Bvb_Grid_DataGrid {
 	 *
 	 */
 	function convertOutputNamesFromSqlToUserDefined($fields) {
-		
+		die ( __FUNCTION__ );
 		$fields = parent::object2array ( $fields );
 		
 		$originalFields = $this->data ['fields'];
@@ -1258,6 +1267,7 @@ class Bvb_Grid_Deploy_Table extends Bvb_Grid_DataGrid {
 				
 				#$form_hidden = " <input type=\"button\"  onclick=\"window.location='$url'\" value=\"" . $this->__ ( 'Cancel' ) . "\"><input type=\"hidden\" name=\"_form_edit\" value=\"1\">";
 				
+
 				$fields = self::removeAutoIncrement ( $fields, $this->data ['table'] );
 			
 			}
@@ -1314,7 +1324,7 @@ class Bvb_Grid_Deploy_Table extends Bvb_Grid_DataGrid {
 		}
 		
 		$grid .= $this->temp ['table']->formStart ();
-		$grid .= str_replace ( "{{value}}", $view->formSubmit('submitForm',$button_name) . $form_hidden . "", $this->temp ['table']->formButtons () );
+		$grid .= str_replace ( "{{value}}", $view->formSubmit ( 'submitForm', $button_name ) . $form_hidden . "", $this->temp ['table']->formButtons () );
 		$grid .= $this->temp ['table']->formEnd ();
 		
 		return $grid;
@@ -1830,7 +1840,7 @@ class Bvb_Grid_Deploy_Table extends Bvb_Grid_DataGrid {
 			}
 		}
 		
-		$grid .= $this->_view->view->formHidden('inputId');
+		$grid .= $this->_view->view->formHidden ( 'inputId' );
 		
 		if ((isset ( $this->info ['double_tables'] ) && $this->info ['double_tables'] == 1) || (@$this->ctrlParams ['edit'] != 1 && @$this->ctrlParams ['add'] != 1)) {
 			

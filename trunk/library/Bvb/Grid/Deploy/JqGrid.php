@@ -604,22 +604,6 @@ HTML;
         return $this;
     }
     /**
-     * Return variable stored in info. Return default if value is not stored.  
-     *
-     * @param string $param   parameter name
-     * @param mixed  $default default falue
-     * 
-     * @return mixed
-     */    
-    public function getInfo($param, $default = false)
-    {
-        if (isset($this->info[$param])) {
-            return $this->info[$param];
-        } else {
-            return $default;
-        }
-    }
-    /**
      * Create Zend_Log object used to debug Bvb classes
      *  
      * @return Bvb_Grid_Deploy_JqGrid

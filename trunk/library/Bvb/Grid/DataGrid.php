@@ -21,7 +21,7 @@
 
 class Bvb_Grid_DataGrid {
 	
-	const VERSION = "0.5.1";
+	const VERSION = "0.6 alpha";
 	
 	/**
 	 * Char encoding
@@ -49,7 +49,7 @@ class Bvb_Grid_DataGrid {
 	/**
 	 * The query object from Zend_Db_Select
 	 *
-	 * @var Zend_Db_Select
+	 * @return Zend_Db_Select
 	 */
 	protected $_select = false;
 	
@@ -169,6 +169,7 @@ class Bvb_Grid_DataGrid {
 	 *  DB Adapter
 	 *
 	 * @var Zend_Db_Select
+	 * @return Zend_Db_Adapter_Abstract
 	 */
 	protected $_db;
 	
@@ -322,11 +323,6 @@ class Bvb_Grid_DataGrid {
 	public $activeTemplates = array ();
 	
 	/**
-	 * If the query has group by
-	 */
-	private $hasGroup = 0;
-	
-	/**
 	 * Result untouched
 	 *
 	 * @var array
@@ -351,12 +347,6 @@ class Bvb_Grid_DataGrid {
 	private $_allFieldsAdded = false;
 	
 	/**
-	 * Fields names without alias
-	 * @var array
-	 */
-	private $_fieldsNoAs = array ();
-	
-	/**
 	 * If the user manually sets the query limit
 	 * @var int|bool
 	 */
@@ -364,7 +354,18 @@ class Bvb_Grid_DataGrid {
 	
 	protected $_view;
 	
+	/**
+	 * The db fetch mode used befora changed
+	 * @var unknown_type
+	 */
 	private $_clientFecthMode = null;
+	
+	/**
+	 * Default filters to be applyed
+	 * @var array
+	 * @return array
+	 */
+	protected $_defaultFilters;
 	
 	/**
 	 *  The __construct function receives the db adapter. All information related to the
@@ -376,17 +377,6 @@ class Bvb_Grid_DataGrid {
 	 */
 	function __construct($db = false) {
 		
-		/*	if (! $db instanceof Zend_Db_Adapter_Abstract) {
-			$this->setAdapter ( 'array' );
-		} else {
-			//Iniciate adapter
-			$this->_db = $db;
-			$this->_db->setFetchMode ( Zend_Db::FETCH_OBJ );
-			//Instanciate the Zend_Db_Select object
-			$this->_select = $this->_db->select ();
-		
-		}
-		*/
 		$this->_view = Zend_Controller_Action_HelperBroker::getStaticHelper ( 'viewRenderer' );
 		
 		//Get the controller params and baseurl to use with filters
@@ -1012,11 +1002,10 @@ class Bvb_Grid_DataGrid {
 		
 		foreach ( $columns as $value ) {
 			if ($key == $value [2]) {
-				if(is_object($value[1]))
-				{
+				if (is_object ( $value [1] )) {
 					$field = $value [1]->__toString ();
-				}else{
-					$field = $value[0].'.'.$value [1];
+				} else {
+					$field = $value [0] . '.' . $value [1];
 				}
 				break;
 			}
@@ -1094,6 +1083,12 @@ class Bvb_Grid_DataGrid {
 	
 	}
 	
+	function setDefaultFilters(array $filters) {
+		$this->_defaultFilters = array_flip ( $filters );
+		return $this;
+	
+	}
+	
 	/**
 	 *  Build the query WHERE
 	 *
@@ -1105,15 +1100,12 @@ class Bvb_Grid_DataGrid {
 			return;
 		}
 		
-		if (isset ( $this->data ['where'] ) && strlen ( trim ( $this->data ['where'] ) ) > 1) {
-			$this->_select->where ( $this->data ['where'] );
-		}
-		
 		//Build an array to know filters values
 		$valor_filters = array ();
 		$filters = @urldecode ( $this->ctrlParams ['filters'] );
 		$filters = str_replace ( "filter_", "", $filters );
 		$filters = Zend_Json::decode ( $filters );
+		
 		$fieldsSemAsFinal = $this->removeAsFromFields ();
 		
 		if (is_array ( $filters )) {
@@ -1181,22 +1173,6 @@ class Bvb_Grid_DataGrid {
 			}
 			
 			$this->_select->order ( $query_order );
-		}
-		
-		if (isset ( $this->info ['groupby'] )) {
-			$this->_select->group ( $this->info ['groupby'] );
-		}
-		
-		if (isset ( $this->info ['having'] )) {
-			if (is_array ( $this->info ['having'] )) {
-				
-				if (isset ( $this->info ['having'] ['agregate'] )) {
-					$myCond = $this->info ['having'] ['agregate'] . "(" . $this->info ['having'] ['field'] . ")";
-				} else {
-					$myCond = $this->info ['having'] ['field'];
-				}
-				$this->_select->having ( $myCond . "  " . $this->info ['having'] ['operand'] . " " . $this->info ['having'] ['value'] );
-			}
 		}
 		
 		if (false === $this->_forceLimit) {
@@ -1269,14 +1245,12 @@ class Bvb_Grid_DataGrid {
 	 * @param string $param
 	 * @return bool | $param
 	 */
-	function getInfo($param) {
-		
+	public function getInfo($param, $default = false) {
 		if (isset ( $this->info [$param] )) {
 			return $this->info [$param];
 		} else {
-			return false;
+			return $default;
 		}
-	
 	}
 	
 	/**
@@ -1294,11 +1268,7 @@ class Bvb_Grid_DataGrid {
 			return false;
 		}
 		
-		if ($this->getAdapter () != 'db') {
-			$data = $this->map_array ( $this->_fields, 'replace_AS' );
-		} else {
-			$data = array_keys ( $this->_fieldsNoAs );
-		}
+		$data = $this->_fields;
 		
 		$tcampos = count ( $data );
 		
@@ -1333,35 +1303,6 @@ class Bvb_Grid_DataGrid {
 		}
 		
 		return $return;
-	}
-	
-	/**
-	 *  Consolidate the fields that are in the array with the one on the table
-	 *
-	 * @param array $fields
-	 * @param string $table
-	 * @return array
-	 */
-	function consolidateFields($fields, $table) {
-		
-		$table = $this->_db->describeTable ( $table );
-		
-		foreach ( $table as $value ) {
-			if ($value ['IDENTITY'] === false) {
-				$table_fields [] = $value ['COLUMN_NAME'];
-			}
-		}
-		
-		foreach ( $fields as $key => $value ) {
-			if (! in_array ( $value, $table_fields )) {
-				unset ( $fields [$key] );
-			}
-		}
-		//Reset keys
-		foreach ( $fields as $value ) {
-			$fields_final [] = $value;
-		}
-		return $fields_final;
 	}
 	
 	/**
@@ -1422,18 +1363,15 @@ class Bvb_Grid_DataGrid {
 		$return = array ();
 		$url = $this->getUrl ( array ('order', 'start', 'comm' ) );
 		
-		if ($this->getAdapter () != 'db') {
-			$tcampos = count ( $this->_fields );
-		} else {
-			$tcampos = count ( $this->_fieldsNoAs );
-		}
+		$tcampos = count ( $this->_fields );
+		
 		for($i = 0; $i < count ( $this->extra_fields ); $i ++) {
 			if ($this->extra_fields [$i] ['position'] == 'left') {
 				$return [$this->extra_fields [$i] ['name']] = array ('type' => 'extraField', 'value' => $this->extra_fields [$i] ['name'], 'position' => 'left' );
 			}
 		}
 		
-		$titles = $this->map_array ( $this->_fields, 'replace_AS' );
+		$titles = $this->_fields;
 		
 		$novaData = array ();
 		
@@ -1568,7 +1506,6 @@ class Bvb_Grid_DataGrid {
 	 * @return string
 	 */
 	function replaceDots($string) {
-		
 		return str_replace ( ".", "bvbdot", $string );
 	}
 	
@@ -1579,7 +1516,6 @@ class Bvb_Grid_DataGrid {
 	 * @return unknown
 	 */
 	function replaceAsString($string) {
-		
 		return stripos ( $string, ' AS ' ) ? substr ( $string, 0, stripos ( $string, ' AS ' ) ) : $string;
 	}
 	
@@ -1788,11 +1724,6 @@ class Bvb_Grid_DataGrid {
 		$item = str_replace ( $text ['find'], $text ['replace'], $item );
 	}
 	
-	protected function insertTableName(&$teste, $key) {
-		$table = func_get_arg ( 2 );
-		$teste = preg_replace ( "/{{([a-z0-9_-]+}})/si", "{{" . $table [0] . ".\\1", $teste );
-	}
-	
 	/**
 	 *  The loop for the results.
 	 *  Check the extra-fields,
@@ -1807,21 +1738,7 @@ class Bvb_Grid_DataGrid {
 		
 		$search = $this->map_array ( $this->_fields, 'prepare_replace' );
 		
-		if ($this->getAdapter () != 'db') {
-			$foreach = array_keys ( $this->_fields );
-		} else {
-			$foreach = array_keys ( $this->_fieldsNoAs );
-		}
-		
-		foreach ( $foreach as $field ) {
-			$fields_duble [] = $field;
-		}
-		
-		if ($this->getAdapter () != 'db') {
-			$fields = $this->_fields;
-		} else {
-			$fields = $this->_fieldsNoAs;
-		}
+		$fields = $this->_fields;
 		
 		$i = 0;
 		
@@ -1836,19 +1753,15 @@ class Bvb_Grid_DataGrid {
 					
 					if ($value ['position'] == 'left') {
 						
-						$fi = is_object ( $dados ) ? get_object_vars ( $dados ) : $dados;
-						
-						if (isset ( $value ['eval'] ) && $this->getAdapter () == 'db') {
-							$value ['eval'] = preg_replace ( "/{{([a-z0-9_-]+}})/si", "{{" . $this->data ['table'] . ".\\1", $value ['eval'] );
+						if (! isset ( $value ['class'] )) {
+							$value ['class'] = '';
 						}
+						
+						$fi = is_object ( $dados ) ? get_object_vars ( $dados ) : $dados;
 						
 						if (isset ( $value ['eval'] )) {
 							$evalf = str_replace ( $search, $fi, $value ['eval'] );
 							$new_value = eval ( 'return ' . $evalf );
-						}
-						
-						if (isset ( $value ['decorator'] ) && $this->getAdapter () == 'db') {
-							$value ['decorator'] = preg_replace ( "/{{([a-z0-9_-]+}})/si", "{{" . $this->data ['table'] . ".\\1", $value ['decorator'] );
 						}
 						
 						if (isset ( $value ['decorator'] )) {
@@ -1858,26 +1771,27 @@ class Bvb_Grid_DataGrid {
 						if (isset ( $value ['format'] )) {
 							$new_value = $this->applyFormat ( $new_value, $value ['format'], $value ['format'] );
 						}
-						/*
+						
 						if (isset ( $value ['callback'] ['function'] )) {
 							
 							if (! is_callable ( $value ['callback'] ['function'] )) {
 								throw new Exception ( $value ['callback'] ['function'] . ' not callable' );
 							}
 							
-							$toReplace = $value ['callback'] ['params'];
-							
-							array_walk ( $toReplace, array ('self', 'insertTableName' ), array ($this->data ['table'] ) );
-							
-							if (is_array ( $toReplace )) {
+							if (isset ( $value ['callback'] ['params'] )) {
+								$toReplace = $value ['callback'] ['params'];
+								
 								array_walk_recursive ( $toReplace, array ($this, 'replaceSpecialTags' ), array ('find' => $search, 'replace' => $fi ) );
+							
+							} else {
+								$toReplace = array ();
 							}
 							
 							$new_value = call_user_func_array ( $value ['callback'] ['function'], $toReplace );
 						
-						}*/
+						}
 						
-						$return [$i] [] = @array ('class' => $value ['class'], 'value' => $new_value );
+						$return [$i] [] = array ('class' => $value ['class'], 'value' => $new_value );
 					}
 				}
 			}
@@ -1910,39 +1824,38 @@ class Bvb_Grid_DataGrid {
 					$new_value = htmlspecialchars ( $new_value );
 				}
 				
-				if (isset ( $this->data ['fields'] [$fields_duble [$is]] ['eval'] )) {
+				if (isset ( $this->data ['fields'] [$fields [$is]] ['eval'] )) {
 					
-					$evalf = str_replace ( $search, $this->reset_keys ( $this->map_array ( $finalDados, 'prepare_output' ) ), $this->data ['fields'] [$fields_duble [$is]] ['eval'] );
+					$evalf = str_replace ( $search, $this->reset_keys ( $this->map_array ( $finalDados, 'prepare_output' ) ), $this->data ['fields'] [$fields [$is]] ['eval'] );
 					$new_value = eval ( 'return ' . $evalf . ';' );
 				
 				}
 				
-				if (isset ( $this->data ['fields'] [$fields_duble [$is]] ['callback'] ['function'] )) {
+				if (isset ( $this->data ['fields'] [$fields [$is]] ['callback'] ['function'] )) {
 					
-					if (! is_callable ( $this->data ['fields'] [$fields_duble [$is]] ['callback'] ['function'] )) {
-						throw new Exception ( $this->data ['fields'] [$fields_duble [$is]] ['callback'] ['function'] . ' not callable' );
+					if (! is_callable ( $this->data ['fields'] [$fields [$is]] ['callback'] ['function'] )) {
+						throw new Exception ( $this->data ['fields'] [$fields [$is]] ['callback'] ['function'] . ' not callable' );
 					}
 					
-					$toReplace = $this->data ['fields'] [$fields_duble [$is]] ['callback'] ['params'];
+					if (isset ( $this->data ['fields'] [$fields [$is]] ['callback'] ['params'] )) {
+						$toReplace = $this->data ['fields'] [$fields [$is]] ['callback'] ['params'];
+					} else {
+						$toReplace = array ();
+					}
+					
 					if (is_array ( $toReplace )) {
-						
-						#array_walk ( $toReplace, array ('self', 'insertTableName' ), array ($this->data ['table'] ) );
-						
-
 						$replace = $this->reset_keys ( $this->map_array ( $finalDados, 'prepare_output' ) );
 						array_walk_recursive ( $toReplace, array ($this, 'replaceSpecialTags' ), array ('find' => $search, 'replace' => $replace ) );
-					} else {
-						$toReplace = arr;
 					}
 					
-					$new_value = call_user_func_array ( $this->data ['fields'] [$fields_duble [$is]] ['callback'] ['function'], $toReplace );
+					$new_value = call_user_func_array ( $this->data ['fields'] [$fields [$is]] ['callback'] ['function'], $toReplace );
 				
 				}
 				
 				//[PT]Aplicar o formato da célula
-				if (isset ( $this->data ['fields'] [$fields_duble [$is]] ['format'] )) {
+				if (isset ( $this->data ['fields'] [$fields [$is]] ['format'] )) {
 					
-					$alias = $this->data ['fields'] [$fields_duble [$is]] ['format'];
+					$alias = $this->data ['fields'] [$fields [$is]] ['format'];
 					
 					if (is_array ( $alias )) {
 						$replace = $this->reset_keys ( $this->map_array ( $finalDados, 'prepare_output' ) );
@@ -1952,23 +1865,23 @@ class Bvb_Grid_DataGrid {
 					$new_value = $this->applyFormat ( $new_value, $alias );
 				}
 				
-				if (isset ( $this->data ['fields'] [$fields_duble [$is]] ['decorator'] )) {
+				if (isset ( $this->data ['fields'] [$fields [$is]] ['decorator'] )) {
 					
 					$finalDados = is_object ( $dados ) ? get_object_vars ( $dados ) : $dados;
 					
-					$end = explode ( '.', $fields_duble [$is] );
+					$end = explode ( '.', $fields [$is] );
 					$varEnd = end ( $end );
 					
 					$finalDados [$varEnd] = $new_value;
 					
 					if ($this->getAdapter () == 'db') {
-						#$this->data ['fields'] [$fields_duble [$is]] ['decorator'] = preg_replace ( "/{{([a-z0-9_-]+}})/si", "{{" . $this->data ['table'] . ".\\1", $this->data ['fields'] [$fields_duble [$is]] ['decorator'] );
+						#$this->data ['fields'] [$fields [$is]] ['decorator'] = preg_replace ( "/{{([a-z0-9_-]+}})/si", "{{" . $this->data ['table'] . ".\\1", $this->data ['fields'] [$fields [$is]] ['decorator'] );
 					}
-					$new_value = str_replace ( $search, $this->reset_keys ( $this->map_array ( $finalDados, 'prepare_output' ) ), $this->data ['fields'] [$fields_duble [$is]] ['decorator'] );
+					$new_value = str_replace ( $search, $this->reset_keys ( $this->map_array ( $finalDados, 'prepare_output' ) ), $this->data ['fields'] [$fields [$is]] ['decorator'] );
 				}
 				
-				if (! isset ( $this->data ['fields'] [$fields_duble [$is]] ['hide'] ) || $this->data ['fields'] [$fields_duble [$is]] ['hide'] == 0) {
-					$fieldClass = isset ( $this->data ['fields'] [$fields_duble [$is]] ['class'] ) ? $this->data ['fields'] [$fields_duble [$is]] ['class'] : '';
+				if (! isset ( $this->data ['fields'] [$fields [$is]] ['hide'] ) || $this->data ['fields'] [$fields [$is]] ['hide'] == 0) {
+					$fieldClass = isset ( $this->data ['fields'] [$fields [$is]] ['class'] ) ? $this->data ['fields'] [$fields [$is]] ['class'] : '';
 					$class = isset ( $class ) ? $class : '';
 					$return [$i] [] = @array ('class' => $class . " " . $fieldClass, 'value' => stripslashes ( $new_value ), 'field' => $integralFields [$is] );
 				}
@@ -1983,6 +1896,11 @@ class Bvb_Grid_DataGrid {
 			if (is_array ( $extra_fields )) {
 				foreach ( $extra_fields as $value ) {
 					if ($value ['position'] == 'right') {
+						
+						if (! isset ( $value ['class'] )) {
+							$value ['class'] = '';
+						}
+						
 						$fi = is_object ( $dados ) ? get_object_vars ( $dados ) : $dados;
 						
 						if (isset ( $value ['eval'] )) {
@@ -1995,12 +1913,29 @@ class Bvb_Grid_DataGrid {
 						}
 						
 						if (isset ( $value ['format'] )) {
-							$new_value = $this->applyFormat ( $new_value, $value ['format'] );
+							$new_value = $this->applyFormat ( $new_value, $value ['format'], $value ['format'] );
 						}
 						
-						$finalClass = isset ( $value ['class'] ) ? $value ['class'] : '';
-						$class = isset ( $class ) ? $class : '';
-						$return [$i] [] = array ('class' => $class . ' ' . $finalClass, 'value' => $new_value );
+						if (isset ( $value ['callback'] ['function'] )) {
+							
+							if (! is_callable ( $value ['callback'] ['function'] )) {
+								throw new Exception ( $value ['callback'] ['function'] . ' not callable' );
+							}
+							
+							if (isset ( $value ['callback'] ['params'] )) {
+								$toReplace = $value ['callback'] ['params'];
+								
+								array_walk_recursive ( $toReplace, array ($this, 'replaceSpecialTags' ), array ('find' => $search, 'replace' => $fi ) );
+							
+							} else {
+								$toReplace = array ();
+							}
+							
+							$new_value = call_user_func_array ( $value ['callback'] ['function'], $toReplace );
+						
+						}
+						
+						$return [$i] [] = array ('class' => $value ['class'], 'value' => $new_value );
 					}
 				}
 			}
@@ -2203,23 +2138,7 @@ class Bvb_Grid_DataGrid {
 			ksort ( $fields_final );
 			
 			$fields_final = $this->reset_keys ( $fields_final );
-		
 		}
-		
-		//remove unwanted fields for dislpay
-		$naoMostrar = array_flip ( $fields_final );
-		
-		foreach ( $naoMostrar as $key => $field ) {
-			if (isset ( $this->data ['hide'] ) && in_array ( $key, $this->data ['hide'] )) {
-				unset ( $naoMostrar [$key] );
-				unset ( $orderFields [$key] );
-				unset ( $titulos [$key] );
-				unset ( $this->data ['fields'] [$key] );
-			
-			}
-		}
-		
-		$fields_final = array_values ( array_flip ( $naoMostrar ) );
 		
 		$this->totalHiddenFields = $hide;
 		$this->_fields = $fields_final;
@@ -2247,31 +2166,9 @@ class Bvb_Grid_DataGrid {
 			return $filters;
 		} elseif ($this->_adapter == 'db') {
 			//Não forneceu dados, temos que ir buscá-los todos às tabelas
-			$titulos = array_combine ( array_keys ( $this->_fieldsNoAs ), array_keys ( $this->_fieldsNoAs ) );
+			$titulos = array_combine ( $this->_fields, $this->_fields );
 		}
 		
-		if (isset ( $this->data ['hide'] ) && is_array ( $this->data ['hide'] )) {
-			
-			foreach ( $this->data ['hide'] as $value ) {
-				if (array_key_exists ( $value, $titulos )) {
-					unset ( $titulos [$value] );
-				}
-			}
-		} else {
-			if (is_array ( $titulos )) {
-				
-				foreach ( $titulos as $key => $value ) {
-					
-					if (strpos ( $key, '.' ) === false) {
-						$key = $this->data ['tableAlias'] . '.' . $key;
-					}
-					
-					if (! in_array ( $key, $this->map_array ( $this->_fields, 'replace_AS' ) )) {
-						unset ( $titulos [$key] );
-					}
-				}
-			}
-		}
 		return $titulos;
 	}
 	
@@ -2336,77 +2233,10 @@ class Bvb_Grid_DataGrid {
 	function consolidateQuery() {
 		
 		$this->consolidated = 1;
-		$cFields = @$this->data ['fields'];
-		
-		if (! is_array ( $cFields )) {
-			
-			if (is_array ( $this->data ['table'] )) {
-				
-				foreach ( $this->data ['table'] as $key => $table ) {
-					
-					$tableFinal = array_keys ( $this->getDescribeTable ( $table ) );
-					
-					foreach ( $tableFinal as $field ) {
-						$this->updateColumn ( $key . '.' . $field );
-					}
-				}
-			
-			} else {
-				
-				$table = array_keys ( $this->getDescribeTable ( $this->data ['table'] ) );
-			}
-			
-			foreach ( $table as $field ) {
-				$this->updateColumn ( $field );
-			}
-		}
+		$cFields = $this->data ['fields'];
 		
 		if (! @is_array ( $this->filters ) && @is_array ( $this->data ['filters'] )) {
 			$this->filters = $this->data ['filters'];
-		}
-		
-		//If a search is performed in a field that isn't displayed,
-		//If so we add the field and hide it
-		if (is_array ( $cFields )) {
-			foreach ( $cFields as $value ) {
-				if (@$value ['searchField'] != "") {
-					if (! in_array ( $value ['searchField'], $this->data ['fields'] )) {
-						$this->updateColumn ( $value ['searchField'], array ('title' => 'Barcelos', 'hide' => 1 ) );
-					}
-				}
-			}
-		}
-		
-		//Make sure the fields we need to execute the distinct query for filter exist
-		//If not, we add them and define the hide param as 1
-		if (is_array ( $this->filters )) {
-			
-			foreach ( $this->filters as $value ) {
-				
-				if (is_array ( $value ) && isset ( $value ['distinct'] ['field'] ) && isset ( $value ['distinct'] ['name'] )) {
-					
-					if (! array_key_exists ( $value ['distinct'] ['field'], $this->data ['fields'] )) {
-						$this->updateColumn ( $value ['distinct'] ['field'] . ' AS f' . md5 ( $value ['distinct'] ['field'] ), array ('title' => 'Barcelos', 'hide' => 1 ) );
-					}
-					
-					if (! array_key_exists ( $value ['distinct'] ['name'], $this->data ['fields'] ) && $value ['distinct'] ['name'] != $value ['distinct'] ['field']) {
-						$this->updateColumn ( $value ['distinct'] ['name'] . ' AS f' . md5 ( $value ['distinct'] ['name'] ), array ('title' => 'Barcelos', 'hide' => 1 ) );
-					}
-					$this->data ['fields'] [$value ['distinct'] ['name']] ['searchField'] = $value ['distinct'] ['field'];
-				}
-			
-			}
-		
-		}
-		
-		// The extra fields, they are not part of database table.
-		// Usefull for adding links (a least for me :D )
-		if (@is_array ( $this->info ['extra_fields'] )) {
-			if (! is_array ( $this->extra_fields )) {
-				$this->extra_fields = $this->info ['extra_fields'];
-			} else {
-				$this->extra_fields = array_merge ( $this->extra_fields, $this->info ['extra_fields'] );
-			}
 		}
 		
 		// Validate table fields, make sure they exist...
@@ -2434,184 +2264,7 @@ class Bvb_Grid_DataGrid {
 		
 		$this->buildQuery ();
 		
-		$this->buildSelectQuery ();
-		
 		return true;
-	}
-	
-	/**
-	 * Build the select fields, from and if necessary the joins part
-	 *
-	 * @return void
-	 */
-	function buildSelectQuery() {
-		
-		if ($this->_selectZendDb === true)
-			return;
-		
-		$select_fields = $this->buildSelectFields ( $this->_fields );
-		
-		$from = trim ( $this->data ['table'] );
-		
-		/**
-		 * This menas that the user set an alias for the table withou the 'as'
-		 * ->from('Country c')
-		 * instead of
-		 * ->from('County as c')
-		 */
-		if (substr_count ( $from, ' ' ) < 2) {
-			if (strpos ( $from, ' ' ) !== false) {
-				$table = array_map ( 'trim', explode ( ' ', $from ) );
-				
-				$this->_select->from ( array ($table [1] => $table [0] ) );
-			} else {
-				
-				$this->_select->from ( $from );
-			}
-			
-			$this->buildColumns ();
-			
-			/**
-			 * No joins
-			 */
-			return;
-		}
-		
-		$a = '';
-		preg_match ( "/(.*?)(inner\sjoin?|left\sjoin?|rigth\sjoin?|full\sjoin?|join|cross\sjoin?|natural\sjoin?).* /mi", $from, $a );
-		
-		$fromTable = trim ( $a [1] );
-		
-		/**
-		 * reset the join part.
-		 * Shouldn't be set already, just in case...
-		 */
-		$this->_select->reset ( Zend_Db_Select::FROM );
-		
-		/**
-		 * We culd simplify this using the preg_split. 
-		 * But it is much faster to use the strpos.
-		 * Waiting on feedback...
-		 */
-		
-		if (strpos ( $fromTable, ' as ' ) !== false) {
-			
-			$final = array_map ( 'trim', explode ( 'as', $fromTable ) );
-			
-			$this->_select->from ( array ($final [1] => $final [0] ) );
-		
-		} elseif (strpos ( $fromTable, ' AS ' ) !== false) {
-			
-			$final = array_map ( 'trim', explode ( 'AS', $fromTable ) );
-			
-			$this->_select->from ( array ($final [1] => $final [0] ) );
-		
-		} elseif (strpos ( $fromTable, ' ' ) !== false) {
-			
-			$final = array_map ( 'trim', explode ( ' ', $fromTable ) );
-			
-			$this->_select->from ( array ($final [1] => $final [0] ) );
-		
-		} else {
-			
-			$this->_select->from ( $fromTable );
-		
-		}
-		
-		$from = str_replace ( $fromTable, '', $from );
-		$t = '';
-		
-		preg_match_all ( "/(inner\sjoin?|left\sjoin?|rigth\sjoin?|join|cross\sjoin?|natural\sjoin?)(.*?)(on)\s+(.*?=.*?\s?\w.+)/i", $from, $t );
-		
-		for($i = 0; $i < count ( $t [1] ); $i ++) {
-			
-			$table = $this->getArrayForDbSelect ( $t [2] [$i] );
-			
-			switch (trim ( strtoupper ( $t [1] [$i] ) )) {
-				case 'INNER JOIN' :
-				case 'JOIN' :
-					$this->_select->join ( $table, $t [4] [$i], array () );
-					break;
-				case 'LEFT JOIN' :
-					$this->_select->joinLeft ( $table, $t [4] [$i], array () );
-					break;
-				case 'RIGHT JOIN' :
-					$this->_select->joinRight ( $table, $t [4] [$i], array () );
-					break;
-				case 'FULL JOIN' :
-					$this->_select->joinFull ( $table, $t [4] [$i], array () );
-					break;
-				case 'CROSS JOIN' :
-					$this->_select->joinCross ( $table, array () );
-					break;
-				case 'NATURAL JOIN' :
-					$this->_select->joinNatural ( $table, array () );
-					break;
-				
-				default :
-					break;
-			
-			}
-		}
-		
-		return;
-	}
-	
-	/**
-	 * Build fields if necessary
-	 *
-	 * @return void
-	 */
-	function buildColumns() {
-		
-		if ($this->_selectZendDb === true) {
-			return;
-		}
-		
-		//Lets add the columns
-		if (count ( $this->data ['fields'] ) != count ( $this->_select->getPart ( Zend_Db_Select::COLUMNS ) )) {
-			
-			//Reset all columns already set
-			$this->_select->reset ( Zend_Db_Select::COLUMNS );
-			
-			$this->_fields = false;
-			$this->_titles = false;
-			
-			foreach ( array_keys ( $this->data ['fields'] ) as $field ) {
-				
-				$finalField = $this->getArrayForDbSelect ( $field );
-				
-				if (is_array ( $finalField )) {
-					
-					$this->_fields [] = key ( $finalField );
-					$this->_titles [key ( $finalField )] = $this->data ['fields'] [$field] ['title'];
-					$this->_select->columns ( $finalField );
-				} else {
-					//we need to check if this fields has any sql expression...
-					
-
-					if (isset ( $this->data ['fields'] [$field] ['sqlexp'] )) {
-						
-						$sqlexp = trim ( $this->data ['fields'] [$field] ['sqlexp'] );
-						
-						$explode = explode ( '.', $finalField );
-						
-						$this->_select->columns ( new Zend_Db_Expr ( $sqlexp . ' as ' . $this->_db->quote ( end ( $explode ) ) ) );
-					
-					} else {
-						$this->_select->columns ( $finalField );
-					}
-					
-					$this->_fields [] = $finalField;
-					$this->_titles [$finalField] = isset ( $this->data ['fields'] [$field] ['title'] ) ? $this->data ['fields'] [$field] ['title'] : ucfirst ( $finalField );
-				}
-			
-			}
-		
-		}
-		
-		return;
-	
 	}
 	
 	/**
@@ -2677,6 +2330,30 @@ class Bvb_Grid_DataGrid {
 		return;
 	}
 	
+	function buildDefaultFilters() {
+		
+		if (is_array ( $this->_defaultFilters ) && ! isset ( $this->ctrlParams ['filters'] ) && !isset($this->ctrlParams['nofilters'])) {
+			$df = array ();
+			foreach ( $this->data ['fields'] as $key => $value ) {
+				
+				if (isset ( $value ['hide'] ) && $value ['hide'] == 1) {
+					continue;
+				}
+				
+				if (array_key_exists ( $key, array_flip ( $this->_defaultFilters ) )) {
+					$df ['filter_' . $key] = array_search ( $key, $this->_defaultFilters );
+				} else {
+					$df ['filter_' . $key] = '';
+				}
+			
+			}
+			
+			$defaultFilters = $df;
+			
+			$this->ctrlParams ['filters'] = Zend_Json_Encoder::encode ( $defaultFilters );
+		}
+	}
+	
 	/**
 	 *  Done. Send the grid to the user
 	 *
@@ -2697,6 +2374,8 @@ class Bvb_Grid_DataGrid {
 		
 		}
 		
+		$this->buildDefaultFilters ();
+		
 		if ($this->consolidated == 0) {
 			$this->consolidateQuery ();
 		}
@@ -2705,7 +2384,6 @@ class Bvb_Grid_DataGrid {
 			
 			$this->getQuery ();
 			$this->getQueryCount ();
-			$this->buildColumns ();
 			
 			if ($this->cache ['use'] == 1) {
 				$cache = $this->cache ['instance'];
@@ -2874,14 +2552,15 @@ class Bvb_Grid_DataGrid {
 			} else {
 				$this->_totalRecords = count ( $this->_result );
 				$result = array_slice ( $this->_result, ( int ) @$this->ctrlParams ['start'] < $this->_totalRecords ? ( int ) @$this->ctrlParams ['start'] : 0, $this->pagination );
-			
 			}
 			
 			$this->_result = $result;
 		
 		}
 		
-		$this->_db->setFetchMode ( $this->_clientFecthMode );
+		if ($this->getAdapter () == 'db') {
+			$this->_db->setFetchMode ( $this->_clientFecthMode );
+		}
 		return;
 	}
 	
@@ -3123,42 +2802,6 @@ class Bvb_Grid_DataGrid {
 		
 		$filters = $this->object2array ( $filters );
 		$filters = $filters ['_filters'];
-		
-		/*
-		$finalFilters = array ();
-		
-		foreach ( $filters as $key => $filter ) {
-			
-			$nkey = $key;
-			
-			if (isset ( $filters [$key] ['distinct'] ['field'] ) && strpos ( $filters [$key] ['distinct'] ['field'], '.' ) === false) {
-				$nf = $filters [$key] ['distinct'] ['field'];
-			} else {
-				$nf = $key;
-			}
-			
-			if (isset ( $filters [$key] ['distinct'] ['name'] ) && strpos ( $filters [$key] ['distinct'] ['name'], '.' ) === false) {
-				$nn = $filters [$key] ['distinct'] ['name'];
-			} else {
-				$nn = $key;
-			}
-			
-			if (isset ( $filters [$key] ['values'] )) {
-				$finalFilters [$nkey] ['values'] = $filters [$key] ['values'];
-			}
-			
-			if (! isset ( $finalFilters [$nkey] )) {
-				$finalFilters [$nkey] = array ();
-			}
-			
-			if (isset ( $filters [$key] ['distinct'] )) {
-				$finalFilters [$nkey] ['distinct'] ['name'] = $nn;
-				$finalFilters [$nkey] ['distinct'] ['field'] = $nf;
-			}
-		
-		}
-		*/
-		
 		$this->filters = $filters;
 	
 	}
