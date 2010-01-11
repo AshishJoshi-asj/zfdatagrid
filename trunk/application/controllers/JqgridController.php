@@ -45,7 +45,8 @@ class JqgridController extends Zend_Controller_Action
         $actions = array(
             array('href'=>$helper->url(array('action'=>'do', 'what'=>'view', 'id'=>$id)), 'caption'=>'View', 'class'=>'{view}'),
             array('href'=>$helper->url(array('action'=>'do', 'what'=>'edit', 'id'=>$id)), 'caption'=>'Edit', 'class'=>'{edit} fixedClass'),
-            array('href'=>$helper->url(array('action'=>'do', 'what'=>'delete', 'id'=>$id)), 'caption'=>'Delete', 'class'=>'{delete}')
+            array('href'=>$helper->url(array('action'=>'do', 'what'=>'delete', 'id'=>$id)), 'caption'=>'Delete', 'class'=>'{delete}'),
+            array('onclick'=>new Zend_Json_Expr('alert("this is js alert");'), 'caption'=>'Alert Me')
         );
         return Bvb_Grid_Deploy_JqGrid::formatterActionBar($actions);
     }
@@ -162,6 +163,7 @@ class JqgridController extends Zend_Controller_Action
             ->order('Name')
             ->columns(array('IsBig'=>new Zend_Db_Expr('IF(Population>500000,1,0)')))
             ->columns(array('_action'=>'ID'))
+            ->columns(array('nullInField'=>new Zend_Db_Expr('Name')))
         ;
         $grid->query($select);
 
@@ -173,13 +175,13 @@ class JqgridController extends Zend_Controller_Action
             'hide'=>true,
         ));
         $grid->updateColumn('_action', array(
-            'order'=>1,
+            'order'=>1, // PROBLEM
             'title'=>'Action',
             'width'=>50,
-            'callback'=>array(
+/*            'callback'=>array(
                 'function'=>array($this,'g1ActionBar'),
                 'params'=>array('{{ID}}')
-            ),
+            ),*/
             'jqg'=>array('fixed'=>true)
         ));
         $grid->updateColumn('Name', array('title'=>'City name','width'=>260));
@@ -199,6 +201,12 @@ class JqgridController extends Zend_Controller_Action
                 'searchoptions'=>array('defaultValue'=>'1', 'value'=>array(null=>'All', 0=>'No', 1=>'Yes'))
             )
         ));
+        $grid->updateColumn('nullInField', array(
+            'callback'=>array(
+                'function'=>array($this,'bugCallbackWithNullField'),
+                'params'=>array('{{nullInField}}')
+            ),
+        ));
 
         ////////////////// 3. set Bvb grid behaviour
         //$grid->noFilters(1);
@@ -216,5 +224,9 @@ class JqgridController extends Zend_Controller_Action
 
         ////////////////// 5. set ajax ID and process response if requested
         $grid->ajax(get_class($grid));
+    }
+    public function bugCallbackWithNullField($value)
+    {
+        return $value;
     }
 }
