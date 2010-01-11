@@ -10,7 +10,7 @@ class JqgridController extends Zend_Controller_Action
         ZendX_JQuery::enableView($this->view);
         // set url to jqGrid library
         if (@isset(Zend_Registry::get ( 'config' )->site->jqGridUrl)) {
-            Bvb_Grid_Deploy_JqGrid::$jqgridLibPath = Zend_Registry::get ( 'config' )->site->jqGridUrl;
+            Bvb_Grid_Deploy_JqGrid::$defaultJqGridLibPath = Zend_Registry::get ( 'config' )->site->jqGridUrl;
         }        
     }
     /**
