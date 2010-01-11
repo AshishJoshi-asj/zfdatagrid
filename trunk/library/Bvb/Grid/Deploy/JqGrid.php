@@ -540,7 +540,7 @@ HTML;
      */
     public function getJqGridLibPath()
     {
-        return $self::$defaultJqGridLibPath;
+        return self::$defaultJqGridLibPath;
     }
     /**
      * Add JavaScript code to be executed when jQuery ready event
@@ -870,7 +870,7 @@ HTML;
                 $html .= sprintf(
                     '<a href="%s" class="%s" style="float:left;"><span>%s</span></a>', 
                     $a['url'], 
-                    $a['class'], 
+                    isset($a['class']) ? $a['class'] : 'x', // TODO improve html attributes passing link on form elements 
                     $a['caption']
                 );
             }
