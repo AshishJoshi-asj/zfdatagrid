@@ -419,6 +419,15 @@ class Bvb_Grid_DataGrid {
 	}
 	
 	/**
+	 * Revert Zend_Db Fetch Mode
+	 */
+	function __destruct() {
+		if ($this->getAdapter () == 'db') {
+			$this->_db->setFetchMode ( $this->_clientFecthMode );
+		}
+	}
+	
+	/**
 	 * If set to false, then this grid won't care about any 
 	 * get vars. This is needed if we want to use more than one 
 	 * grid per page
@@ -947,47 +956,6 @@ class Bvb_Grid_DataGrid {
 		#return count ( $this->_fields ) - $this->totalHiddenFields + count($this->extra_fields);
 	}
 	
-	/**
-	 *  Apply quoteidentifier to the table fields
-	 *
-	 * @return string
-	 */
-	function buildSelectFields($values) {
-		
-		if ($this->sourceIsExternal == 1) {
-			return implode ( ', ', $values );
-		}
-		
-		foreach ( $values as $value ) {
-			
-			if (isset ( $this->data ['fields'] [$value] ['sqlexp'] )) {
-				$sqlExp = trim ( $this->data ['fields'] [$value] ['sqlexp'] );
-				
-				if (stripos ( $sqlExp, " AS " )) {
-					$fields [] = $sqlExp;
-				} else {
-					$fields [] = $sqlExp . ' AS ' . str_replace ( '.', '', $value );
-				}
-			
-			} else {
-				
-				if (stripos ( $value, ' AS ' )) {
-					$asFinal = substr ( $value, stripos ( $value, ' as' ) + 4 );
-					$asValue = substr ( $value, 0, stripos ( $value, ' as' ) );
-					
-					$fields [] = $asValue . ' AS ' . $asFinal;
-				
-				} elseif (strpos ( $value, "." )) {
-					$ini = substr ( $value, 0, (strpos ( $value, "." )) );
-					$fields [] = $ini . substr ( $value, strpos ( $value, "." ) );
-				} else {
-					$fields [] = $value;
-				}
-			}
-		}
-		
-		return implode ( ', ', $fields );
-	}
 	
 	/**
 	 * Searchj type to be used in filters
@@ -1242,10 +1210,12 @@ class Bvb_Grid_DataGrid {
 	}
 	
 	/**
-	 * Check if a var exist 
+	 * Return variable stored in info. Return default if value is not stored.  
 	 *
 	 * @param string $param
-	 * @return bool | $param
+	 * @param mixed  $default
+	 * 
+	 * @return mixed
 	 */
 	public function getInfo($param, $default = false) {
 		if (isset ( $this->info [$param] )) {
@@ -1282,7 +1252,7 @@ class Bvb_Grid_DataGrid {
 		
 		for($i = 0; $i < $tcampos; $i ++) {
 			
-			$nf = reset ( explode ( ' ', $this->_fields [$i] ) );
+			$nf = $this->_fields [$i];
 			
 			if (! isset ( $this->data ['fields'] [$nf] ['hide'] ) || $this->data ['fields'] [$nf] ['hide'] == 0) {
 				
@@ -2010,22 +1980,11 @@ class Bvb_Grid_DataGrid {
 	 */
 	function buildSqlExp() {
 		
-		$exp = isset ( $this->info ['sqlexp'] ) ? $this->info ['sqlexp'] : '';
+		$final = isset ( $this->info ['sqlexp'] ) ? $this->info ['sqlexp'] : '';
 		
-		if (! is_array ( $exp )) {
+		if (! is_array ( $final )) {
 			return false;
 		}
-		
-		foreach ( $exp as $key => $value ) {
-			if (strpos ( $key, '.' ) === false) {
-				$exp_final [$this->data ['table'] . '.' . $key] = $value;
-			} else {
-				$exp_final [$key] = $value;
-			}
-		
-		}
-		
-		$final = $exp_final;
 		
 		if ($this->_adapter == 'array') {
 			
@@ -2334,7 +2293,7 @@ class Bvb_Grid_DataGrid {
 	
 	function buildDefaultFilters() {
 		
-		if (is_array ( $this->_defaultFilters ) && ! isset ( $this->ctrlParams ['filters'] ) && !isset($this->ctrlParams['nofilters'])) {
+		if (is_array ( $this->_defaultFilters ) && ! isset ( $this->ctrlParams ['filters'] ) && ! isset ( $this->ctrlParams ['nofilters'] )) {
 			$df = array ();
 			foreach ( $this->data ['fields'] as $key => $value ) {
 				
@@ -2560,9 +2519,6 @@ class Bvb_Grid_DataGrid {
 		
 		}
 		
-		if ($this->getAdapter () == 'db') {
-			$this->_db->setFetchMode ( $this->_clientFecthMode );
-		}
 		return;
 	}
 	
