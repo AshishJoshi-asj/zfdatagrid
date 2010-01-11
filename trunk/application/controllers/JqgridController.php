@@ -78,10 +78,10 @@ class JqgridController extends Zend_Controller_Action
             'title'=>'Action',
             'width'=>100,
             'class'=>'bvb_action bvb_first',
-/*            'callback'=>array(
+            'callback'=>array(
                 'function'=>array($this,'g1ActionBar'),
                 'params'=>array('{{ID}}')
-            ),*/
+            ),
             'jqg'=>array('fixed'=>true)
         ));
         $grid->updateColumn('Name', array(
