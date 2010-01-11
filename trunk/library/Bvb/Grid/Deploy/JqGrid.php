@@ -134,39 +134,6 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
         }
     }
     /**
-     * Configuration magic
-     * 
-     * @param string $var   name of property to set with value
-     * @param mixed  $value value
-     * 
-     * @return void
-     */
-    public function __set($var, $value)
-    {
-        // check what domain parameter it is
-        $domain = substr($var, 0, 3);
-        if (strlen($var)>3 && $var[3]===strtoupper($var[3]) && 0===strcmp($domain, strtolower($domain))) {
-            // it is valid domain
-            $variableName = substr($var, 3);
-            $setterName = $domain."Set".$variableName;
-            if (method_exists($this, $setterName)) {
-                // there is dedicated setter function for this option
-                $this->$setterName($value);
-                return;
-            }
-            
-            $variableName[0] = strtolower($variableName[0]);            
-            $setterName = "set".ucfirst($domain)."Param";
-            if (method_exists($this, $setterName)) {
-                // there is setter function for this domain
-                $this->$setterName($variableName, $value);
-                return;
-            }
-        }
-        // not a domain property 
-        parent::__set($var, $value);           
-    }
-    /**
      * Set jQuery Grid options (merging with old options)
      * 
      * @param array $options set JqGrid options (@see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:options)  
@@ -208,12 +175,13 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      * Return value of parameter from jqGrid domain
      * 
      * @param string $var variable name
+     * @param mixed  $default value to return if option is not set 
      * 
      * @return mixed
      */
-    public function getJqgParam($var)
+    public function getJqgParam($var, $default = null)
     {
-        return isset($this->_jqgParams[$var]) ? $this->_jqgParams[$var] : null;
+        return isset($this->_jqgParams[$var]) ? $this->_jqgParams[$var] : $default;
     }
     /**
      * Set Bvb_Grid_Deploy_JqGrid own options (merging with old options)
@@ -256,13 +224,14 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
     /**
      * Return value of parameter from Bvb_Grid_Deploy_JqGrid domain
      * 
-     * @param string $var variable name
+     * @param string $var     variable name
+     * @param mixed  $default value to return if option is not set 
      * 
      * @return mixed
      */
-    public function getBvbParam($var)
+    public function getBvbParam($var, $default = null)
     {
-        return isset($this->_bvbParams[$var]) ? $this->_bvbParams[$var] : null;
+        return isset($this->_bvbParams[$var]) ? $this->_bvbParams[$var] : $default;
     }
     /**
      * Will add passed javascript code inside anonymouse function.
@@ -357,8 +326,8 @@ JS
         foreach ($this->_navButtons as $btn) {
             $this->_postCommands[] = sprintf("navButtonAdd('#%s', %s)", $this->jqgGetIdPager(), self::encodeJson($btn));
         }
-        if (false) {
-            // first data will be loaded via ajax call  
+        if (!$this->getBvbParam('firstDataAsLocal', true)) {
+            // first data will be loaded via ajax call
             $data = array();
             $this->_jqgParams['datatype'] = "json";
         } else {
@@ -898,4 +867,38 @@ HTML;
         }
         return $html;
     }
+    /**
+     * Configuration magic
+     * 
+     * @param string $var   name of property to set with value
+     * @param mixed  $value value
+     * 
+     * @return void
+     */
+    public function __set($var, $value)
+    {
+        // check what domain parameter it is
+        $domain = substr($var, 0, 3);
+        if (strlen($var)>3 && $var[3]===strtoupper($var[3]) && 0===strcmp($domain, strtolower($domain))) {
+            // it is valid domain
+            $variableName = substr($var, 3);
+            $setterName = $domain."Set".$variableName;
+            if (method_exists($this, $setterName)) {
+                // there is dedicated setter function for this option
+                $this->$setterName($value);
+                return;
+            }
+            
+            $variableName[0] = strtolower($variableName[0]);            
+            $setterName = "set".ucfirst($domain)."Param";
+            if (method_exists($this, $setterName)) {
+                // there is setter function for this domain
+                $this->$setterName($variableName, $value);
+                return;
+            }
+        }
+        // not a domain property 
+        parent::__set($var, $value);           
+    }
+    // TODO __get()    
 }

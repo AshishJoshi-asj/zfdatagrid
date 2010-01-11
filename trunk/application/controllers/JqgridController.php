@@ -33,7 +33,7 @@ class JqgridController extends Zend_Controller_Action
         
         // pass grids to view and deploy() them there 
         $this->view->g1 = $grid1->deploy();       
-        //$this->view->g1_html = $grid1_html->deploy();        
+        $this->view->g1_html = $grid1_html->deploy();        
     }
     
     public function g1ActionBar($id) {
@@ -125,6 +125,8 @@ class JqgridController extends Zend_Controller_Action
         $grid->bvbOnInit = 'console.log("this message will not be logged because of call to bvbClearOnInit().");';
         $grid->bvbClearOnInit();
         $grid->bvbSetOnInit('console.log("jqGrid initiated ! If data are remote they are not loaded at this point.");');
+        
+        $grid->bvbFirstDataAsLocal = false; // how will grid receive first data ?
         
         ////////////////// 5. set ajax ID and process response if requested 
         $grid->ajax(get_class($grid));
