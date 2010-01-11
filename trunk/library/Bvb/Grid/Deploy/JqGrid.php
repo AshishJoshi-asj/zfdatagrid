@@ -42,6 +42,12 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
         '{delete}' => 'ui-icon ui-icon-trash',
         '{view}'   => 'ui-icon ui-icon-search'
     );
+    /**
+     * Track if ajax() function was called
+     *
+     * @var boolean
+     */
+    private $_ajaxFuncCalled = false;
 
     /**
      * Default options for JqGrid
@@ -125,6 +131,8 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
     function ajax($gridId)
     {
         $this->setId($gridId);
+        // track that this function was called
+        $this->_ajaxFuncCalled = true;
         // if request is Ajax we should only return data
         if (false!==$gridId && $this->isAjaxRequest()) {
             // prepare data
@@ -307,6 +315,10 @@ JS
      */
     function deploy()
     {
+        // check if ajax() function was called
+        if (!$this->_ajaxFuncCalled) {
+            $this->log("ajax() function was not called before deploy()", Zend_Log::WARN);
+        }
         // prepare internal Bvb data
         parent::deploy();
         // prepare access to view
