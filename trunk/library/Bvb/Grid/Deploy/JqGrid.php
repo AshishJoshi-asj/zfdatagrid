@@ -597,11 +597,13 @@ HTML;
             'callback',
             'searchType',
             'format',
+            'field',
             'jqg' // we handle this separately
         );
 
         $titles = $this->buildTitles();
-        $fields = $this->removeAsFromFields();
+        //$fields = $this->removeAsFromFields();
+        $fields = $this->data['fields'];
         foreach ($titles as $key=>$title) {
             // basic options
             $options = array("name" => $title['name'], "label" => $title['value']);
@@ -620,8 +622,8 @@ HTML;
                     if ( in_array($name, $skipOptions)) {
                         continue ;
                     }
-                    // TODO hm, this should never happen
-                    $this->log("unknown option: ".$name);
+                    // standard Bvb property which is not excluded will be passed to jqGrid colModel
+                    //$this->log("not skipped option: ".$name);
                     $options[$name] = $value;
                 }
                 if (isset($fields[$key]['jqg'])) {

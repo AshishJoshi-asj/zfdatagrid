@@ -4,6 +4,10 @@ class JqgridController extends Zend_Controller_Action
     function init()
     {
         $this->db = Zend_Registry::get ( 'db' );
+        // turn on profiler
+        $profiler = new Zend_Db_Profiler_Firebug('DB Queries');
+        $profiler->setEnabled(true);
+        $this->db->setProfiler($profiler);
         // enable debug
         Bvb_Grid_Deploy_JqGrid::$debug = true;
         // enable JQuery - should be part of bootstrap
@@ -70,27 +74,37 @@ class JqgridController extends Zend_Controller_Action
             'hide'=>true,
         ));
         $grid->updateColumn('_action', array(
-            //'order'=>1, // TODO see #107
+            //'order'=>1,
             'title'=>'Action',
-            'width'=>50,
+            'width'=>100,
             'class'=>'bvb_action bvb_first',
-            'callback'=>array(
+/*            'callback'=>array(
                 'function'=>array($this,'g1ActionBar'),
                 'params'=>array('{{ID}}')
-            ),
+            ),*/
             'jqg'=>array('fixed'=>true)
         ));
-        $grid->updateColumn('Name', array('title'=>'City name','width'=>260));
+        $grid->updateColumn('Name', array(
+            'title'=>'City name',
+            'width'=>260
+        ));
         $grid->updateColumn('CountryCode',
             array(
                 'title'=>'Country code',
                 'searchType'=>"="
             )
         );
+        $grid->updateColumn('District', array(
+            'title'=>'District (ucase)',
+            'callback'=>array(
+                'function'=>create_function('$text', 'return strtoupper($text);'),
+                'params'=>array('{{District}}')
+            ),
+        ));
         $grid->updateColumn('Population', array(
+            'align'=>'right',
             'jqg' => array(
-                'formatter'=>'integer',
-                'align'=>'right'
+                'formatter'=>'integer'
             )
         ));
         $grid->updateColumn('IsBig', array(
@@ -163,7 +177,7 @@ class JqgridController extends Zend_Controller_Action
             ->order('Name')
             ->columns(array('IsBig'=>new Zend_Db_Expr('IF(Population>500000,1,0)')))
             ->columns(array('_action'=>'ID'))
-            ->columns(array('nullInField'=>new Zend_Db_Expr('Name')))
+            ->columns(array('nullInField'=>new Zend_Db_Expr('Null')))
         ;
         $grid->query($select);
 
@@ -175,16 +189,23 @@ class JqgridController extends Zend_Controller_Action
             'hide'=>true,
         ));
         $grid->updateColumn('_action', array(
-            'order'=>1, // PROBLEM
+            'order'=>1, // PROBLEM !!!!
             'title'=>'Action',
-            'width'=>50,
-/*            'callback'=>array(
+            'width'=>100,
+            'callback'=>array(
                 'function'=>array($this,'g1ActionBar'),
                 'params'=>array('{{ID}}')
-            ),*/
+            ),
             'jqg'=>array('fixed'=>true)
         ));
         $grid->updateColumn('Name', array('title'=>'City name','width'=>260));
+        $grid->updateColumn('District', array(
+            'title'=>'District (ucase)',
+            'callback'=>array(
+                'function'=>create_function('$text', 'return strtoupper($text);'),
+                'params'=>array('{{District}}')
+            ),
+        ));
         $grid->updateColumn('Population', array(
             'jqg' => array(
                 'formatter'=>'integer',
