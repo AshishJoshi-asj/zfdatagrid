@@ -584,7 +584,8 @@ HTML;
             'hide',      // handled in parent::buildTitles()
             'sqlexp',
             'hRow',
-            'eval', 
+            'eval',
+            'callback',
             'searchType', 
             'format',
             'jqg' // we handle this separately
