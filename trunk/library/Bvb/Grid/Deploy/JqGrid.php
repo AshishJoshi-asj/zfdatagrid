@@ -32,7 +32,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      * 
      * @var string
      */
-    public static $jqgridLibPath = "public/scripts/jqgrid";
+    public static $defaultJqGridLibPath = "public/scripts/jqgrid";
         
     /**
      * Default options for JqGrid 
@@ -523,15 +523,25 @@ HTML;
      */
     public function jqInit()
     {
+        $jqgridLibPath = $this->getJqGridLibPath();
         $this->getView()->jQuery()
             ->enable()        
             ->uiEnable()
-            ->addStylesheet(self::$jqgridLibPath . "/css/ui.jqgrid.css")
+            ->addStylesheet($jqgridLibPath . "/css/ui.jqgrid.css")
             // TODO locale should be configurable
-            ->addJavascriptFile(self::$jqgridLibPath . '/js/i18n/grid.locale-en.js')
-            ->addJavascriptFile(self::$jqgridLibPath . '/js/jquery.jqGrid.min.js');
+            ->addJavascriptFile($jqgridLibPath . '/js/i18n/grid.locale-en.js')
+            ->addJavascriptFile($jqgridLibPath . '/js/jquery.jqGrid.min.js');
         return $this;
-    }    
+    }
+    /**
+     * Return URL where jqGrid library is located (it has js and css folders under it).
+     * 
+     * @return string
+     */
+    public function getJqGridLibPath()
+    {
+        return $self::$defaultJqGridLibPath;
+    }
     /**
      * Add JavaScript code to be executed when jQuery ready event
      * 
