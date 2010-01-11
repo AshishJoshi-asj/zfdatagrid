@@ -32,7 +32,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      * 
      * @var string
      */
-    public static $jqgridLibPath = "/public/scripts/jqgrid";
+    public static $jqgridLibPath = "public/scripts/jqgrid";
         
     /**
      * Default options for JqGrid 
