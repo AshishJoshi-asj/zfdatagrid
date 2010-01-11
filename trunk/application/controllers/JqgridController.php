@@ -24,7 +24,7 @@ class JqgridController extends Zend_Controller_Action
     function indexAction()
     {
         // construct JqGrid and let it configure
-        $grid1 = new Bvb_Grid_Deploy_JqGrid('jqGrid Example');
+        $grid1 = new Bvb_Grid_Deploy_JqGrid();
         $this->configG1($grid1);
         
         // construct HTML Table Grid and let it configure in the same way
@@ -33,7 +33,7 @@ class JqgridController extends Zend_Controller_Action
         
         // pass grids to view and deploy() them there 
         $this->view->g1 = $grid1->deploy();       
-        $this->view->g1_html = $grid1_html->deploy();        
+        //$this->view->g1_html = $grid1_html->deploy();        
     }
     
     public function g1ActionBar($id) {
@@ -65,9 +65,10 @@ class JqgridController extends Zend_Controller_Action
             'hide'=>true,
         ));
         $grid->updateColumn('_action', array(
-            //'order'=>1, 
+            //'order'=>1, // TODO see #107
             'title'=>'Action',
-            'width'=>50,       
+            'width'=>50,
+            'class'=>'bvb_action bvb_first',
             'callback'=>array(
                 'function'=>array($this,'g1ActionBar'), 
                 'params'=>array('{{ID}}')
@@ -75,6 +76,12 @@ class JqgridController extends Zend_Controller_Action
             'jqg'=>array('fixed'=>true)
         ));        
         $grid->updateColumn('Name', array('title'=>'City name','width'=>260));
+        $grid->updateColumn('CountryCode', 
+            array(
+                'title'=>'Country code', 
+                'searchType'=>"="
+            )
+        );
         $grid->updateColumn('Population', array(
             'jqg' => array(
                 'formatter'=>'integer', 
@@ -88,23 +95,36 @@ class JqgridController extends Zend_Controller_Action
                 'formatter'=>'checkbox', 
                 'align'=>'center',
                 'stype'=>'select',
-                'searchoptions'=>array('defaultValue'=>'1', 'value'=>array(null=>'All', 0=>'No', 1=>'Yes'))
+                'searchoptions'=>array(/*'defaultValue'=>'1', */'value'=>array(null=>'All', 0=>'No', 1=>'Yes'))
             )
         ));
 
         ////////////////// 3. configure Bvb grid behaviour        
         //$grid->noFilters(1);        
         //$grid->noOrder(1);
+        $grid->setDefaultFilters(array('IsBig'=>'=1'));
         
         ////////////////// 4. configure jqGrid options 
         ////////////////// for setJqgOptions see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:options
         ////////////////// see also other Bvb_Grid_Deploy_JqGrid::setJqg*() and Bvb_Grid_Deploy_JqGrid::jqg*() methods    
-        $grid->setJqgOptions(array(
+        $grid->setJqgParams(array(
+            'caption' => 'jqGrid Example',        
             'forceFit'=>true,
-            'viewrecords'=>false,
-            'idname'=>'ID'
+            'viewrecords'=>false, // show/hide record count right bottom in navigation bar
+            'rowList'=> array(10, 15, 50) // show row number per page control in navigation bar 
         ));
-        $grid->setJqgOnInit('console.log("jqGrid initiated ! If data are remote they are not loaded at this point.");');
+        $grid->setJqgParam('viewrecords', true); // yet another way to set jqGrid property viewrecords        
+        $grid->jqgViewrecords = true; // yet another way to set jqGrid property viewrecords
+        
+        $grid->setBvbParams(array(
+            'id'=>'ID'        
+        ));
+        $grid->setBvbParam('id', 'ID'); // another way to set own Bvb_Grid_Deploy_JqGrid parameter
+        $grid->bvbId = 'ID'; // yet another way to set own Bvb_Grid_Deploy_JqGrid parameter       
+
+        $grid->bvbOnInit = 'console.log("this message will not be logged because of call to bvbClearOnInit().");';
+        $grid->bvbClearOnInit();
+        $grid->bvbSetOnInit('console.log("jqGrid initiated ! If data are remote they are not loaded at this point.");');
         
         ////////////////// 5. set ajax ID and process response if requested 
         $grid->ajax(get_class($grid));
@@ -184,7 +204,7 @@ class JqgridController extends Zend_Controller_Action
         $grid->setJqgOptions(array(
             'forceFit'=>true,
             'viewrecords'=>false,
-            'idname'=>'ID'
+            'idname'=>'ID',
         ));
         $grid->setJqgOnInit('console.log("jqGrid initiated ! If data are remote they are not loaded at this point.");');
         

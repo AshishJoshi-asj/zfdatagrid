@@ -733,7 +733,9 @@ class Bvb_Grid_DataGrid {
 		if (substr ( strtolower ( $name ), 0, 3 ) == 'set') {
 			$name = substr ( $name, 3 );
 		}
-		$this->__set ( $name, $value [0] );
+		if (isset($value [0])) {
+		  $this->__set ( $name, $value [0] );
+		}
 		return $this;
 	}
 	
