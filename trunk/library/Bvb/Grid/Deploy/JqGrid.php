@@ -24,7 +24,6 @@ require_once 'Zend/Json.php';
 /** Zend_Controller_Front */
 require_once 'Zend/Controller/Front.php';
 
-// TODO see also http://www.datatables.net/examples/ and http://www.flexigrid.info/
 class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
 {
     /**
@@ -933,7 +932,7 @@ HTML;
                 if (!is_scalar($val)) {
                     // non-scalar data should be cast to JSON first
                     require_once 'Zend/Json.php';
-                    $val = Zend_Json::encode($val);
+                    $val = self::encodeJson($val);
                 }
                 $val = preg_replace('/"([^"]*)":/', '$1:', $val);
             } else {
