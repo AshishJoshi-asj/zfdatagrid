@@ -1625,11 +1625,6 @@ class Bvb_Grid_DataGrid {
 						
 						$fi = is_object ( $dados ) ? get_object_vars ( $dados ) : $dados;
 						
-						if (isset ( $value ['eval'] )) {
-							$evalf = str_replace ( $search, $fi, $value ['eval'] );
-							$new_value = eval ( 'return ' . $evalf );
-						}
-						
 						if (isset ( $value ['decorator'] )) {
 							$new_value = str_replace ( $search, $fi, $value ['decorator'] );
 						}
@@ -1687,13 +1682,6 @@ class Bvb_Grid_DataGrid {
 				
 				if ($this->escapeOutput === true) {
 					$new_value = htmlspecialchars ( $new_value );
-				}
-				
-				if (isset ( $this->data ['fields'] [$fields [$is]] ['eval'] )) {
-					
-					$evalf = str_replace ( $search, $outputToReplace, $this->data ['fields'] [$fields [$is]] ['eval'] );
-					$new_value = eval ( 'return ' . $evalf . ';' );
-				
 				}
 				
 				if (isset ( $this->data ['fields'] [$fields [$is]] ['callback'] ['function'] )) {
@@ -1762,11 +1750,6 @@ class Bvb_Grid_DataGrid {
 						}
 						
 						$fi = is_object ( $dados ) ? get_object_vars ( $dados ) : $dados;
-						
-						if (isset ( $value ['eval'] )) {
-							$evalf = str_replace ( $search, $fi, $value ['eval'] );
-							$new_value = eval ( 'return ' . $evalf );
-						}
 						
 						if (isset ( $value ['decorator'] )) {
 							$new_value = str_replace ( $search, $fi, $value ['decorator'] );
