@@ -721,7 +721,8 @@ HTML;
     public function Cmd($command, $params)
     {
         $cmd = new JqGridCommand($this);
-        call_user_func_array(array($cmd, 'Cmd'), func_get_args());
+        $args = func_get_args();
+        call_user_func_array(array($cmd, 'Cmd'), $args);
         return $cmd;
     }
     ///////////////////////////////////////////////// Following functions could go to Bvb_Grid_DataGrid
@@ -753,12 +754,22 @@ HTML;
     {
         if (is_null($this->_deploymentContent)) {
             $this->log("You should call deploy() before ", Zend_Log::WARN);
+            // TODO !!! maybe we should simply call deploy() here
             // TODO enable this line after DataGrid will be fixed
             // return false;
             return parent::__toString();
         } else {
             return $this->_deploymentContent;
         }
+    }
+    /**
+     * Return the query to be executed
+     *
+     * @return Zend_Db_Select
+     */
+    function &getSelect()
+    {
+        return $this->_select;
     }
     /**
      * @var Zend_View_Interface
