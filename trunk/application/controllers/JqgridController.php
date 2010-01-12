@@ -33,7 +33,7 @@ class JqgridController extends Zend_Controller_Action
     {
         // construct JqGrid and let it configure
         $grid1 = new Bvb_Grid_Deploy_JqGrid();
-        $this->configG1($grid1);
+        $this->configG1($grid1, $this->_getParam('onlyFromPolynesia', 'false')==='true');
 
         // construct HTML Table Grid and let it configure in the same way
         $grid1_html = new Bvb_Grid_Deploy_Table();
@@ -55,15 +55,21 @@ class JqgridController extends Zend_Controller_Action
         return Bvb_Grid_Deploy_JqGrid::formatterActionBar($actions);
     }
 
-    function configG1($grid)
+    function configG1($grid, $onlyFromPolynesia = false)
     {
         ////////////////// 1. define select
         $select = $this->db->select()
             ->from('City')
             ->order('Name')
-            ->columns(array('IsBig'=>new Zend_Db_Expr('IF(Population>500000,1,0)')))
+            ->columns(array('IsBig'=>new Zend_Db_Expr('IF(City.Population>500000,1,0)')))
             ->columns(array('_action'=>'ID'))
         ;
+        if ($onlyFromPolynesia) {
+            $select
+                ->join('Country', 'Country.Code=City.CountryCode', array('Region'))
+                ->where('Country.Region=?', "Polynesia")
+            ;
+        }
         $grid->query($select);
 
         ////////////////// 2. update column options
