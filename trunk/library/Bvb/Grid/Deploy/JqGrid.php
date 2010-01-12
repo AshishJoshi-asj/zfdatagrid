@@ -1070,7 +1070,7 @@ class JqGridCommand
             case 'setPostDataItem':
             case 'removePostDataItem':
                 // fix non chainable jqGrid methods
-                $this->_cmds[$this->_cmsStack] = array("trigger($params)");
+                $this->_cmds[$this->_cmsStack] = array('jqGrid("' . $command . '",' . $params . ')');
                 $this->_cmsStack++;
                 break;
             default:
