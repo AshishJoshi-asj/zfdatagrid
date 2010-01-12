@@ -362,7 +362,7 @@ JS
     {
         // ! this should be the last commands (it is not chainable anymore)
         foreach ($this->_navButtons as $btn) {
-            $this->_postCommands[] = sprintf("navButtonAdd('#%s', %s)", $this->jqgGetIdPager(), self::encodeJson($btn));
+            $this->_postCommands[] = sprintf('jqGrid("navButtonAdd", "#%s", %s)', $this->jqgGetIdPager(), self::encodeJson($btn));
         }
         if (!$this->getBvbParam('firstDataAsLocal', true)) {
             // first data will be loaded via ajax call
@@ -372,7 +372,7 @@ JS
             // set first data without ajax request
             $data = $this->renderPartData();
             $this->_jqgParams['datatype'] = "local";
-            $this->_postCommands[] = 'setGridParam({datatype:"json"})';
+            $this->_postCommands[] = 'jqGrid("setGridParam", {datatype:"json"})';
             $this->_postCommands[] = 'jqGrid()[0].addJSONData(myData)';
         }
         // combine the post commands into JavaScrip string
@@ -503,7 +503,7 @@ HTML;
         $this->_jqgParams += $this->_jqgDefaultParams;
         // prepare navigation
         $this->_postCommands[] = sprintf(
-            "navGrid('#%s',{edit:false,add:false,del:false,search:false,view:true})",
+            "jqGrid('navGrid', '#%s',{edit:false,add:false,del:false,search:false,view:true})",
             $this->jqgGetIdPager()
         );
 
@@ -518,7 +518,7 @@ HTML;
 
         if (!$this->getInfo('noFilters', false)) {
             // add filter toolbar to grid - if not set $grid->noFilters(1);
-            $this->_postCommands[] = 'filterToolbar()';
+            $this->_postCommands[] = 'jqGrid("filterToolbar")';
             $this->jqgAddNavButton(
                 array(
                     'caption' => $this->__("Toggle Search"),
@@ -614,7 +614,9 @@ HTML;
      */
     public function getJqgPreloadConfig()
     {
-        return "jQuery.jgrid.useJSON = true;"; // \njQuery.jgrid.no_legacy_api = true;
+        // TODO settings should be configurable
+        // TODO is there benefit to add: \njQuery.jgrid.no_legacy_api = true;
+        return "jQuery.jgrid.useJSON = true;";
     }
     /**
      * Add action button to navigation bar
