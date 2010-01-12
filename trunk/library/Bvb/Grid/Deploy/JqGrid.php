@@ -551,6 +551,7 @@ HTML;
             ->addStylesheet($jqgridLibPath . "/css/ui.jqgrid.css")
             // TODO locale should be configurable
             ->addJavascriptFile($jqgridLibPath . '/js/i18n/grid.locale-en.js')
+            ->addJavascript('jQuery.jgrid.useJSON = true;')
             ->addJavascriptFile($jqgridLibPath . '/js/jquery.jqGrid.min.js');
         return $this;
     }
@@ -671,6 +672,18 @@ HTML;
     public function jqgGetIdTable()
     {
         return "jqg_" . $this->getId();
+    }
+    /**
+     * Add command to chain. See http://www.trirand.com/jqgridwiki/doku.php?id=wiki:methods.
+     *
+     * @param string       $command jqGrid command
+     *                     there could be any number of additional parameters
+     */
+    public function Cmd($command, $params)
+    {
+        $cmd = new JqGridCommand($this);
+        call_user_func_array(array($cmd, 'Cmd'), func_get_args());
+        return $cmd;
     }
     ///////////////////////////////////////////////// Following functions could go to Bvb_Grid_DataGrid
     /////////////////////////////////////////////////
@@ -1004,4 +1017,66 @@ HTML;
         parent::__set($var, $value);
     }
     // TODO __get()
+}
+class JqGridCommand
+{
+    protected $_cmds = array(0=>array());
+    protected $_cmsStack = 0;
+    protected $_grid;
+
+    public function __construct($grid)
+    {
+        $this->_grid = $grid;
+    }
+
+    public function __toString()
+    {
+        $stacks = array();
+        foreach ($this->_cmds as $stack) {
+            if (count($stack)>0) {
+                $stacks[] = "jQuery('#" . $this->_grid->jqgGetIdTable() . "')." . implode('.', $stack) . ";";
+            }
+        }
+
+        if (count($stacks)>0) {
+            return implode("\n", $stacks);
+        }
+    }
+    /**
+     * Add command to chain. See http://www.trirand.com/jqgridwiki/doku.php?id=wiki:methods.
+     *
+     * @param string       $command jqGrid command
+     *                     there could be any number of additional parameters
+     */
+    public function Cmd($command)
+    {
+        $params = func_get_args();
+        // remove command from parameter list
+        array_shift($params);
+        // encode parameters
+        $tmp = array();
+         foreach ($params as $param) {
+            $tmp[] = $this->_grid->encodeJson($param);
+        }
+        $params = implode(",", $tmp);
+        // add parameter to stack
+        switch ($command) {
+            case "trigger":
+                // does not seam to work in new API, maybe it will change in future
+                $this->_cmds[$this->_cmsStack][] = "trigger($params)";
+                break;
+            case 'setPostData':
+            case 'appendPostData':
+            case 'setPostDataItem':
+            case 'removePostDataItem':
+                // fix non chainable jqGrid methods
+                $this->_cmds[$this->_cmsStack] = array("trigger($params)");
+                $this->_cmsStack++;
+                break;
+            default:
+                $this->_cmds[$this->_cmsStack][] = 'jqGrid("' . $command . '",' . $params . ')';
+        }
+        // let us be chainable
+        return $this;
+    }
 }
