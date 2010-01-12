@@ -33,6 +33,20 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      */
     public static $defaultJqGridLibPath = "public/scripts/jqgrid";
     /**
+     * Code of locale file to use
+     * TODO should be static and how to configure it ?
+     *
+     * @var string
+     */
+    protected $_jqgI18n = "en";
+
+    /**
+     * Remember if we are already initialized
+     *
+     * @var boolean
+     */
+    protected $_jqInitialized = false;
+    /**
      * URL path to place where JqGrid library resides
      *
      * @var string
@@ -547,15 +561,24 @@ HTML;
      */
     public function jqInit()
     {
+        if ($this->_jqInitialized) {
+            // this should run only once for all grids in this request
+            return $this;
+        }
         $jqgridLibPath = $this->getJqGridLibPath();
         $this->getView()->jQuery()
             ->enable()
             ->uiEnable()
             ->addStylesheet($jqgridLibPath . "/css/ui.jqgrid.css")
-            // TODO locale should be configurable
-            ->addJavascriptFile($jqgridLibPath . '/js/i18n/grid.locale-en.js')
-            ->addJavascript('jQuery.jgrid.useJSON = true;')
+            ->addJavascriptFile($jqgridLibPath . '/js/i18n/grid.locale-' . $this->_jqgI18n . '.js')
+            // TODO enable following lines when ZendX_Jquery will support it
+            //->addJavascriptBetweenFiles($this->getJqgPreloadConfig())
             ->addJavascriptFile($jqgridLibPath . '/js/jquery.jqGrid.min.js');
+        ;
+
+        // remember that we are initialized
+        $this->_jqInitialized = true;
+
         return $this;
     }
     /**
@@ -582,6 +605,17 @@ HTML;
         return $this;
     }
     /////////////////////
+    /**
+     * Return Javascript which will configure jqGrid before it will be loaded.
+     *
+     * This code should be added between grid.locale-*.js and  jquery.jqGrid.min.js file.
+     *
+     * @return string
+     */
+    public function getJqgPreloadConfig()
+    {
+        return "jQuery.jgrid.useJSON = true;"; // \njQuery.jgrid.no_legacy_api = true;
+    }
     /**
      * Add action button to navigation bar
      *
