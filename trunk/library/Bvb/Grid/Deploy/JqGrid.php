@@ -311,7 +311,9 @@ JS
     /**
      * Build grid. Will output HTML definition for grid and add js/css to view.
      *
-     * @return string output this sting to place in view where you want to display the grid
+     * Use __toString() function to receive the result and place it in view where you want to display the grid.
+     *
+     * @return Bvb_Grid_Deploy_JqGrid
      */
     function deploy()
     {
@@ -334,7 +336,8 @@ JS
         $this->_jqgParams['colModel'] = $this->jqgGetColumnModel();
         // build final JavaScript code and return HTML code to display
         $this->jqAddOnLoad($this->renderPartJavascript());
-        return $this->renderPartHtml();
+        $this->_deploymentContent = $this->renderPartHtml();
+        return $this;
     }
     /**
      * Return javascript part of grid
@@ -699,6 +702,28 @@ HTML;
      * @see Bvb_Grid_DataGrid::$export
      */
     public $export = array();
+    /**
+     * Contains result of deploy() function.
+     *
+     * @var string
+     */
+    protected $_deploymentContent = null;
+    /**
+     * Return result of deploy().
+     *
+     * string|boolean FALSE if deploy() was not called before
+     */
+    public function __toString()
+    {
+        if (is_null($this->_deploymentContent)) {
+            $this->log("You should call deploy() before ", Zend_Log::WARN);
+            // TODO enable this line after DataGrid will be fixed
+            // return false;
+            return parent::__toString();
+        } else {
+            return $this->_deploymentContent;
+        }
+    }
     /**
      * @var Zend_View_Interface
      */
