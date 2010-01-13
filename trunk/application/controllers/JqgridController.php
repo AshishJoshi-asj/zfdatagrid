@@ -81,7 +81,7 @@ class JqgridController extends Zend_Controller_Action
         ));
         $grid->updateColumn('_action', array(
             'search'=>false, // this will disable search on this field
-            //'order'=>1,
+            'order'=>1,
             'title'=>'Action',
             'width'=>100,
             'class'=>'bvb_action bvb_first',
