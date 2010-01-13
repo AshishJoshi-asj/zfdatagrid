@@ -1106,7 +1106,7 @@ HTML;
      */
     public static function getVersion()
     {
-        return '$Id$';
+        return '$Rev$';
     }
     // TODO __get()
 }
