@@ -80,6 +80,7 @@ class JqgridController extends Zend_Controller_Action
             'hide'=>true,
         ));
         $grid->updateColumn('_action', array(
+            'search'=>false, // this will disable search on this field
             //'order'=>1,
             'title'=>'Action',
             'width'=>100,
@@ -88,7 +89,7 @@ class JqgridController extends Zend_Controller_Action
                 'function'=>array($this,'g1ActionBar'),
                 'params'=>array('{{ID}}')
             ),
-            'jqg'=>array('fixed'=>true)
+            'jqg'=>array('fixed'=>true, 'search'=>false)
         ));
         $grid->updateColumn('Name', array(
             'title'=>'City name',
@@ -195,6 +196,7 @@ class JqgridController extends Zend_Controller_Action
             'hide'=>true,
         ));
         $grid->updateColumn('_action', array(
+            'search'=>false, // this will disable search on this field
             'order'=>1, // PROBLEM !!!!
             'title'=>'Action',
             'width'=>100,
