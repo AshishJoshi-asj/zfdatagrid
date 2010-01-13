@@ -1099,6 +1099,15 @@ HTML;
         // not a domain property
         parent::__set($var, $value);
     }
+    /**
+     * Will return actual version of this file
+     *
+     * @return string
+     */
+    public static function getVersion()
+    {
+        return '$Id$';
+    }
     // TODO __get()
 }
 class JqGridCommand
