@@ -128,7 +128,7 @@ class JqgridController extends Zend_Controller_Action
         ////////////////// 3. configure Bvb grid behaviour
         //$grid->noFilters(1);
         //$grid->noOrder(1);
-        $grid->setDefaultFilters(array('IsBig'=>'=1'));
+        $grid->setDefaultFilters(array('IsBig'=>'1'));
 
         ////////////////// 4. configure jqGrid options
         ////////////////// for setJqgOptions see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:options
@@ -152,7 +152,7 @@ class JqgridController extends Zend_Controller_Action
         $grid->bvbClearOnInit();
         $grid->bvbSetOnInit('console.log("jqGrid initiated ! If data are remote they are not loaded at this point.");');
 
-        $grid->bvbFirstDataAsLocal = false; // how will grid receive first data ?
+        //$grid->bvbFirstDataAsLocal = false; // how will grid receive first data ?
 
         ////////////////// 5. set ajax ID and process response if requested
         $grid->ajax(get_class($grid));
@@ -227,7 +227,7 @@ class JqgridController extends Zend_Controller_Action
                 'formatter'=>'checkbox',
                 'align'=>'center',
                 'stype'=>'select',
-                'searchoptions'=>array('defaultValue'=>'1', 'value'=>array(null=>'All', 0=>'No', 1=>'Yes'))
+                'searchoptions'=>array('defaultValue'=>null, 'value'=>array(null=>'All', 0=>'No', 1=>'Yes'))
             )
         ));
         $grid->updateColumn('nullInField', array(

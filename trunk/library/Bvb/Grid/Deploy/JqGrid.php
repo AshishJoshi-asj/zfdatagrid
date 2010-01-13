@@ -653,6 +653,8 @@ HTML;
             'jqg' // we handle this separately
         );
 
+        $defaultFilters = array_flip($this->_defaultFilters);
+
         $titles = $this->buildTitles();
         //$fields = $this->removeAsFromFields();
         $fields = $this->data['fields'];
@@ -687,6 +689,15 @@ HTML;
                 }
             } else {
                 $this->log("why there is no key $key in fields ?");
+            }
+            // overide default filters if setDefaultFilers() was used
+            if (isset($defaultFilters[$key])) {
+                // this does not work with bvbFirstDataAsLocal = false, because jQuery().trigger("refreshGrid") will reset filters
+                if (isset($options['searchoptions'])) {
+                    $options['searchoptions']['defaultValue'] = $defaultFilters[$key];
+                } else {
+                    $options['searchoptions'] = array('defaultValue'=>$defaultFilters[$key]);
+                }
             }
             // add field to model
             $model[] = $options;
