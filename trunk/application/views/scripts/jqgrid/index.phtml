@@ -4,12 +4,12 @@ $this->doctype('XHTML1_TRANSITIONAL');
 $this->setEncoding('UTF-8');
 $this->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=UTF-8');
 ?>
-<!-- code to show external filter possibility and Cmd() chaining -->
+<!-- code to show external filter possibility and cmd() chaining -->
 <?php $this->jQuery()->onLoadCaptureStart(); ?>
 $('#filterPolynesia').bind('change', function() {
     <?=$this->g1
-        ->Cmd('setPostDataItem', 'onlyFromPolynesia', new Zend_Json_Expr('$(this).is(":checked")'))
-        ->Cmd('trigger', 'reloadGrid');
+        ->cmd('setPostDataItem', 'onlyFromPolynesia', new Zend_Json_Expr('$(this).is(":checked")'))
+        ->cmd('trigger', 'reloadGrid');
     ?>
 });
 <?php $this->jQuery()->onLoadCaptureEnd(); ?>
@@ -44,7 +44,7 @@ $('#filterPolynesia').bind('change', function() {
 
 <h1>Bvb JqGrid Examples</h1>
 
-<h2>JqGrid</h2>
+<h2>JqGrid (version <?=$this->g1->getVersion()?>)</h2>
 <div>
 <?=$this->formCheckbox("filterPolynesia", 0, null, array(1,0));?> Cities Only From Polynesia
 </div>

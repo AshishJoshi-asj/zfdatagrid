@@ -205,7 +205,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
     /**
      * Return value of parameter from jqGrid domain
      *
-     * @param string $var variable name
+     * @param string $var     variable name
      * @param mixed  $default value to return if option is not set
      *
      * @return mixed
@@ -362,7 +362,11 @@ JS
     {
         // ! this should be the last commands (it is not chainable anymore)
         foreach ($this->_navButtons as $btn) {
-            $this->_postCommands[] = sprintf('jqGrid("navButtonAdd", "#%s", %s)', $this->jqgGetIdPager(), self::encodeJson($btn));
+            $this->_postCommands[] = sprintf(
+                'jqGrid("navButtonAdd", "#%s", %s)',
+                $this->jqgGetIdPager(),
+                self::encodeJson($btn)
+            );
         }
         if (!$this->getBvbParam('firstDataAsLocal', true)) {
             // first data will be loaded via ajax call
@@ -653,7 +657,7 @@ HTML;
             'jqg' // we handle this separately
         );
 
-        $defaultFilters = array_flip($this->_defaultFilters);
+        $defaultFilters = array_flip(is_null($this->_defaultFilters) ? array() : $this->_defaultFilters);
 
         $titles = $this->buildTitles();
         //$fields = $this->removeAsFromFields();
@@ -692,7 +696,8 @@ HTML;
             }
             // overide default filters if setDefaultFilers() was used
             if (isset($defaultFilters[$key])) {
-                // this does not work with bvbFirstDataAsLocal = false, because jQuery().trigger("refreshGrid") will reset filters
+                // this does not work with bvbFirstDataAsLocal = false,
+                // because jQuery().trigger("refreshGrid") will reset filters
                 if (isset($options['searchoptions'])) {
                     $options['searchoptions']['defaultValue'] = $defaultFilters[$key];
                 } else {
@@ -726,14 +731,16 @@ HTML;
     /**
      * Add command to chain. See http://www.trirand.com/jqgridwiki/doku.php?id=wiki:methods.
      *
-     * @param string       $command jqGrid command
-     *                     there could be any number of additional parameters
+     * @param string $command jqGrid command
+     *                        there could be any number of additional parameters
+     *
+     * @return JqGridCommand
      */
-    public function Cmd($command, $params)
+    public function cmd($command)
     {
         $cmd = new JqGridCommand($this);
         $args = func_get_args();
-        call_user_func_array(array($cmd, 'Cmd'), $args);
+        call_user_func_array(array($cmd, 'cmd'), $args);
         return $cmd;
     }
     ///////////////////////////////////////////////// Following functions could go to Bvb_Grid_DataGrid
@@ -760,6 +767,8 @@ HTML;
      * Return result of deploy().
      *
      * string|boolean FALSE if deploy() was not called before
+     *
+     * @return string
      */
     public function __toString()
     {
@@ -970,13 +979,13 @@ HTML;
             }
         }
     }
-   /**
+    /**
      * Function to format action links
      *
      * @param mixed $actions definition of links to action
      *                       all parameters will be added as HTML attributes to link except:
      *                       caption: will be placed between <a><span>$caption</span></a>
-     *                       class: predefined variables {edit}, {delete}, {view} will be replaced with jQuery UI classes
+     *                       class: predefined variables {edit},{delete},{view} will be replaced with jQuery UI classes
      *                       img: could be array and will be extracted as HTML attributes to <img> tag
      *
      * @return string
@@ -991,11 +1000,13 @@ HTML;
             $htmlAtts = array();
             if (isset($a['class'])) {
                 // support predefined CSS classes
-                $class = trim(str_replace(
-                    array_keys($actionClasses),
-                    $actionClasses,
-                    $a['class']
-                ));
+                $class = trim(
+                    str_replace(
+                        array_keys($actionClasses),
+                        $actionClasses,
+                        $a['class']
+                    )
+                );
                 if (!empty($class)) {
                     $a['class'] = $class;
                 }
@@ -1023,10 +1034,8 @@ HTML;
      *
      * This function is clone from Zend_View_Helper_HtmlElement
      *
-     * @access public
-     *
      * @param array $attribs From this array, each key-value pair is
-     * converted to an attribute name and value.
+     *                       converted to an attribute name and value.
      *
      * @return string The XHTML for the attributes.
      */
@@ -1041,7 +1050,7 @@ HTML;
                 // Don't escape event attributes; _do_ substitute double quotes with singles
                 if (!is_scalar($val)) {
                     // non-scalar data should be cast to JSON first
-                    require_once 'Zend/Json.php';
+                    include_once 'Zend/Json.php';
                     $val = self::encodeJson($val);
                 }
                 $val = preg_replace('/"([^"]*)":/', '$1:', $val);
@@ -1104,7 +1113,7 @@ HTML;
      *
      * @return string
      */
-    public static function getVersion()
+    public function getVersion()
     {
         return '$Rev$';
     }
@@ -1115,12 +1124,22 @@ class JqGridCommand
     protected $_cmds = array(0=>array());
     protected $_cmsStack = 0;
     protected $_grid;
-
+    /**
+     * Constructor
+     *
+     * @param Bvb_Grid_Deploy_JqGrid $grid grid object
+     *
+     * @return void
+     */
     public function __construct($grid)
     {
         $this->_grid = $grid;
     }
-
+    /**
+     * Build javascript from all commands
+     *
+     * @return string
+     */
     public function __toString()
     {
         $stacks = array();
@@ -1137,36 +1156,38 @@ class JqGridCommand
     /**
      * Add command to chain. See http://www.trirand.com/jqgridwiki/doku.php?id=wiki:methods.
      *
-     * @param string       $command jqGrid command
-     *                     there could be any number of additional parameters
+     * @param string $command jqGrid command
+     *               there could be any number of additional parameters
+     *
+     * @return JqGridCommand
      */
-    public function Cmd($command)
+    public function cmd($command)
     {
         $params = func_get_args();
         // remove command from parameter list
         array_shift($params);
         // encode parameters
         $tmp = array();
-         foreach ($params as $param) {
+        foreach ($params as $param) {
             $tmp[] = $this->_grid->encodeJson($param);
         }
         $params = implode(",", $tmp);
         // add parameter to stack
         switch ($command) {
-            case "trigger":
-                // does not seam to work in new API, maybe it will change in future
-                $this->_cmds[$this->_cmsStack][] = "trigger($params)";
-                break;
-            case 'setPostData':
-            case 'appendPostData':
-            case 'setPostDataItem':
-            case 'removePostDataItem':
-                // fix non chainable jqGrid methods
-                $this->_cmds[$this->_cmsStack] = array('jqGrid("' . $command . '",' . $params . ')');
-                $this->_cmsStack++;
-                break;
-            default:
-                $this->_cmds[$this->_cmsStack][] = 'jqGrid("' . $command . '",' . $params . ')';
+        case "trigger":
+            // does not seam to work in new API, maybe it will change in future
+            $this->_cmds[$this->_cmsStack][] = "trigger($params)";
+            break;
+        case 'setPostData':
+        case 'appendPostData':
+        case 'setPostDataItem':
+        case 'removePostDataItem':
+            // fix non chainable jqGrid methods
+            $this->_cmds[$this->_cmsStack] = array('jqGrid("' . $command . '",' . $params . ')');
+            $this->_cmsStack++;
+            break;
+        default:
+            $this->_cmds[$this->_cmsStack][] = 'jqGrid("' . $command . '",' . $params . ')';
         }
         // let us be chainable
         return $this;
