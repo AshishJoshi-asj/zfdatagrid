@@ -144,6 +144,9 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      */
     function ajax($gridId)
     {
+        // apply additional configuration
+        $this->_runConfigCallbacks();
+
         $this->setId($gridId);
         // track that this function was called
         $this->_ajaxFuncCalled = true;
@@ -298,29 +301,58 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      *
      * @return void
      */
-    protected function addExportButtons(array $types)
+    protected function addExportButtons(array $exports)
     {
-        // TODO not ok links
-        foreach ($types as $export=>$url) {
+        $myUrl = 'x';
+        foreach ($exports as $export=>$options) {
+            $url = isset($options['url']) ?  $options['url'] : $myUrl;
+            $newWindow = isset($options['newwindow']) ?  $options['newwindow'] : true;
             $this->jqgAddNavButton(
-                array(
-                    'caption' => $export,
-                    'buttonicon' => "ui-icon-extlink",
-                    'onClickButton' => new Zend_Json_Expr(<<<JS
-function() {
-    newwindow = window.open("$url",'$export Export','');
-    if (window.focus) {
-        newwindow.focus();
-    }
-    return false;
-}
-JS
-                    ),
+                array( // /public/images/csv.gif
+                    'caption' => $options['caption'],
+                    'buttonicon' => isset($options['ui-icon']) ? : "ui-icon-extlink",
+                    'onClickButton' => isset($options['onclick'])
+                        ? new Zend_Json_Expr($options['onclick'])
+                        // TODO following JS function should be added as universal function if at least one exp. button
+                        : new Zend_Json_Expr($this->_getExportButtonJs($url, $newWindow, $export)),
                     'position' => "last"
                 )
             );
         }
         return $this;
+    }
+    protected function _getExportButtonJs($url, $newWindow, $exportTo)
+    {
+
+        $cmd1 = $this->cmd("getGridParam", "url");
+        $cmd2 = $this->cmd("getGridParam", "postData");
+        // TODO does not support sending of search/sort parameters yet
+        $getUrl = <<<JS
+var url = $cmd1;
+var data = $cmd2;
+url = url + "&_exportFrom=jqGrid&_exportTo=$exportTo";
+JS;
+        if ($newWindow) {
+        return
+<<<JS
+function() {
+    $getUrl
+    newwindow = window.open(url);
+    if (window.focus) {
+        newwindow.focus();
+    }
+    return false;
+}
+JS;
+        } else {
+            return
+<<<JS
+function() {
+    $getUrl
+    location.href = url;
+}
+JS;
+        }
     }
     /**
      * Build grid. Will output HTML definition for grid and add js/css to view.
@@ -538,7 +570,7 @@ HTML;
             $this->_jqgParams['viewsortcols'] = array(false,'vertical',false);
         }
         // add export buttons
-        $this->addExportButtons($this->export);
+        $this->addExportButtons($this->getExports());
     }
     /**
      * Encode Json that may include javascript expressions.
@@ -1118,6 +1150,41 @@ HTML;
         return '$Rev$';
     }
     // TODO __get()
+    ///////////////////////////////////////////////// EXPORT
+    /**
+     * Build list of exports with options
+     *
+     * Options:
+     * caption   - mandatory
+     * img       - (default null)
+     * ui-icon   - (default ui-icon-extlink)
+     * newwindow - (default true)
+     * url       - (default actual url)
+     * onclick   - (default null)
+     * _class    - (reserved, used internaly)
+     */
+    public function getExports()
+    {
+        $res = array();
+        foreach ($this->export as $name=>$defs) {
+            if (!is_array($defs)) {
+                // only export name is paased, we need to get default option
+                $name = $defs;
+                $className = "Bvb_Grid_Deploy_" . $name; // TODO support user defined classes
+                if (Zend_Loader_Autoloader::autoload($className) && method_exists($className, 'getExportDefaults')) {
+                    // learn the defualt values
+                    $defs = $className::getExportDefaults();
+                } else {
+                    // there are no defaults, we need at least some caption
+                    $defs = array('caption'=>$name);
+                }
+                $defs['_class'] = $className;
+            }
+            $res[$name] = $defs;
+        }
+
+        return $res;
+    }
 }
 class JqGridCommand
 {

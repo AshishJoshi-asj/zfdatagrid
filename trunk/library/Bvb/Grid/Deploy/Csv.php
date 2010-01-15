@@ -18,7 +18,7 @@
  * @copyright  Copyright (c) Mascker (http://www.petala-azul.com)
  * @license    http://www.petala-azul.com/bsd.txt   New BSD License
  * @version    0.4  mascker $
- * @author     Mascker (Bento Vilas Boas) <geral@petala-azul.com > 
+ * @author     Mascker (Bento Vilas Boas) <geral@petala-azul.com >
  */
 
 
@@ -32,7 +32,7 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
     protected $options = array ();
 
     protected $output = 'csv';
-    
+
     /**
      * Set true if data should be downloaded
      */
@@ -42,7 +42,7 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
      * Set true if data should be stored
      */
     protected $storeData = null;
-    
+
     /**
      * Storing file
      */
@@ -51,26 +51,32 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
 
     /*
      *
-     * Optimize performance by setting best value for $this->setPagination(?); 
+     *
+     * Optimize performance by setting best value for $this->setPagination(?);
      * and setting options:
      * set_time_limit
      * memory_limit
-     * download: send data to directly to user 
+     * download: send data to directly to user
      * save: save the file
-     * 
+     * ?dir:
+     *
      * @param array $data
      */
-    function __construct( $dir, $options = array('download')) {
+    function __construct($options = array('download')) {
 
         if (! in_array ( 'csv', $this->export )) {
             echo $this->__ ( "You dont' have permission to export the results to this format" );
             die ();
         }
 
-        $this->setPagination ( 5000 );        
+        $this->setPagination ( 5000 );
+
+        // TODO this needs rework
+        $dir = isset($options['dir']) ? $options['dir'] : '';
         $this->dir = rtrim ( $dir, "/" ) . "/";
+
         $this->options = $options;
-        
+
         parent::__construct (  );
     }
 
@@ -81,7 +87,7 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
      * @param string $var
      * @param string $value
      */
-    
+
     function __set($var, $value) {
 
         parent::__set ( $var, $value );
@@ -92,12 +98,12 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
 
         $grid = '';
         foreach ( $titles as $title ) {
-            
+
             $grid .= '"' . $title ['value'] . '",';
         }
-        
+
         return substr ( $grid, 0, - 1 ) . "\n";
-    
+
     }
 
 
@@ -105,15 +111,15 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
 
         $grid = '';
         if (is_array ( $sql )) {
-            
+
             foreach ( $sql as $exp ) {
                 $grid .= '"' . $exp ['value'] . '",';
             }
         }
-        
+
 
         return substr ( $grid, 0, - 1 ) . " \n";
-    
+
     }
 
 
@@ -121,20 +127,20 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
 
         $grid = '';
         foreach ( $grids as $value ) {
-            
+
             foreach ( $value as $final ) {
                 $grid .= '"' . $final ['value'] . '",';
             }
-            
+
             $grid = substr ( $grid, 0, - 1 ) . " \n";
         }
-        
+
         return $grid;
-    
+
     }
 
     /**
-     * Depending on settings store to file and/or directly upload 
+     * Depending on settings store to file and/or directly upload
      */
     protected function csvAddData($data)
     {
@@ -146,9 +152,9 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
         }
         if ($this->storeData) {
             // open file handler
-            fwrite($this->outFile, $data);            
-        }        
-    } 
+            fwrite($this->outFile, $data);
+        }
+    }
     function deploy() {
         // apply options
         if (isset($this->options['set_time_limit'])) {
@@ -156,16 +162,16 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
             set_time_limit($this->options['set_time_limit']);
         }
         if (isset($this->options['memory_limit'])) {
-            // adjust memory_limit if needed (not very important)         
+            // adjust memory_limit if needed (not very important)
             ini_set('memory_limit', $this->options['memory_limit']);
         }
         // decide if we should store data to file or send directly to user
         $this->downloadData = in_array('download', $this->options);
         $this->storeData = in_array('save', $this->options);
 
-        // prepare data 
+        // prepare data
         parent::deploy ();
-        
+
         if ($this->downloadData) {
             // send first headers
             header ( 'Content-type: text/plain; charset=utf-8'.$this->charEncoding );
@@ -173,9 +179,9 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
         }
         if ($this->storeData) {
             // open file handler
-            $this->outFile = fopen($this->dir . $this->title . ".csv", "w");            
+            $this->outFile = fopen($this->dir . $this->title . ".csv", "w");
         }
-       
+
         // export header
         $this->csvAddData(self::buildTitltesCsv ( parent::buildTitles () ));
         $i=0;
@@ -188,13 +194,15 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
             $stmt = $this->_db->query($this->_select);
             $this->_result = $stmt->fetchAll();
         } while(count($this->_result));
-        
+
         if ($this->storeData) {
             // close file handler
-            fclose($this->outFile);            
+            fclose($this->outFile);
+        } else {
+            die;
         }
-        
-        return true;    
+
+        return true;
     }
 
 }
