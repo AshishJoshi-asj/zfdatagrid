@@ -310,7 +310,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
             $this->jqgAddNavButton(
                 array( // /public/images/csv.gif
                     'caption' => $options['caption'],
-                    'buttonicon' => isset($options['ui-icon']) ? $options['ui-icon'] : "ui-icon-extlink",
+                    'buttonicon' => isset($options['css_class']) ? $options['css_class'] : "ui-icon-extlink",
                     'onClickButton' => isset($options['onclick'])
                         ? new Zend_Json_Expr($options['onclick'])
                         // TODO following JS function should be added as universal function if at least one exp. button
@@ -1150,41 +1150,6 @@ HTML;
         return '$Rev$';
     }
     // TODO __get()
-    ///////////////////////////////////////////////// EXPORT
-    /**
-     * Build list of exports with options
-     *
-     * Options:
-     * caption   - mandatory
-     * img       - (default null)
-     * ui-icon   - (default ui-icon-extlink)
-     * newwindow - (default true)
-     * url       - (default actual url)
-     * onclick   - (default null)
-     * _class    - (reserved, used internaly)
-     */
-    public function getExports()
-    {
-        $res = array();
-        foreach ($this->export as $name=>$defs) {
-            if (!is_array($defs)) {
-                // only export name is paased, we need to get default option
-                $name = $defs;
-                $className = "Bvb_Grid_Deploy_" . $name; // TODO support user defined classes
-                if (Zend_Loader_Autoloader::autoload($className) && method_exists($className, 'getExportDefaults')) {
-                    // learn the defualt values
-                    $defs = call_user_func(array($className, "getExportDefaults"));
-                } else {
-                    // there are no defaults, we need at least some caption
-                    $defs = array('caption'=>$name);
-                }
-                $defs['_class'] = $className;
-            }
-            $res[$name] = $defs;
-        }
-
-        return $res;
-    }
 }
 class JqGridCommand
 {

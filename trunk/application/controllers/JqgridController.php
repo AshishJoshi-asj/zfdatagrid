@@ -46,7 +46,12 @@ class JqgridController extends Zend_Controller_Action
     function exportAction()
     {
         // construct JqGrid and let it configure
-        $grid1 = Bvb_Grid_DataGrid::factory('Bvb_Grid_Deploy_JqGrid', array('csv'=>array($this, 'configG1PostCsv')));
+        $grid1 = Bvb_Grid_DataGrid::factory(
+            'Bvb_Grid_Deploy_JqGrid', // this is the defualt grid class used to render on page
+            array(
+                'csv'=>array($this, 'configG1PostCsv') // do post config for Csv export
+            )
+        );
         $this->configG1($grid1, $this->_getParam('onlyFromPolynesia', 'false')==='true');
         // pass grids to view and deploy() them there
         $this->view->g1 = $grid1->deploy();
@@ -151,7 +156,10 @@ class JqgridController extends Zend_Controller_Action
         ////////////////// 4. configure jqGrid options
         ////////////////// for setJqgOptions see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:options
         ////////////////// see also other Bvb_Grid_Deploy_JqGrid::setJqg*() and Bvb_Grid_Deploy_JqGrid::jqg*() methods
-        $grid->export = array('csv');
+        $grid->export = array(
+            // define parameters for csv export, see Bvb_Grid_DataGrid::getExports
+            'csv'=>array('caption'=>'Csv')
+        );
         $grid->setJqgParams(array(
             'caption' => 'jqGrid Example',
             'forceFit'=>true,
