@@ -1173,7 +1173,7 @@ HTML;
                 $className = "Bvb_Grid_Deploy_" . $name; // TODO support user defined classes
                 if (Zend_Loader_Autoloader::autoload($className) && method_exists($className, 'getExportDefaults')) {
                     // learn the defualt values
-                    $defs = $className::getExportDefaults();
+                    $defs = call_user_func(array($className, "getExportDefaults"));
                 } else {
                     // there are no defaults, we need at least some caption
                     $defs = array('caption'=>$name);
