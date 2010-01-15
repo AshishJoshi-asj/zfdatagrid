@@ -310,7 +310,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
             $this->jqgAddNavButton(
                 array( // /public/images/csv.gif
                     'caption' => $options['caption'],
-                    'buttonicon' => isset($options['ui-icon']) ? : "ui-icon-extlink",
+                    'buttonicon' => isset($options['ui-icon']) ? $options['ui-icon'] : "ui-icon-extlink",
                     'onClickButton' => isset($options['onclick'])
                         ? new Zend_Json_Expr($options['onclick'])
                         // TODO following JS function should be added as universal function if at least one exp. button
