@@ -1,7 +1,6 @@
 <?php
 
 /**
- * Mascker
  *
  * LICENSE
  *
@@ -13,10 +12,10 @@
  * to geral@petala-azul.com so we can send you a copy immediately.
  *
  * @package    Bvb_Grid
- * @copyright  Copyright (c) Mascker (http://www.petala-azul.com)
+ * @copyright  Copyright (c)  (http://www.petala-azul.com)
  * @license    http://www.petala-azul.com/bsd.txt   New BSD License
- * @version    0.4  mascker $
- * @author     Mascker (Bento Vilas Boas) <geral@petala-azul.com > 
+ * @version    0.4   $
+ * @author     Bento Vilas Boas <geral@petala-azul.com > 
  */
 
 
@@ -52,6 +51,7 @@ class Bvb_Grid_Deploy_Word extends Bvb_Grid_DataGrid
 
         parent::__construct (  );
         
+        $this->addTemplateDir ( 'Bvb/Grid/Template/Word', 'Bvb_Grid_Template_Word', 'word' );
 
         if (! is_object ( $this->temp ['word'] ))
         {

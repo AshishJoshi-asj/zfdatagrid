@@ -1,7 +1,6 @@
 <?php
 
 /**
- * Mascker
  *
  * LICENSE
  *
@@ -13,10 +12,10 @@
  * to geral@petala-azul.com so we can send you a copy immediately.
  *
  * @package    Bvb_Grid
- * @copyright  Copyright (c) Mascker (http://www.petala-azul.com)
+ * @copyright  Copyright (c)  (http://www.petala-azul.com)
  * @license    http://www.petala-azul.com/bsd.txt   New BSD License
- * @version    0.4  mascker $
- * @author     Mascker (Bento Vilas Boas) <geral@petala-azul.com > 
+ * @version    0.4   $
+ * @author     Bento Vilas Boas <geral@petala-azul.com > 
  */
 
 
@@ -144,7 +143,7 @@ class Bvb_Grid_Template_Table_Table
 
     function sqlExpLoop ()
     {
-        return "<td class=\"sum\">{{value}}</td>";
+        return "<td class=\"sum {{class}}\">{{value}}</td>";
     }
 
 
