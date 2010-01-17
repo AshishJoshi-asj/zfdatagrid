@@ -145,27 +145,27 @@ class Bvb_Grid_DataGrid {
 	public $export = array ('pdf', 'word', 'wordx', 'excel', 'print', 'xml', 'csv', 'ods', 'odt' );
 
 	/**
-	 *  All info that is not directly related to the database
+	 * All info that is not directly related to the database
 	 */
 	public $info = array ();
 
 	/**
-	 *  Save the result of the describeTables
+	 * Save the result of the describeTables
 	 */
 	protected $_describeTables = array ();
 
 	/**
-	 *  Registry for PK
+	 * Registry for PK
 	 */
 	protected $_primaryKey = array ();
 
 	/**
-	 *  Where part from query
+	 * Where part from query
 	 */
 	protected $_queryWhere = false;
 
 	/**
-	 *  DB Adapter
+	 * DB Adapter
 	 *
 	 * @var Zend_Db_Select
 	 * @return Zend_Db_Adapter_Abstract
@@ -173,14 +173,14 @@ class Bvb_Grid_DataGrid {
 	protected $_db;
 
 	/**
-	 *  Baseurl
+	 * Baseurl
 	 *
 	 * @var string
 	 */
 	protected $_baseUrl;
 
 	/**
-	 *  Array containing the query result from table(s)
+	 * Array containing the query result from table(s)
 	 *
 	 * @var array
 	 */
@@ -194,21 +194,21 @@ class Bvb_Grid_DataGrid {
 	protected $_totalRecords;
 
 	/**
-	 *  Array containing field titles
+	 * Array containing field titles
 	 *
 	 * @var array
 	 */
 	protected $_titles;
 
 	/**
-	 *  Array containing table(s) fields
+	 * Array containing table(s) fields
 	 *
 	 * @var array
 	 */
 	protected $_fields = array ();
 
 	/**
-	 *  Where initially defined by user
+	 * Where initially defined by user
 	 *
 	 * @var string
 	 */
@@ -222,35 +222,35 @@ class Bvb_Grid_DataGrid {
 	public $filters;
 
 	/**
-	 *  Filters values inserted by the user
+	 * Filters values inserted by the user
 	 *
 	 * @var array
 	 */
 	protected $_filtersValues;
 
 	/**
-	 *  All information databse related
+	 * All information databse related
 	 *
 	 * @var array
 	 */
 	public $data = array ();
 
 	/**
-	 *  Params list
+	 * Params list
 	 *
 	 * @var array
 	 */
 	public $params = array ();
 
 	/**
-	 *  URL params
+	 * URL params
 	 *
 	 * @var string
 	 */
 	public $ctrlParams;
 
 	/**
-	 *  Extra fields array
+	 * Extra fields array
 	 *
 	 * @var array
 	 */
@@ -264,13 +264,6 @@ class Bvb_Grid_DataGrid {
 	 */
 	protected $_finalFields;
 
-	/**
-	 * Number of hidden fields
-	 * used to calculate the colspan
-	 *
-	 * @var int
-	 */
-	public $totalHiddenFields;
 
 	/**
 	 * Check if everything was analyzed
@@ -308,7 +301,7 @@ class Bvb_Grid_DataGrid {
 	private $fieldHorizontalRow;
 
 	/**
-	 *  Template instance
+	 * Template instance
 	 *
 	 * @var unknown_type
 	 */
@@ -371,8 +364,14 @@ class Bvb_Grid_DataGrid {
 	public $configCallbacks = array ();
 
 	/**
-	 *  The __construct function receives the db adapter. All information related to the
-	 *  URL is also processed here
+	 * Treat hidden fields as 'remove'
+	 * @var bool
+	 */
+	protected $_removeHiddenFields = false;
+
+	/**
+	 * The __construct function receives the db adapter. All information related to the
+	 * URL is also processed here
 	 *
 	 * @var $db = Zend_Db_Adapter_Abstract
 	 *
@@ -389,9 +388,9 @@ class Bvb_Grid_DataGrid {
 		/**
 		 * plugins loaders
 		 */
-		$this->_formatter = new Zend_Loader_PluginLoader ( );
-		$this->_elements ['filter'] = new Zend_Loader_PluginLoader ( );
-		$this->_elements ['validator'] = new Zend_Loader_PluginLoader ( );
+		$this->_formatter = new Zend_Loader_PluginLoader ();
+		$this->_elements ['filter'] = new Zend_Loader_PluginLoader ();
+		$this->_elements ['validator'] = new Zend_Loader_PluginLoader ();
 
 		//Templates loading
 		if (is_array ( $this->export )) {
@@ -408,7 +407,8 @@ class Bvb_Grid_DataGrid {
 		// Add the formatter fir for fields content
 		$this->addFormatterDir ( 'Bvb/Grid/Formatter', 'Bvb_Grid_Formatter' );
 
-		// Add the templates dir'sx
+	// Add the templates dir'sx
+
 
 	}
 
@@ -703,7 +703,7 @@ class Bvb_Grid_DataGrid {
 	}
 
 	/**
-	 *  The translator
+	 * The translator
 	 *
 	 * @param string $message
 	 * @return string
@@ -717,8 +717,8 @@ class Bvb_Grid_DataGrid {
 	}
 
 	/**
-	 *  Use the overload function so we can return an object to  make possibler
-	 *  the use of
+	 * Use the overload function so we can return an object to  make possibler
+	 * the use of
 	 * @param string $name
 	 * @param string $value
 	 * @return $this
@@ -840,7 +840,7 @@ class Bvb_Grid_DataGrid {
 	}
 
 	/**
-	 *  The allowed fields from a table
+	 * The allowed fields from a table
 	 *
 	 * @param string $mode
 	 * @param string $table
@@ -856,7 +856,7 @@ class Bvb_Grid_DataGrid {
 	}
 
 	/**
-	 *  Get table fields
+	 * Get table fields
 	 *
 	 * @param string $table
 	 * @return string
@@ -881,7 +881,7 @@ class Bvb_Grid_DataGrid {
 	}
 
 	/**
-	 *  Calculate colspan for pagination and top
+	 * Calculate colspan for pagination and top
 	 *
 	 * @return int
 	 */
@@ -891,9 +891,12 @@ class Bvb_Grid_DataGrid {
 		$a = 0;
 		$i = 0;
 		foreach ( $this->data ['fields'] as $value ) {
-			if (isset ( $value ['hide'] ) && $value ['hide'] == 1) {
+			if (isset ( $value ['remove'] ) && $value ['remove'] == 1) {
+				$i ++;
+			} elseif (isset ( $value ['hidden'] ) && $value ['hidden'] == 1 && $this->_removeHiddenFields === true) {
 				$i ++;
 			}
+
 			if (isset ( $value ['hRow'] ) && $value ['hRow'] == 1) {
 				$totalFields --;
 			}
@@ -915,7 +918,6 @@ class Bvb_Grid_DataGrid {
 			$this->temp [$this->output]->colSpan = $colspan;
 		}
 		return $colspan;
-		#return count ( $this->_fields ) - $this->totalHiddenFields + count($this->extra_fields);
 	}
 
 	/**
@@ -1069,7 +1071,7 @@ class Bvb_Grid_DataGrid {
 	}
 
 	/**
-	 *  Build the query WHERE
+	 * Build the query WHERE
 	 *
 	 * @return void
 	 */
@@ -1112,7 +1114,7 @@ class Bvb_Grid_DataGrid {
 	}
 
 	/**
-	 *  Build query.
+	 * Build query.
 	 *
 	 * @return string
 	 */
@@ -1162,7 +1164,7 @@ class Bvb_Grid_DataGrid {
 	}
 
 	/**
-	 *  Returns the url, without the param(s) specified
+	 * Returns the url, without the param(s) specified
 	 *
 	 * @param array|string $situation
 	 * @return string
@@ -1236,8 +1238,8 @@ class Bvb_Grid_DataGrid {
 
 	/**
 	 *
-	 *  Build Filters. If defined put the values
-	 *  Also check if the user wants to hide a field
+	 * Build Filters. If defined put the values
+	 * Also check if the user wants to hide a field
 	 *
 	 *
 	 * @return string
@@ -1267,7 +1269,10 @@ class Bvb_Grid_DataGrid {
 				$this->data ['fields'] [$nf] ['search'] = true;
 			}
 
-			if (! isset ( $this->data ['fields'] [$nf] ['hide'] ) || $this->data ['fields'] [$nf] ['hide'] == 0) {
+			#$this->data ['fields'] [$nf] ['remove'] == 0 &&
+
+
+			if ($this->_displayField ( $nf )) {
 
 				if (@array_key_exists ( $data [$i], $this->filters ) && $this->data ['fields'] [$nf] ['search'] !== false) {
 					if (isset ( $this->filters [$data [$i]] ['decorator'] ) && is_array ( $this->filters [$data [$i]] )) {
@@ -1290,6 +1295,27 @@ class Bvb_Grid_DataGrid {
 		return $return;
 	}
 
+	protected function _displayField($field) {
+
+
+		if (! isset ( $this->data ['fields'] [$field] ['remove'] )) {
+			$this->data ['fields'] [$field] ['remove'] = false;
+		}
+		if (! isset ( $this->data ['fields'] [$field] ['hidden'] )) {
+			$this->data ['fields'] [$field] ['hidden'] = false;
+		}
+
+		if(  $this->data ['fields'] [$field] ['remove'] == 0 &&
+		 ( ($this->data ['fields'] [$field] ['hidden'] == 0 ) ||
+		 ($this->data ['fields'] [$field] ['hidden'] == 1 && $this->_removeHiddenFields!==true))){
+
+			return true;
+		}
+
+		return false;
+
+	}
+
 	function prepareReplace($fields) {
 		return array_map ( create_function ( '$value', 'return "{{{$value}}}";' ), $fields );
 	}
@@ -1306,7 +1332,7 @@ class Bvb_Grid_DataGrid {
 	}
 
 	/**
-	 *  Build the titles with the order links (if wanted)
+	 * Build the titles with the order links (if wanted)
 	 *
 	 * @return string
 	 */
@@ -1353,7 +1379,7 @@ class Bvb_Grid_DataGrid {
 
 			$order = $orderFinal == @key ( $this->order ) ? $this->order [$orderFinal] : 'ASC';
 
-			if (! isset ( $novaData [$titles [$i]] ['hide'] ) || $novaData [$titles [$i]] ['hide'] == 0) {
+			if ($this->_displayField ($titles [$i] )) {
 
 				$noOrder = isset ( $this->info ['noOrder'] ) ? $this->info ['noOrder'] : '';
 
@@ -1454,9 +1480,9 @@ class Bvb_Grid_DataGrid {
 	}
 
 	/**
-	 *  Field type on the filters area. If the field type is enum, build the options
-	 *  Also, we first need to check if the user has defined values to presente.
-	 *  If set, this values override the others
+	 * Field type on the filters area. If the field type is enum, build the options
+	 * Also, we first need to check if the user has defined values to presente.
+	 * If set, this values override the others
 	 *
 	 * @param string $campo
 	 * @param string $valor
@@ -1540,7 +1566,7 @@ class Bvb_Grid_DataGrid {
 
 			$hRow = isset ( $this->data ['fields'] [$value] ['hRow'] ) ? $this->data ['fields'] [$value] ['hRow'] : '';
 
-			if ((! isset ( $this->data ['fields'] [$value] ['hide'] ) || $this->data ['fields'] [$value] ['hide'] == 0) && $hRow != 1 && $this->data ['fields'] [$value] ['search'] != false) {
+			if ($this->_displayField($value) && $hRow != 1 && $this->data ['fields'] [$value] ['search'] != false) {
 				$help_javascript .= "filter_" . $value . ",";
 			}
 		}
@@ -1622,8 +1648,8 @@ class Bvb_Grid_DataGrid {
 	}
 
 	/**
-	 *  The loop for the results.
-	 *  Check the extra-fields,
+	 * The loop for the results.
+	 * Check the extra-fields,
 	 *
 	 * @return string
 	 */
@@ -1754,7 +1780,7 @@ class Bvb_Grid_DataGrid {
 					$new_value = str_replace ( $search, $outputToReplace, $this->data ['fields'] [$fields [$is]] ['decorator'] );
 				}
 
-				if (! isset ( $this->data ['fields'] [$fields [$is]] ['hide'] ) || $this->data ['fields'] [$fields [$is]] ['hide'] == 0) {
+				if ($this->_displayField($fields [$is])) {
 					$fieldClass = isset ( $this->data ['fields'] [$fields [$is]] ['class'] ) ? $this->data ['fields'] [$fields [$is]] ['class'] : '';
 					$class = isset ( $class ) ? $class : '';
 					$return [$i] [] = @array ('class' => $class . " " . $fieldClass, 'value' => stripslashes ( $new_value ), 'field' => $integralFields [$is] );
@@ -1917,6 +1943,7 @@ class Bvb_Grid_DataGrid {
 				$select->reset ( Zend_Db_Select::ORDER );
 				$select->reset ( Zend_Db_Select::LIMIT_COUNT );
 				$select->reset ( Zend_Db_Select::LIMIT_OFFSET );
+				$select->reset ( Zend_Db_Select::GROUP );
 
 				$select->columns ( new Zend_Db_Expr ( $valor . ' AS TOTAL' ) );
 
@@ -1954,7 +1981,7 @@ class Bvb_Grid_DataGrid {
 	}
 
 	/**
-	 *  Make sure the fields exists on the database, if not remove them from the array
+	 * Make sure the fields exists on the database, if not remove them from the array
 	 *
 	 * @param array $fields
 	 */
@@ -1993,9 +2020,6 @@ class Bvb_Grid_DataGrid {
 					$fields_final [$i + 100] = $key;
 				}
 
-				if (isset ( $value ['hide'] ) && $value ['hide'] == 1) {
-					$hide ++;
-				}
 				$i ++;
 				$i ++;
 				$i ++;
@@ -2006,17 +2030,16 @@ class Bvb_Grid_DataGrid {
 			$fields_final = $this->reset_keys ( $fields_final );
 		}
 
-		$this->totalHiddenFields = $hide;
 		$this->_fields = $fields_final;
 		$this->_titles = $titulos;
 		$this->_fieldsOrder = $orderFields;
 	}
 
 	/**
-	 *  Make sure the filters exists, they are the name from the table field.
-	 *  If not, remove them from the array
-	 *  If we get an empty array, we then creat a new one with all the fields specifieds
-	 *  in $this->_fields method
+	 * Make sure the filters exists, they are the name from the table field.
+	 * If not, remove them from the array
+	 * If we get an empty array, we then creat a new one with all the fields specifieds
+	 * in $this->_fields method
 	 *
 	 * @param string $filters
 	 */
@@ -2039,9 +2062,9 @@ class Bvb_Grid_DataGrid {
 	}
 
 	/**
-	 *  Get the primary table key
-	 *  This is important because we only allow edit, add or remove records
-	 *  From tables that have on primary key
+	 * Get the primary table key
+	 * This is important because we only allow edit, add or remove records
+	 * From tables that have on primary key
 	 *
 	 * @return string
 	 */
@@ -2185,7 +2208,7 @@ class Bvb_Grid_DataGrid {
 			$df = array ();
 			foreach ( $this->data ['fields'] as $key => $value ) {
 
-				if (isset ( $value ['hide'] ) && $value ['hide'] == 1) {
+				if (!$this->_displayField($key)) {
 					continue;
 				}
 
@@ -2206,7 +2229,7 @@ class Bvb_Grid_DataGrid {
 	}
 
 	/**
-	 *  Done. Send the grid to the user
+	 * Done. Send the grid to the user
 	 *
 	 * @return string
 	 */
@@ -2616,7 +2639,7 @@ class Bvb_Grid_DataGrid {
 	function addTemplateDir($dir, $prefix, $type) {
 
 		if (! isset ( $this->_templates [$type] )) {
-			$this->_templates [$type] = new Zend_Loader_PluginLoader ( );
+			$this->_templates [$type] = new Zend_Loader_PluginLoader ();
 		}
 
 		$this->_templates [$type]->addPrefixPath ( trim ( $prefix, "_" ), trim ( $dir, "/" ) . '/', $type );
@@ -2704,7 +2727,7 @@ class Bvb_Grid_DataGrid {
 	}
 
 	/**
-	 *  Get table description and then save it to a array.
+	 * Get table description and then save it to a array.
 	 *
 	 * @param array|string $table
 	 * @return array
@@ -2876,7 +2899,7 @@ class Bvb_Grid_DataGrid {
 		}
 		if (! isset ( $requestData ['_exportTo'] )) {
 			// return instance of the main Bvb object, because this is not and export request
-			$grid = new $defaultClass ( );
+			$grid = new $defaultClass ();
 			$lClass = $defaultClass;
 		} else {
 			$lClass = strtolower ( $requestData ['_exportTo'] );
@@ -2889,9 +2912,9 @@ class Bvb_Grid_DataGrid {
 			// now we need to find and load the right Bvb deploy class
 			$className = "Bvb_Grid_Deploy_" . ucfirst ( $requestData ['_exportTo'] ); // TODO support user defined classes
 			if (Zend_Loader_Autoloader::autoload ( $className )) {
-				$grid = new $className ( );
+				$grid = new $className ();
 			} else {
-				$grid = new $defaultClass ( );
+				$grid = new $defaultClass ();
 				$lClass = $defaultClass;
 			}
 		}
@@ -2957,6 +2980,18 @@ class Bvb_Grid_DataGrid {
 		}
 
 		return $res;
+	}
+
+	/**
+	 * This is usefull if the deploy clas has no intention of using hidden fields
+	 * @param bool $value
+	 * @return $this
+	 */
+	protected function _setRemoveHiddenFields($value) {
+
+		$this->_removeHiddenFields = ( bool ) $value;
+		return $this;
+
 	}
 
 }
