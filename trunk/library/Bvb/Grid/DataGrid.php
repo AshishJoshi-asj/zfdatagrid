@@ -2954,10 +2954,10 @@ class Bvb_Grid_DataGrid {
 	 * Options:
 	 * caption   - mandatory
 	 * img       - (default null)
-	 * css_class   - (default ui-icon-extlink)
-	 * newwindow - (default true)
+	 * cssClass   - (default ui-icon-extlink)
+	 * newWindow - (default true)
 	 * url       - (default actual url)
-	 * onclick   - (default null)
+	 * onClick   - (default null)
 	 * _class    - (reserved, used internaly)
 	 */
 	public function getExports() {
