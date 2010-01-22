@@ -32,7 +32,12 @@ class JqgridController extends Zend_Controller_Action
     function indexAction()
     {
         // construct JqGrid and let it configure
-        $grid1 = new Bvb_Grid_Deploy_JqGrid();
+        $grid1 = Bvb_Grid_DataGrid::factory(
+            'Bvb_Grid_Deploy_JqGrid', // this is the defualt grid class used to render on page
+            array(
+                'csv'=>array($this, 'configG1PostCsv') // do post config for Csv export
+            )
+        );
         $this->configG1($grid1, $this->_getParam('onlyFromPolynesia', 'false')==='true');
 
         // construct HTML Table Grid and let it configure in the same way
@@ -43,28 +48,13 @@ class JqgridController extends Zend_Controller_Action
         $this->view->g1 = $grid1->deploy();
         $this->view->g1_html = $grid1_html->deploy();
     }
-    function exportAction()
-    {
-        // construct JqGrid and let it configure
-        $grid1 = Bvb_Grid_DataGrid::factory(
-            'Bvb_Grid_Deploy_JqGrid', // this is the defualt grid class used to render on page
-            array(
-                'csv'=>array($this, 'configG1PostCsv') // do post config for Csv export
-            )
-        );
-        $this->configG1($grid1, $this->_getParam('onlyFromPolynesia', 'false')==='true');
-        // pass grids to view and deploy() them there
-        $this->view->g1 = $grid1->deploy();
-
-        $this->render('index');
-    }
     /**
      * This will run if we will export to Csv before deploy() and ajax() functions
      */
     public function configG1PostCsv($grid)
     {
         // we don't want this column in export
-        $grid->updateColumn('_action', array('hide'=>true));
+        $grid->updateColumn('_action', array('hidden'=>true));
     }
 
     public function g1ActionBar($id) {
@@ -100,7 +90,7 @@ class JqgridController extends Zend_Controller_Action
         ////////////////// and for jqg array see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:colmodel_options
         $grid->updateColumn('ID', array(
             'title'=>'#ID',
-            'hide'=>true,
+            'hidden'=>true,
         ));
         $grid->updateColumn('_action', array(
             'search'=>false, // this will disable search on this field
@@ -116,7 +106,7 @@ class JqgridController extends Zend_Controller_Action
         ));
         $grid->updateColumn('Name', array(
             'title'=>'City name',
-            'width'=>260
+            'width'=>260, 'hidden'=>1
         ));
         $grid->updateColumn('CountryCode',
             array(

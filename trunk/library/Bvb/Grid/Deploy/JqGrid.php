@@ -64,6 +64,13 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
     private $_ajaxFuncCalled = false;
 
     /**
+     * Trac if deploy() function was called
+     *
+     * @var boolean
+     */
+    private $_deployFuncCalled = false;
+
+    /**
      * Default options for JqGrid
      *
      * @var array
@@ -376,6 +383,10 @@ JS;
         if (!$this->_ajaxFuncCalled) {
             $this->log("ajax() function was not called before deploy()", Zend_Log::WARN);
         }
+        // it will not work correctly if deploy() is called more times
+        if ($this->_deployFuncCalled) {
+            return $this;
+        }
         // prepare internal Bvb data
         parent::deploy();
         // prepare access to view
@@ -392,6 +403,7 @@ JS;
         // build final JavaScript code and return HTML code to display
         $this->jqAddOnLoad($this->renderPartJavascript());
         $this->_deploymentContent = $this->renderPartHtml();
+        $this->_deployFuncCalled = true;
         return $this;
     }
     /**
@@ -687,7 +699,7 @@ HTML;
         //BVB grid options
         $skipOptions = array(
             'title',     // handled in parent::buildTitles()
-            'hide',      // handled in parent::buildTitles()
+            'remove',      // handled in parent::buildTitles()
             'sqlexp',
             'hRow',
             'eval',
@@ -744,6 +756,12 @@ HTML;
                 } else {
                     $options['searchoptions'] = array('defaultValue'=>$defaultFilters[$key]);
                 }
+            }
+            // fix hidden field
+            if ($options['hidden']) {
+                $options['hidden'] = (bool) $options['hidden'];
+            } else {
+                unset($options['hidden']);
             }
             // add field to model
             $model[] = $options;

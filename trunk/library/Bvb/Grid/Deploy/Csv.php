@@ -19,30 +19,37 @@
  */
 
 class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
-	
+
 	protected $dir;
-	
+
 	protected $title;
-	
+
 	protected $options = array ();
-	
+
 	protected $output = 'csv';
-	
+
 	/**
 	 * Set true if data should be downloaded
 	 */
 	protected $downloadData = null;
-	
+
 	/**
 	 * Set true if data should be stored
 	 */
 	protected $storeData = null;
-	
+
 	/**
 	 * Storing file
 	 */
 	protected $outFile = null;
-	
+
+	/**
+	 * We don't want to display hidden fields
+	 *
+	 * @var $_removeHiddenFields boolean
+	 */
+	protected $_removeHiddenFields = true;
+
 	/*
      *
      *
@@ -57,78 +64,78 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
      * @param array $data
      */
 	function __construct($options = array('download')) {
-		
+
 		if (! in_array ( 'csv', $this->export )) {
 			echo $this->__ ( "You dont' have permission to export the results to this format" );
 			die ();
 		}
-		
+
 		$this->setPagination ( 5000 );
-		
+
 		// TODO this needs rework
 		$dir = isset ( $options ['dir'] ) ? $options ['dir'] : '';
 		$this->dir = rtrim ( $dir, "/" ) . "/";
-		
+
 		$this->options = $options;
-		
+
         $this->addTemplateDir ( 'Bvb/Grid/Template/Wordx', 'Bvb_Grid_Template_Wordx', 'wordx' );
 		parent::__construct ();
 	}
-	
+
 	/**
 	 * [Para podemros utiliza]
 	 *
 	 * @param string $var
 	 * @param string $value
 	 */
-	
+
 	function __set($var, $value) {
-		
+
 		parent::__set ( $var, $value );
 	}
-	
+
 	function buildTitltesCsv($titles) {
-		
+
 		$grid = '';
 		foreach ( $titles as $title ) {
-			
+
 			$grid .= '"' . $title ['value'] . '",';
 		}
-		
+
 		return substr ( $grid, 0, - 1 ) . "\n";
-	
+
 	}
-	
+
 	function buildSqlexpCsv($sql) {
-		
+
 		$grid = '';
 		if (is_array ( $sql )) {
-			
+
 			foreach ( $sql as $exp ) {
 				$grid .= '"' . $exp ['value'] . '",';
 			}
 		}
-		
+
 		return substr ( $grid, 0, - 1 ) . " \n";
-	
+
 	}
-	
+
 	function buildGridCsv($grids) {
-		
+
 		$grid = '';
 		foreach ( $grids as $value ) {
-			
+
 			foreach ( $value as $final ) {
 				$grid .= '"' . $final ['value'] . '",';
 			}
-			
+
 			$grid = substr ( $grid, 0, - 1 ) . " \n";
 		}
-		
+
 		return $grid;
-	
+
 	}
-	
+
 	/**
 	 * Depending on settings store to file and/or directly upload
 	 */
@@ -157,12 +164,13 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
 		// decide if we should store data to file or send directly to user
 		$this->downloadData = in_array ( 'download', $this->options );
 		$this->storeData = in_array ( 'save', $this->options );
-		
+
 		// prepare data
 		parent::deploy ();
-		
+
 		if ($this->downloadData) {
 			// send first headers
+            ob_end_clean();
 			header ( 'Content-type: text/plain; charset=utf-8' . $this->charEncoding );
 			header ( 'Content-Disposition: attachment; filename="' . $this->title . '.csv"' );
 		}
@@ -170,7 +178,7 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
 			// open file handler
 			$this->outFile = fopen ( $this->dir . $this->title . ".csv", "w" );
 		}
-		
+
 		// export header
 		$this->csvAddData ( self::buildTitltesCsv ( parent::buildTitles () ) );
 		$i = 0;
@@ -183,14 +191,14 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
 			$stmt = $this->_db->query ( $this->_select );
 			$this->_result = $stmt->fetchAll ();
 		} while ( count ( $this->_result ) );
-		
+
 		if ($this->storeData) {
 			// close file handler
 			fclose ( $this->outFile );
 		} else {
 			die ();
 		}
-		
+
 		return true;
 	}
 
