@@ -50,6 +50,19 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
 	 */
 	protected $_removeHiddenFields = true;
 
+	public function getFileName()
+	{
+        if (isset($this->info['Title'])) {
+            $title = $this->info['Title'][0];
+        } elseif (isset($this->info['title'])) {
+            $title = $this->info['title'][0];
+        } else {
+            $title = Zend_Controller_Front::getInstance()->getRequest()->getParam('controller') . '-' . date("Ymd");
+        }
+
+        return $title . '.csv';
+	}
+
 	/*
      *
      *
@@ -90,7 +103,6 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
 	 */
 
 	function __set($var, $value) {
-
 		parent::__set ( $var, $value );
 	}
 
@@ -172,11 +184,11 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
 			// send first headers
             ob_end_clean();
 			header ( 'Content-type: text/plain; charset=utf-8' . $this->charEncoding );
-			header ( 'Content-Disposition: attachment; filename="' . $this->title . '.csv"' );
+			header ( 'Content-Disposition: attachment; filename="' . $this->getFileName().'"' );
 		}
 		if ($this->storeData) {
 			// open file handler
-			$this->outFile = fopen ( $this->dir . $this->title . ".csv", "w" );
+			$this->outFile = fopen ( $this->dir . $this->getFileName(), "w" );
 		}
 
 		// export header
