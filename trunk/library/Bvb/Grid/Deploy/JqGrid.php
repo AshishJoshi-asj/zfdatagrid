@@ -149,12 +149,13 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid_DataGrid
      *
      * @return void
      */
-    function ajax($gridId)
+    function ajax($gridId=null)
     {
+        if (!is_null($gridId) && false!==$gridId) {
+            $this->setId($gridId);
+        }
         // apply additional configuration
         $this->_runConfigCallbacks();
-
-        $this->setId($gridId);
         // track that this function was called
         $this->_ajaxFuncCalled = true;
         // if request is Ajax we should only return data
@@ -931,6 +932,14 @@ HTML;
     {
         $this->_id = $id;
         return $this;
+    }
+    public function bvbSetId($id)
+    {
+        return $this->setId($id);
+    }
+    public function bvbGetId()
+    {
+        return $this->getId();
     }
     /**
      * Create Zend_Log object used to debug Bvb classes

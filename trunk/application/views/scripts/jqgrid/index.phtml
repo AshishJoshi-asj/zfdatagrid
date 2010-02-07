@@ -23,6 +23,11 @@ $('#filterPolynesia').bind('change', function() {
 
   <!-- next line will add all necessery JavaScript and CSS includes -->
   <?php echo $this->jQuery();?>
+<style type="text/css">
+.ui-priority-secondary {
+    background: #F7F7F7;
+}
+</style>
 
   <!-- add fancy jQuery UI Theme switcher -->
   <script type="text/javascript">
@@ -39,6 +44,7 @@ $('#filterPolynesia').bind('change', function() {
 
 <!-- add fancy jQuery UI Theme switcher -->
 <script type="text/javascript" src="http://jqueryui.com/themeroller/themeswitchertool/"></script>
+<p ></p>
 <div id="switcher"></div>
 <!-- end jQuery UI Theme switcher -->
 
@@ -49,6 +55,8 @@ $('#filterPolynesia').bind('change', function() {
 <?=$this->formCheckbox("filterPolynesia", 0, null, array(1,0));?> Cities Only From Polynesia
 </div>
 <?=$this->g1;?>
+<p>Second jqGrid instance</p>
+<?=$this->g2;?>
 
 <?php if (isset($this->g1_html)):?>
 <h2>HTML Table</h2>

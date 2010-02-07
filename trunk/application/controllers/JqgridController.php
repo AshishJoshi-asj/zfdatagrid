@@ -38,7 +38,15 @@ class JqgridController extends Zend_Controller_Action
                 'csv'=>array($this, 'configG1PostCsv') // do post config for Csv export
             )
         );
-        $this->configG1($grid1, $this->_getParam('onlyFromPolynesia', 'false')==='true');
+        $this->configG1($grid1, $this->_getParam('onlyFromPolynesia', 'false')==='true', 'first');
+
+        $grid2 = Bvb_Grid_DataGrid::factory(
+            'Bvb_Grid_Deploy_JqGrid', // this is the defualt grid class used to render on page
+            array(
+                'csv'=>array($this, 'configG1PostCsv') // do post config for Csv export
+            )
+        );
+        $this->configG1($grid2, $this->_getParam('onlyFromPolynesia', 'false')==='true', 'second');
 
         // construct HTML Table Grid and let it configure in the same way
         $grid1_html = new Bvb_Grid_Deploy_Table();
@@ -46,6 +54,7 @@ class JqgridController extends Zend_Controller_Action
 
         // pass grids to view and deploy() them there
         $this->view->g1 = $grid1->deploy();
+        $this->view->g2 = $grid2->deploy();
         $this->view->g1_html = $grid1_html->deploy();
     }
     /**
@@ -68,7 +77,7 @@ class JqgridController extends Zend_Controller_Action
         return Bvb_Grid_Deploy_JqGrid::formatterActionBar($actions);
     }
 
-    function configG1($grid, $onlyFromPolynesia = false)
+    function configG1($grid, $onlyFromPolynesia = false, $gridId = null)
     {
         ////////////////// 1. define select
         $select = $this->db->select()
@@ -161,10 +170,10 @@ class JqgridController extends Zend_Controller_Action
         $grid->jqgViewrecords = true; // yet another way to set jqGrid property viewrecords
 
         $grid->setBvbParams(array(
-            'id'=>'ID'
+            'id'=>$gridId
         ));
-        $grid->setBvbParam('id', 'ID'); // another way to set own Bvb_Grid_Deploy_JqGrid parameter
-        $grid->bvbId = 'ID'; // yet another way to set own Bvb_Grid_Deploy_JqGrid parameter
+        $grid->setBvbParam('id', $gridId); // another way to set own Bvb_Grid_Deploy_JqGrid parameter
+        $grid->bvbId = $gridId; // yet another way to set own Bvb_Grid_Deploy_JqGrid parameter
 
         $grid->bvbOnInit = 'console.log("this message will not be logged because of call to bvbClearOnInit().");';
         $grid->bvbClearOnInit();
@@ -173,6 +182,6 @@ class JqgridController extends Zend_Controller_Action
         //$grid->bvbFirstDataAsLocal = false; // how will grid receive first data ?
 
         ////////////////// 5. set ajax ID and process response if requested
-        $grid->ajax(get_class($grid));
+        $grid->ajax($gridId);
     }
 }
