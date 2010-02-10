@@ -6,7 +6,7 @@ $this->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=UTF-8');
 ?>
 <!-- code to show external filter possibility and cmd() chaining -->
 <?php $this->jQuery()->onLoadCaptureStart(); ?>
-$('#filterPolynesia').bind('change', function() {
+$('#filterPolynesia').bind('click', function() {
     <?=$this->g1
         ->cmd('setPostDataItem', 'onlyFromPolynesia', new Zend_Json_Expr('$(this).is(":checked")'))
         ->cmd('trigger', 'reloadGrid');
