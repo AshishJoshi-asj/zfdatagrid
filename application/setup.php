@@ -22,6 +22,6 @@ if (file_exists(AP . '/configs/local.ini')) {
     $configLocal = new Zend_Config_Ini(AP . '/configs/local.ini', AE);
     $config = $config->merge($configLocal);
 }
-//die(Var_dump($config->toArray()));
+
 // Create application, bootstrap, and run
 $application = new Zend_Application(AE, $config);
