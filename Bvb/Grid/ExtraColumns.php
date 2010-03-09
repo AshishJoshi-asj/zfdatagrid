@@ -14,7 +14,7 @@
  * @package    Bvb_Grid
  * @copyright  Copyright (c)  (http://www.petala-azul.com)
  * @license    http://www.petala-azul.com/bsd.txt   New BSD License
- * @version    $Id: ExtraColumns.php 538 2010-02-08 17:47:01Z pao.fresco@gmail.com $
+ * @version    $Id$
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 

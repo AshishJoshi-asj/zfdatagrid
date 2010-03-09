@@ -14,7 +14,7 @@
  * @package    Bvb_Grid
  * @copyright  Copyright (c)  (http://www.petala-azul.com)
  * @license    http://www.petala-azul.com/bsd.txt   New BSD License
- * @version    $Id: Array.php 822 2010-03-03 15:43:07Z pao.fresco@gmail.com $
+ * @version    $Id$
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 

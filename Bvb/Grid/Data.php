@@ -14,7 +14,7 @@
  * @author    Bento Vilas Boas <geral@petala-azul.com>
  * @copyright ZFDatagrid 2010
  * @license   http://www.petala-azul.com/bsd.txt   New BSD License
- * @version   $Id: Data.php 852 2010-03-08 16:27:09Z bento.vilas.boas@gmail.com $
+ * @version   $Id$
  */
 
 abstract class Bvb_Grid_Data
@@ -2200,7 +2200,7 @@ abstract class Bvb_Grid_Data
      */
     public function getVersion ()
     {
-        return '$Rev: 852 $';
+        return '$Rev$';
         #return self::VERSION;
     }
 
@@ -2439,7 +2439,6 @@ abstract class Bvb_Grid_Data
         $name = strtolower(end($deploy));
 
         if ( isset($this->_options['deploy'][$name]) && is_array($this->_options['deploy'][$name]) ) {
-
             if ( method_exists($this, '_applyConfigOptions') ) {
                 $this->_applyConfigOptions($this->_options['deploy'][$name]);
             } else {

@@ -14,7 +14,7 @@
  * @package    Bvb_Grid
  * @copyright  Copyright (c) XTmotion Limited (http://www.xtmotion.co.uk/)
  * @license    http://www.petala-azul.com/bsd.txt   New BSD License
- * @version    $Id: JqGrid.php 840 2010-03-06 23:48:27Z bento.vilas.boas@gmail.com $
+ * @version    $Id$
  * @author     k2s (Martin Minka) <martin.minka@gmail.com>
  */
 
@@ -1126,7 +1126,7 @@ HTML;
      */
     public function getVersion()
     {
-        return '$Rev: 840 $';
+        return '$Rev$';
     }
     // TODO __get()
 }

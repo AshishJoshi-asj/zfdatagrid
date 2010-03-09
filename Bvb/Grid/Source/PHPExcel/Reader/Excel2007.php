@@ -14,7 +14,7 @@
  * @package    Bvb_Grid
  * @copyright  Copyright (c)  (http://www.petala-azul.com)
  * @license    http://www.petala-azul.com/bsd.txt   New BSD License
- * @version    $Id: Excel2007.php 692 2010-02-26 16:29:58Z pao.fresco@gmail.com $
+ * @version    $Id$
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 

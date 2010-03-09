@@ -15,7 +15,7 @@
  * @package    Bvb_Grid
  * @copyright  Copyright (c) Bento Vilas Boas (http://www.petala-azul.com)
  * @license    http://www.petala-azul.com/bsd.txt   New BSD License
- * @version    $Id: Json.php 840 2010-03-06 23:48:27Z bento.vilas.boas@gmail.com $
+ * @version    $Id$
  * @author     Mascker (Bento Vilas Boas) <geral@petala-azul.com >
  */
 
@@ -36,7 +36,6 @@ class Bvb_Grid_Deploy_Json extends Bvb_Grid_Data implements Bvb_Grid_Deploy_Inte
             echo $this->__("You dont' have permission to export the results to this format");
             die();
         }
-        $this->options = $options;
 
         parent::__construct($options);
     }
@@ -101,6 +100,7 @@ class Bvb_Grid_Deploy_Json extends Bvb_Grid_Data implements Bvb_Grid_Deploy_Inte
 
         die();
     }
+
 }
 
 
