@@ -4,7 +4,8 @@ class IndexController extends Zend_Controller_Action
 {
     public function indexAction()
     {
-        $q = Doctrine_Query::create()->from('Model_Country co')
+        $q = Doctrine_Query::create()->select('co.code, co.name, co.continent AS poop, ci.name')
+                                     ->from('Model_Country co')
                                      ->leftJoin('co.City ci');
                                      
         $grid = $this->_getGrid();
@@ -19,7 +20,8 @@ class IndexController extends Zend_Controller_Action
         $grid = Bvb_Grid_Data::factory('Bvb_Grid_Deploy_Table', $config);
         
         $grid->setEscapeOutput(false);
-        $grid->setGridColumns(array('code', 'name', 'continent'));
+        $grid->setGridColumns(array('co_code', 'co_name', 'co_poop', 'ci_name'));
+        $grid->updateColumn('ci_name', array('title' => 'City Name'));
         //$grid->addTemplateDir('My/Template/Table', 'My_Template_Table', 'table');
         //$grid->addFormatterDir('My/Formatter', 'My_Formatter');
         $grid->imagesUrl = '/images/';
