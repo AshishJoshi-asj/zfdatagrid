@@ -38,8 +38,6 @@ interface Bvb_Grid_Source_Interface
      */
     function getRecord ($table, array $condition);
 
-    public function getPrimaryKey($table = null);
-
     /**
      * builds a key=>value array
      *

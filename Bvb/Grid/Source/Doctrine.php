@@ -4,9 +4,15 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
 {
     protected $_query;
     
+    protected $_queryExecuted;
+    
+    protected $_queryExecutedResults;
+    
     public function __construct(Doctrine_Query $q)
     {
         $this->_query = $q;
+        $this->_queryExecuted = clone $q;
+        $this->_queryExecutedResults = $this->_queryExecuted->limit(1)->execute(array(), Doctrine::HYDRATE_SCALAR);
     }
     
     public function hasCrud()
@@ -21,7 +27,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      */
     public function getMainTable()
     {
-        return 'Model_Country';
+        return $this->_queryExecuted->getRoot()->getTableName();
     }
     
     /**
@@ -45,42 +51,27 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      * its not bad idea to apply this to fields titles
      * $title = ucwords(str_replace('_',' ',$title));
      *
-     *
+     * TODO: Find way to not use query results to get this data
      */
     public function buildFields()
     {
-        //$model = Doctrine::getTable('Model_Country');
-        //$sql = $this->_query->buildSqlQuery();
-        //die(Zend_Debug::dump($this->_query->parseClause()));
-        
-        //die(Zend_Debug::dump($this->_query->load('Model_Country')));
-        
         $return = array();
-        $cloneQuery = clone $this->_query;
-        $results = $cloneQuery->execute(array(), Doctrine::HYDRATE_SCALAR);
         
-        foreach ($results[0] as $column => $data) {
+        foreach ($this->_queryExecutedResults[0] as $column => $data) {
             list($alias, $name) = explode('_', $column);
-            $return[$name]['title'] = ucwords($name);
-            $return[$name]['field'] = $alias . '.' . $name;
+            $return[$column]['title'] = ucwords(str_replace('_', ' ', $name));
+            $return[$column]['field'] = $alias . '.' . $name;
         }
-        
-        //die(Zend_Debug::dump($return));
         
         return $return;
     }
     
     /**
      * Use the supplied Doctrine_Query to find its primary ID
-     * 
-     * @param string $table Not Currently used
      */
-    public function getPrimaryKey($table = null)
+    public function getPrimaryKey()
     {
-        $map = $this->_query->getRootDeclaration();
-        $mapTable = $map['table'];
-        
-        return $mapTable->getIdentifier();
+        return $this->_queryExecuted->getRoot()->getIdentifier();
     }
     
     /**
@@ -99,9 +90,9 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      *
      * Ex: mysql, pgsql, array, xml
      */
-    function getSourceName ()
+    public function getSourceName()
     {
-        
+        return strtolower($this->_queryExecuted->getConnection()->getDriverName());
     }
 
     /**
@@ -113,17 +104,17 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
         $newQuery = clone $this->_query;
         $results = $newQuery->execute(array(), Doctrine::HYDRATE_SCALAR);
         
-        foreach ($results as $rows) {
-            $temp = array();
-            foreach ($rows as $col => $val) {
-                list($alias, $name) = explode('_', $col);
-                $temp[$name] = $val;
-            }
-            
-            $newArray[] = $temp;
-        }
-        //die(Zend_Debug::dump($newArray));
-        return $newArray;
+//        foreach ($results as $rows) {
+//            $temp = array();
+//            foreach ($rows as $col => $val) {
+//                list($alias, $name) = explode('_', $col);
+//                $temp[$name] = $val;
+//            }
+//            
+//            $newArray[] = $temp;
+//        }
+        //die(Zend_Debug::dump($results));
+        return $results;
     }
 
 
@@ -141,7 +132,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
     /**
      * Return the total of records
      */
-    function getTotalRecords ()
+    public function getTotalRecords()
     {
         return $this->_query->count();
     }
@@ -207,10 +198,21 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      * @param string $field
      * @param string $order
      * @param bool $reset
+     * @return Bvb_Grid_Source_Doctrine
      */
-    function buildQueryOrder ($field, $order, $reset = false)
+    public function buildQueryOrder($field, $order, $reset = false)
     {
+        $parts = explode('_', $field);
+        $alias = $parts[0];
+        unset($parts[0]);
+        $newField = implode('_', $parts);
         
+        //die(Zend_Debug::dump($this->_queryExecuted->getRootDeclaration()));
+        
+        $this->_query->addOrderBy($alias . '.' . $newField . ' ' . $order);
+        //$this->_query->addOrderBy($newField . ' ' . $order);
+        
+        return $this;
     }
 
 
