@@ -1,0 +1,284 @@
+City:
+  connection: master
+  tableName: City
+  columns:
+    id:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: true
+      autoincrement: true
+    name:
+      type: string(35)
+      fixed: true
+      unsigned: false
+      primary: false
+      default: ''
+      notnull: true
+      autoincrement: false
+    countrycode:
+      type: string(3)
+      fixed: true
+      unsigned: false
+      primary: false
+      default: ''
+      notnull: true
+      autoincrement: false
+    district:
+      type: string(20)
+      fixed: true
+      unsigned: false
+      primary: false
+      default: ''
+      notnull: true
+      autoincrement: false
+    population:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: '0'
+      notnull: true
+      autoincrement: false
+  relations:
+    Country:
+      local: countrycode
+      foreign: code
+      type: one
+      
+Country:
+  connection: master
+  tableName: Country
+  columns:
+    code:
+      type: string(3)
+      fixed: true
+      unsigned: false
+      primary: true
+      autoincrement: false
+    name:
+      type: string(52)
+      fixed: true
+      unsigned: false
+      primary: false
+      default: ''
+      notnull: true
+      autoincrement: false
+    continent:
+      type: enum(13)
+      fixed: false
+      unsigned: false
+      values:
+        - Asia
+        - Europe
+        - 'North America'
+        - Africa
+        - Oceania
+        - Antarctica
+        - 'South America'
+      primary: false
+      default: Asia
+      notnull: true
+      autoincrement: false
+    region:
+      type: string(26)
+      fixed: true
+      unsigned: false
+      primary: false
+      default: ''
+      notnull: true
+      autoincrement: false
+    surfacearea:
+      type: float(10)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: '0.00'
+      notnull: true
+      autoincrement: false
+    indepyear:
+      type: integer(2)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    population:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: '0'
+      notnull: true
+      autoincrement: false
+    lifeexpectancy:
+      type: float(3)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    gnp:
+      type: float(10)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    gnpold:
+      type: float(10)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    localname:
+      type: string(45)
+      fixed: true
+      unsigned: false
+      primary: false
+      default: ''
+      notnull: true
+      autoincrement: false
+    governmentform:
+      type: string(45)
+      fixed: true
+      unsigned: false
+      primary: false
+      default: ''
+      notnull: true
+      autoincrement: false
+    headofstate:
+      type: string(60)
+      fixed: true
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    capital:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    code2:
+      type: string(2)
+      fixed: true
+      unsigned: false
+      primary: false
+      default: ''
+      notnull: true
+      autoincrement: false
+  relations:
+    City:
+      local: capital
+      foreign: id
+      type: one
+      
+CountryLanguage:
+  connection: master
+  tableName: CountryLanguage
+  columns:
+    countrycode:
+      type: string(3)
+      fixed: true
+      unsigned: false
+      primary: true
+      autoincrement: false
+    language:
+      type: string(30)
+      fixed: true
+      unsigned: false
+      primary: true
+      autoincrement: false
+    isofficial:
+      type: enum(1)
+      fixed: false
+      unsigned: false
+      values:
+        - T
+        - F
+      primary: false
+      default: F
+      notnull: true
+      autoincrement: false
+    percentage:
+      type: float(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: '0.0'
+      notnull: true
+      autoincrement: false
+  relations:
+    Country:
+      local: countrycode
+      foreign: code
+      type: one
+Crud:
+  connection: master
+  tableName: crud
+  columns:
+    id:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: true
+      autoincrement: true
+    firstname:
+      type: string(255)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: true
+      autoincrement: false
+    lastname:
+      type: string(255)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: true
+      autoincrement: false
+    age:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: true
+      autoincrement: false
+    language:
+      type: string(255)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: true
+      autoincrement: false
+    date_added:
+      type: timestamp(25)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: true
+      autoincrement: false
+    country:
+      type: string(255)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: true
+      autoincrement: false
+    email:
+      type: string(255)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: true
+      autoincrement: false
+    id_bug:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: true
+      autoincrement: false
