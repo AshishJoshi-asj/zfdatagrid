@@ -1,45 +1,29 @@
 <?php
 
-/**
- *
- * LICENSE
- *
- * This source file is subject to the new BSD license
- * It is  available through the world-wide-web at this URL:
- * http://www.petala-azul.com/bsd.txt
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to geral@petala-azul.com so we can send you a copy immediately.
- *
- * @package    Bvb_Grid
- * @copyright  Copyright (c)  (http://www.petala-azul.com)
- * @license    http://www.petala-azul.com/bsd.txt   New BSD License
- * @version    $Id$
- * @author     Bento Vilas Boas <geral@petala-azul.com >
- */
-
-
-interface Bvb_Grid_Source_Interface
+class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
 {
-
-
+    protected $_query;
+    
+    public function __construct(Doctrine_Query $q)
+    {
+        $this->_query = $q;
+    }
+    
+    public function hasCrud()
+    {
+        return true;
+    }
+    
     /**
-     * Sould return true|false if this source support
-     * crud operations
-     * @return bool
+     * Returns the "main" table
+     * the one after select * FROM {MAIN_TABLE}
+     *
      */
-    function hasCrud ();
-
-
-    /**
-     *Gets a unique record as a associative array
-     * @param $table
-     * @param $condition
-     */
-    function getRecord ($table, array $condition);
-
-    public function getPrimaryKey($table = null);
-
+    public function getMainTable()
+    {
+        return 'Model_Country';
+    }
+    
     /**
      * builds a key=>value array
      *
@@ -63,21 +47,84 @@ interface Bvb_Grid_Source_Interface
      *
      *
      */
-    function buildFields ();
-
+    public function buildFields()
+    {
+        //$model = Doctrine::getTable('Model_Country');
+        //$sql = $this->_query->buildSqlQuery();
+        //die(Zend_Debug::dump($this->_query->parseClause()));
+        
+        //die(Zend_Debug::dump($this->_query->load('Model_Country')));
+        
+        $return = array();
+        $cloneQuery = clone $this->_query;
+        $results = $cloneQuery->execute(array(), Doctrine::HYDRATE_SCALAR);
+        
+        foreach ($results[0] as $column => $data) {
+            list($alias, $name) = explode('_', $column);
+            $return[$name]['title'] = ucwords($name);
+            $return[$name]['field'] = $alias . '.' . $name;
+        }
+        
+        //die(Zend_Debug::dump($return));
+        
+        return $return;
+    }
+    
+    /**
+     * Use the supplied Doctrine_Query to find its primary ID
+     * 
+     * @param string $table Not Currently used
+     */
+    public function getPrimaryKey($table = null)
+    {
+        $map = $this->_query->getRootDeclaration();
+        $mapTable = $map['table'];
+        
+        return $mapTable->getIdentifier();
+    }
+    
+    /**
+     * Gets a unique record as a associative array
+     * 
+     * @param $table
+     * @param $condition
+     */
+    function getRecord ($table, array $condition)
+    {
+        
+    }
 
     /**
      * Should return the database server name or source name
      *
      * Ex: mysql, pgsql, array, xml
      */
-    function getSourceName ();
-
+    function getSourceName ()
+    {
+        
+    }
 
     /**
-     *Runs the query and returns the result as a associative array
+     * Runs the query and returns the result as a associative array
      */
-    function execute ();
+    public function execute()
+    {
+        $newArray = array();
+        $newQuery = clone $this->_query;
+        $results = $newQuery->execute(array(), Doctrine::HYDRATE_SCALAR);
+        
+        foreach ($results as $rows) {
+            $temp = array();
+            foreach ($rows as $col => $val) {
+                list($alias, $name) = explode('_', $col);
+                $temp[$name] = $val;
+            }
+            
+            $newArray[] = $temp;
+        }
+        //die(Zend_Debug::dump($newArray));
+        return $newArray;
+    }
 
 
     /**
@@ -85,13 +132,19 @@ interface Bvb_Grid_Source_Interface
      * @param array $where
      * @return array
      */
-    function fetchDetail (array $where);
+    function fetchDetail (array $where)
+    {
+        
+    }
 
 
     /**
      * Return the total of records
      */
-    function getTotalRecords ();
+    function getTotalRecords ()
+    {
+        return $this->_query->count();
+    }
 
 
     /**
@@ -101,7 +154,10 @@ interface Bvb_Grid_Source_Interface
      * where c is the table alias. If the table as no alias,
      * c should be the table name
      */
-    function getTableList ();
+    function getTableList ()
+    {
+        
+    }
 
 
     /**
@@ -117,7 +173,10 @@ interface Bvb_Grid_Source_Interface
      *
      * @param $field
      */
-    function getFilterValuesBasedOnFieldDefinition ($field);
+    function getFilterValuesBasedOnFieldDefinition ($field)
+    {
+        
+    }
 
 
     /**
@@ -131,16 +190,10 @@ interface Bvb_Grid_Source_Interface
      * @param string $field
      */
 
-    function getFieldType ($field);
-
-
-    /**
-     * Returns the "main" table
-     * the one after select * FROM {MAIN_TABLE}
-     *
-     */
-    function getMainTable ();
-
+    function getFieldType ($field)
+    {
+        
+    }
 
     /**
      *
@@ -155,21 +208,33 @@ interface Bvb_Grid_Source_Interface
      * @param string $order
      * @param bool $reset
      */
-    function buildQueryOrder ($field, $order, $reset = false);
+    function buildQueryOrder ($field, $order, $reset = false)
+    {
+        
+    }
 
 
     /**
      * Build the query limit clause
+     * 
      * @param $start
      * @param $offset
      */
-    function buildQueryLimit ($start, $offset);
+    public function buildQueryLimit ($start, $offset)
+    {
+        $this->_query->limit($start)->offset($offset);
+        
+        return $this;
+    }
 
 
     /**
      * Returns the select object
      */
-    function getSelectObject ();
+    function getSelectObject ()
+    {
+        
+    }
 
 
     /**
@@ -190,7 +255,10 @@ interface Bvb_Grid_Source_Interface
      *
      * @return array
      */
-    function getSelectOrder ();
+    function getSelectOrder ()
+    {
+        
+    }
 
 
     /**
@@ -205,7 +273,10 @@ interface Bvb_Grid_Source_Interface
      * @param string $value
      * @return array
      */
-    function getDistinctValuesForFilters ($field, $value);
+    function getDistinctValuesForFilters ($field, $value)
+    {
+        
+    }
 
 
     /**
@@ -224,7 +295,10 @@ interface Bvb_Grid_Source_Interface
      *
      * @param array $value
      */
-    function getSqlExp (array $value);
+    function getSqlExp (array $value)
+    {
+        
+    }
 
 
     /**
@@ -241,7 +315,10 @@ interface Bvb_Grid_Source_Interface
      * @param $filter
      * @param $field
      */
-    function addFullTextSearch ($filter, $field);
+    function addFullTextSearch ($filter, $field)
+    {
+        
+    }
 
 
     /**
@@ -255,7 +332,10 @@ interface Bvb_Grid_Source_Interface
      * @param $op
      * @param $completeField
      */
-    function addCondition ($filter, $op, $completeField);
+    function addCondition ($filter, $op, $completeField)
+    {
+        
+    }
 
 
     /**
@@ -263,7 +343,10 @@ interface Bvb_Grid_Source_Interface
      * @param string $table
      * @param array $post
      */
-    function insert ($table, array $post);
+    function insert ($table, array $post)
+    {
+        
+    }
 
 
     /**
@@ -281,7 +364,10 @@ interface Bvb_Grid_Source_Interface
      * @param array $post
      * @param array $condition
      */
-    function update ($table, array $post, array $condition);
+    function update ($table, array $post, array $condition)
+    {
+        
+    }
 
 
     /**
@@ -297,23 +383,34 @@ interface Bvb_Grid_Source_Interface
      * @param string $table
      * @param array $condition
      */
-    function delete ($table, array $condition);
+    function delete ($table, array $condition)
+    {
+        
+    }
 
 
     /**
      * Removes any order in que query
      */
-    function resetOrder();
+    function resetOrder()
+    {
+        
+    }
 
     /**
      * Cache handler.
      */
-    function setCache($cache);
+    function setCache($cache)
+    {
+        
+    }
 
     /**
      * Build the form based on a Model or query
      * @param $decorators
      */
-    function buildForm();
-
+    function buildForm()
+    {
+        
+    }
 }
