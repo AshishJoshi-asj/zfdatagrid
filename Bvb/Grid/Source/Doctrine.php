@@ -68,6 +68,9 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
     
     /**
      * Use the supplied Doctrine_Query to find its primary ID
+     * 
+     * TODO : Test for what happens if there are multiple primaries set
+     *        Check the Zend_Select version
      */
     public function getPrimaryKey()
     {
@@ -181,9 +184,9 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      * @param string $field
      */
 
-    function getFieldType ($field)
+    public function getFieldType($field)
     {
-        
+        die('getFieldType');
     }
 
     /**
@@ -210,7 +213,6 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
         //die(Zend_Debug::dump($this->_queryExecuted->getRootDeclaration()));
         
         $this->_query->addOrderBy($alias . '.' . $newField . ' ' . $order);
-        //$this->_query->addOrderBy($newField . ' ' . $order);
         
         return $this;
     }
@@ -235,7 +237,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      */
     function getSelectObject ()
     {
-        
+        die('getSelectObject');
     }
 
 
@@ -254,12 +256,28 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      * [1] => ORDER (ASC|DESC)
      * )
      *
-     *
      * @return array
      */
-    function getSelectOrder ()
+    public function getSelectOrder ()
     {
+        $newOrderBys = array();
+        $orderBy = $this->_query->getDqlPart('orderby');
         
+        if (!empty($orderBy)) {
+            foreach ($orderBy as $anOrderby) {
+                $orderBys = explode(',', $anOrderby);
+                
+                foreach ($orderBys as $order) {
+                    $parts = explode(' ', trim($order));
+                    if (strtolower($parts[1]) != 'desc' && strtolower($parts[1]) != 'asc') {
+                        $parts[1] = '';
+                    }
+                    $newOrderBys[] = $parts;
+                }
+            }
+        }
+        
+        return $newOrderBys;
     }
 
 
@@ -277,7 +295,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      */
     function getDistinctValuesForFilters ($field, $value)
     {
-        
+        die('getDistinctValuesForFilters');
     }
 
 
@@ -299,7 +317,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      */
     function getSqlExp (array $value)
     {
-        
+        die('getSqlExp');
     }
 
 
@@ -319,7 +337,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      */
     function addFullTextSearch ($filter, $field)
     {
-        
+        die('addFullTextSearch');
     }
 
 
@@ -336,7 +354,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      */
     function addCondition ($filter, $op, $completeField)
     {
-        
+        die('addCondition');
     }
 
 
@@ -347,7 +365,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      */
     function insert ($table, array $post)
     {
-        
+        die('insert');
     }
 
 
@@ -368,7 +386,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      */
     function update ($table, array $post, array $condition)
     {
-        
+        die('update');
     }
 
 
@@ -387,7 +405,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      */
     function delete ($table, array $condition)
     {
-        
+        die('delete');
     }
 
 
@@ -396,15 +414,19 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      */
     function resetOrder()
     {
-        
+        die('resetOrder');
     }
 
     /**
      * Cache handler.
+     * 
+     * TODO: Research what 'cache' does, might just need to look at the 
+     *       bool and see if we need to set Doctrine Cache or not
      */
     function setCache($cache)
     {
-        
+        //die(Zend_Debug::dump($cache));
+        //die('setCache');
     }
 
     /**
@@ -413,6 +435,6 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
      */
     function buildForm()
     {
-        
+        die('buildForm');
     }
 }
