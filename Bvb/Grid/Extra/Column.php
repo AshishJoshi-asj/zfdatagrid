@@ -20,7 +20,7 @@
 
 
 
-class Bvb_Grid_ExtraColumns
+class Bvb_Grid_Extra_Column
 {
     public   $_field;
 

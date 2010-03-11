@@ -270,8 +270,7 @@ class Bvb_Grid_Source_Zend_Select implements Bvb_Grid_Source_Interface
         }
 
 
-        if(!isset($result[0]))
-        {
+        if ( ! isset($result[0]) ) {
             return false;
         }
 
@@ -292,7 +291,7 @@ class Bvb_Grid_Source_Zend_Select implements Bvb_Grid_Source_Interface
         $selectCount->reset(Zend_Db_Select::LIMIT_COUNT);
         $selectCount->reset(Zend_Db_Select::ORDER);
 
-        $selectCount->columns(new Zend_Db_Expr('COUNT(*) AS TOTAL '));
+        $selectCount->columns(new Zend_Db_Expr('COUNT(*) AS total '));
 
         if ( $this->_cache['use'] == 1 ) {
             $hash = 'Bvb_Grid' . md5($selectCount->__toString());
@@ -303,7 +302,7 @@ class Bvb_Grid_Source_Zend_Select implements Bvb_Grid_Source_Interface
                 if ( count($result) > 1 ) {
                     $result = count($result);
                 } else {
-                    $result = $result[0]['TOTAL'];
+                    $result = $result[0]['total'];
                 }
                 $this->_cache['instance']->save($result, $hash, array($this->_cache['tag']));
             }
@@ -314,7 +313,7 @@ class Bvb_Grid_Source_Zend_Select implements Bvb_Grid_Source_Interface
             if ( count($result) > 1 ) {
                 $result = count($result);
             } else {
-                $result = $result[0]['TOTAL'];
+                $result = $result[0]['total'];
             }
 
         }
@@ -344,8 +343,7 @@ class Bvb_Grid_Source_Zend_Select implements Bvb_Grid_Source_Interface
 
         $table = $this->getDescribeTable($tableName);
 
-        if(!isset($table[$field]))
-        {
+        if ( ! isset($table[$field]) ) {
             return 'text';
         }
         $type = $table[$field]['DATA_TYPE'];
@@ -598,10 +596,9 @@ class Bvb_Grid_Source_Zend_Select implements Bvb_Grid_Source_Interface
             }
         }
 
-        if ( strpos($field, '.') === false && $simpleField ===false ) {
+        if ( strpos($field, '.') === false && $simpleField === false ) {
             $field = $completeField['field'];
         }
-
 
 
         /**
@@ -612,8 +609,7 @@ class Bvb_Grid_Source_Zend_Select implements Bvb_Grid_Source_Interface
          *
          * We can not quoteIdentifier this fields...
          */
-        if(preg_match("/^[a-z_]$/i",$field))
-        {
+        if ( preg_match("/^[a-z_]$/i", $field) ) {
             $field = $this->_getDb()->quoteIdentifier($field);
         }
 
@@ -726,8 +722,15 @@ class Bvb_Grid_Source_Zend_Select implements Bvb_Grid_Source_Interface
 
     function setCache ($cache)
     {
+
         if ( ! is_array($cache) ) {
             $cache = array('use' => 0);
+        }
+
+        if ( isset($cache['use']['db']) && $cache['use']['db'] == 1 ) {
+            $cache['use'] = 1;
+        } else {
+            $cache['use'] = 0;
         }
 
         $this->_cache = $cache;
@@ -889,7 +892,7 @@ class Bvb_Grid_Source_Zend_Select implements Bvb_Grid_Source_Interface
      * This is important because we only allow edit, add or remove records
      * From tables that have on primary key
      *
-     * @return string
+     * @return array
      */
     function getPrimaryKey ($table)
     {
