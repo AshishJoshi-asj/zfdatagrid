@@ -111,18 +111,26 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
         $results = $newQuery->execute(array(), Doctrine::HYDRATE_SCALAR);
         
         if (empty($this->_queryParts['from']['alias'])) {
-            return $results;
-        }
-        
-        foreach ($results as $rows) {
-            $temp = array();
-            foreach ($rows as $col => $val) {
-                $pos = strpos($col,'_');
-                $name = substr($col, ++$pos);
-                $temp[$name] = $val;
+            foreach ($results as $rows) {
+                $temp = array();
+                foreach ($rows as $col => $val) {
+                    $name = str_replace($this->_queryParts['from']['table'] . '_', '', $col);
+                    $temp[$name] = $val;
+                }
+                
+                $newArray[] = $temp;
             }
-            
-            $newArray[] = $temp;
+        } else {
+            foreach ($results as $rows) {
+                $temp = array();
+                foreach ($rows as $col => $val) {
+                    $pos = strpos($col,'_');
+                    $name = substr($col, ++$pos);
+                    $temp[$name] = $val;
+                }
+                
+                $newArray[] = $temp;
+            }
         }
         
         return $newArray;
@@ -689,15 +697,6 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
         $return = array();
         
         list($table, $alias) = explode(' ', $from);
-        
-//        if (empty($alias)) {
-//            $tableName = Doctrine::getTable($table)->getTableName();
-//            $alias = strtolower($tableName{0});
-//            $this->_query->removeDqlQueryPart('from');
-//            $this->_query->from($table . ' ' . $alias);
-//            $from = $this->_query->getDqlPart('from');
-//            list($table, $alias) = explode(' ', $from[0]);
-//        }
         
         if (strpos($table, '.') !== false) {
             $return = $this->_explodeJoin($from, 'left');
