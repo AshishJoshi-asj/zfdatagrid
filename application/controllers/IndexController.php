@@ -4,8 +4,8 @@ class IndexController extends Zend_Controller_Action
 {
     public function indexAction()
     {
-        //$q = Doctrine_Query::create()->select('co.code AS code, co.name AS country_name, co.continent AS poop, ci.name AS city_name')
-        //                             ->from('Model_Country AS co, co.City AS ci');
+//        $q = Doctrine_Query::create()->select('co.code AS code, co.name AS country_name, co.continent AS poop, ci.name AS city_name')
+//                                     ->from('Model_Country AS co, co.City AS ci');
                                      
 //        $q = Doctrine_Query::create()->select('co.code AS code, co.name AS country_name, co.continent AS poop, ci.name AS city_name')
 //                                     ->from('Model_Country AS co')
@@ -15,6 +15,9 @@ class IndexController extends Zend_Controller_Action
 //                                     ->leftJoin('co.City AS ci');
 
         $q = Doctrine_Query::create()->from('Model_Country');
+        
+//        $q = Doctrine_Query::create()->select('code AS code, name AS country_name, continent AS poop')
+//                                     ->from('Model_Country');
         
         $grid = $this->_getGrid($q);
         
@@ -35,6 +38,8 @@ class IndexController extends Zend_Controller_Action
         //$grid->setGridColumns(array('co_code', 'co_name', 'co_continent', 'ci_name'));
         
         $grid->setGridColumns(array('code', 'name', 'continent'));
+        
+        //$grid->setGridColumns(array('code', 'country_name', 'poop'));
         
         $grid->imagesUrl = '/images/';
         $grid->setDetailColumns();
