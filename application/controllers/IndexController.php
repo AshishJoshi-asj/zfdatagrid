@@ -24,6 +24,39 @@ class IndexController extends Zend_Controller_Action
         $this->view->grid = $grid->deploy();
     }
     
+    public function crudAction()
+    {
+        $q = Doctrine_Query::create()->from('Model_Country');
+        $grid = $this->_getGrid($q);
+        
+        $form = new Bvb_Grid_Form();
+        $form->setAdd(1)->setEdit(1)->setDelete(1)->setAddButton(1);
+        
+        $grid->setForm($form);
+        
+        $this->view->grid = $grid->deploy();
+    }
+    
+    public function jqgridAction()
+    {
+        $q = Doctrine_Query::create()->from('Model_Country');
+        $grid = $this->_getJqGrid($q);
+        
+    }
+    
+    protected function _getJqGrid($query)
+    {
+        $config = new Zend_Config_Ini(AP . '/configs/grid.ini', AE);
+        $grid = Bvb_Grid_Data::factory('Bvb_Grid_Deploy_JqGrid', $config);
+        
+        
+    }
+    
+    /**
+     * 
+     * @param Doctrine_Query $query
+     * @return Bvb_Grid_Data
+     */
     protected function _getGrid($query)
     {
         $config = new Zend_Config_Ini(AP . '/configs/grid.ini', AE);
@@ -32,14 +65,8 @@ class IndexController extends Zend_Controller_Action
         $grid->setSource(new Bvb_Grid_Source_Doctrine($query));
         
         $grid->setEscapeOutput(false);
-        //$grid->setGridColumns(array('code', 'country_name', 'poop', 'city_name'));
-        //$grid->updateColumn('city_name', array('title' => 'City Name'));
-        
-        //$grid->setGridColumns(array('co_code', 'co_name', 'co_continent', 'ci_name'));
-        
         $grid->setGridColumns(array('code', 'name', 'continent'));
-        
-        //$grid->setGridColumns(array('code', 'country_name', 'poop'));
+        $grid->updateColumn('name', array('title' => 'Country'));
         
         $grid->imagesUrl = '/images/';
         $grid->setDetailColumns();
