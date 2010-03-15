@@ -6,6 +6,13 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
     
     protected $_queryParts = array();
     
+    /**
+     * Intialize the Doctrine_Query. We will parse out
+     * all the provided DQL or start a Doctrine_Query
+     * if an instance of Doctrine_Record is provided
+     * 
+     * @param mixed $q
+     */
     public function __construct($q)
     {
         if ($q instanceof Doctrine_Record) {
@@ -13,10 +20,17 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
             $q = Doctrine_Query::create()->from($name);
         }
         
+        if (!$q instanceof Doctrine_Query) {
+            require_once 'Bvb/Grid/Source/Doctrine/Exception.php';
+            throw new Bvb_Grid_Source_Doctrine_Exception(
+                "Please provide only an instance of Doctrine_Query "
+                 . "or a valid Doctrine_Record instance"
+            );
+        }
+        
         $this->_query = $q;
         $this->_setFromParts();
         $this->_setSelectParts();
-        
     }
     
     public function hasCrud()
