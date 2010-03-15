@@ -6,12 +6,17 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
     
     protected $_queryParts = array();
     
-    public function __construct(Doctrine_Query $q)
+    public function __construct($q)
     {
+        if ($q instanceof Doctrine_Record) {
+            $name = get_class($q);
+            $q = Doctrine_Query::create()->from($name);
+        }
+        
         $this->_query = $q;
         $this->_setFromParts();
         $this->_setSelectParts();
-        //die(Zend_Debug::dump($this->_queryParts, null, false));
+        
     }
     
     public function hasCrud()
@@ -123,6 +128,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
         } else {
             foreach ($results as $rows) {
                 $temp = array();
+                
                 foreach ($rows as $col => $val) {
                     $pos = strpos($col,'_');
                     $name = substr($col, ++$pos);
@@ -651,7 +657,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
              * 
              * @var string
              */
-            $addColumn = (!empty($fromAlias)) ? $fromAlias . '.' . $fromColumn : $fromColumn;
+            $addColumn = (!empty($fromAlias)) ? $fromAlias . '.' . $fromColumn . ' AS ' . $fromColumn : $fromColumn;
             $this->_query->addSelect($addColumn);
         }
         
