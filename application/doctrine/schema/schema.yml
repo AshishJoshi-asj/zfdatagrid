@@ -219,6 +219,12 @@ CountryLanguage:
 Crud:
   connection: master
   tableName: crud
+  actAs: 
+    Timestampable:
+      created:
+        name: date_added
+      updated:
+        disabled: true
   columns:
     id:
       type: integer(4)

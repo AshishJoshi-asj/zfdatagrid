@@ -112,6 +112,16 @@ abstract class Model_Base_Crud extends Doctrine_Record
     public function setUp()
     {
         parent::setUp();
-        
+        $timestampable0 = new Doctrine_Template_Timestampable(array(
+             'created' => 
+             array(
+              'name' => 'date_added',
+             ),
+             'updated' => 
+             array(
+              'disabled' => true,
+             ),
+             ));
+        $this->actAs($timestampable0);
     }
 }

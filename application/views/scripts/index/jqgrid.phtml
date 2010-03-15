@@ -1,0 +1,17 @@
+<?php $this->headLink()->prependStylesheet('http://jquery-ui.googlecode.com/svn/tags/latest/themes/base/jquery-ui.css');?>
+<?php echo $this->jQuery();?>
+
+<!-- add fancy jQuery UI Theme switcher -->
+<script type="text/javascript">
+    $(document).ready(function(){
+      $('#switcher').themeswitcher();
+    });
+</script>
+<!-- end jQuery UI Theme switcher -->
+
+<!-- add fancy jQuery UI Theme switcher -->
+<script type="text/javascript" src="http://jqueryui.com/themeroller/themeswitchertool/"></script>
+<div id="switcher"></div>
+<!-- end jQuery UI Theme switcher -->
+
+<?php echo $this->grid; ?>
