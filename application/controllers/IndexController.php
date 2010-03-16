@@ -6,17 +6,18 @@ class IndexController extends Zend_Controller_Action
     {
         /**
          * This is a basic Doctrine_Query example.
-         * Alternatively to you could do the following:
+         * Alternatively to you could do one of the following:
          * 
          * <code>
          * $q = new Model_Country();
+         * $q = 'Model_Country';
          * </code>
          * 
          * And will work just the same
          * 
          * @var Doctrine_Query
          */
-        $q = Doctrine_Query::create()->from('Model_Country c');
+        $q = Doctrine_Query::create()->from('Model_Country');
         
         $grid = $this->_getGrid($q);
         $grid->setGridColumns(array('code', 'name', 'continent'));
@@ -30,12 +31,20 @@ class IndexController extends Zend_Controller_Action
         $q = Doctrine_Query::create()->from('Model_Crud');
         $grid = $this->_getGrid($q);
         
-        $form = new Bvb_Grid_Form();
-        $form->setAdd(1)->setEdit(1)->setDelete(1)->setAddButton(1);
+        $grid->setGridColumns(array('firstname', 'lastname'));
         
+        $form = new Bvb_Grid_Form();
+        $form->setAdd(1)
+             ->setEdit(1)
+             ->setDelete(1)
+             ->setAddButton(1)
+             ->setDisallowedFields(array('date_added'));
+             
         $grid->setForm($form);
         
         $this->view->grid = $grid->deploy();
+        
+        return $this->render('index');
     }
     
     public function jqgridAction()
@@ -45,8 +54,15 @@ class IndexController extends Zend_Controller_Action
         
         $this->_helper->layout->setLayout('blank');
         
-        $q = Doctrine_Query::create()->select('code, name, continent, code AS _action')
-                                     ->from('Model_Country');
+        $select[] = 'co.code';
+        $select[] = 'co.name AS country_name';
+        $select[] = 'co.continent AS continent';
+        $select[] = 'ci.name AS city_name';
+        $select[] = 'co.code AS _action';
+        
+        $q = Doctrine_Query::create()->select(implode(", ", $select))
+                                     ->from('Model_Country co')
+                                     ->leftJoin('co.City ci');
         
         $grid = $this->_getJqGrid($q);
         
@@ -61,29 +77,38 @@ class IndexController extends Zend_Controller_Action
         
         $data = Doctrine_Query::create()->from('Model_Country')
                                         ->where('code = ?', $id)
-                                        ->fetchOne(array(), Doctrine::HY);
+                                        ->fetchOne(array(), Doctrine::HYDRATE_ARRAY);
                                         
         $this->view->data = $data;
     }
     
+    /**
+     * Just grab and setup our JqGrid grid
+     * 
+     * @param mixed $query
+     */
     protected function _getJqGrid($query)
     {
         $config = new Zend_Config_Ini(AP . '/configs/grid.ini', AE);
-        $grid = Bvb_Grid_Data::factory('Bvb_Grid_Deploy_JqGrid', $config);
+        $grid = Bvb_Grid::factory('Bvb_Grid_Deploy_JqGrid', $config);
         
         $grid->setSource(new Bvb_Grid_Source_Doctrine($query));
         
         $grid->setEscapeOutput(false);
-        $grid->setGridColumns(array('code', 'name', 'continent', '_action'));
+        $grid->setGridColumns(array('co_code', 'country_name', 'continent', 'city_name', '_action'));
         
-        $grid->updateColumn('code', array('align' => 'center'));
+        $grid->updateColumn('co_code', array(
+            'title' => 'Country Code',
+            'align' => 'center'
+        ));
         
-        $grid->updateColumn('name', array(
+        $grid->updateColumn('country_name', array(
             'title' => 'Country',
             'align' => 'center'
         ));
         
         $grid->updateColumn('continent', array('align' => 'center'));
+        $grid->updateColumn('city_name', array('align' => 'center'));
         
         $grid->updateColumn('_action', array(
             'search'   => false, //this will disable search on this field
@@ -98,15 +123,12 @@ class IndexController extends Zend_Controller_Action
             'jqg'      => array('fixed' => true, 'search' => false)
         ));
         
-        $grid->imagesUrl = '/images/';
-        //$grid->setDetailColumns();
-        
         $grid->setJqgParams(array(
-            'caption' => 'jqGrid Example',
-            'forceFit' => true,
+            'caption'     => 'jqGrid Example',
+            'forceFit'    => true,
             'viewrecords' => true, // show/hide record count right bottom in navigation bar
-            'rowList' => array(10, 15, 50), // show row number per page control in navigation bar
-            'altRows' => true, // rows will alternate color
+            'rowList'     => array(10, 15, 50), // show row number per page control in navigation bar
+            'altRows'     => true, // rows will alternate color
         ));
         
         return $grid;
@@ -121,13 +143,13 @@ class IndexController extends Zend_Controller_Action
     protected function _getGrid($query)
     {
         $config = new Zend_Config_Ini(AP . '/configs/grid.ini', AE);
-        $grid = Bvb_Grid_Data::factory('Bvb_Grid_Deploy_Table', $config);
+        $grid = Bvb_Grid::factory('Bvb_Grid_Deploy_Table', $config);
         
         $grid->setSource(new Bvb_Grid_Source_Doctrine($query));
         
         $grid->setEscapeOutput(false);
         
-        $grid->imagesUrl = '/images/';
+        $grid->setImagesUrl('/images/');
         $grid->setDetailColumns();
         //$grid->addTemplateDir('My/Template/Table', 'My_Template_Table', 'table');
         //$grid->addFormatterDir('My/Formatter', 'My_Formatter');
