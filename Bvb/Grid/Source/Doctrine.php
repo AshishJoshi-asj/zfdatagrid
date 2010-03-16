@@ -31,6 +31,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
         $this->_query = $q;
         $this->_setFromParts();
         $this->_setSelectParts();
+        //die(Zend_Debug::dump($this->_queryParts, null, false));
     }
     
     public function hasCrud()
@@ -144,15 +145,19 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
                 $temp = array();
                 
                 foreach ($rows as $col => $val) {
-                    $pos = strpos($col,'_');
-                    $name = substr($col, ++$pos);
-                    $temp[$name] = $val;
+                    $parts = explode('_', $col, 2);
+                    
+                    foreach ($this->_queryParts['select'] as $alias => $select) {
+                        if (implode('.', $parts) == $select['field']) {
+                            $temp[$alias] = $val;
+                        }
+                    }
                 }
                 
                 $newArray[] = $temp;
             }
         }
-        
+        //die(Zend_Debug::dump($newArray, null, false));
         return $newArray;
     }
 
@@ -228,7 +233,11 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
         
         $tableClass = Doctrine::getTable($table);
         
-        list($alias, $column) = explode('.', $field);
+        if (strpos($field, '.') !== false) {
+            list($alias, $column) = explode('.', $field);
+        } else {
+            $column = $field;
+        }
         
         $definition = $tableClass->getDefinitionOf($column);
         
@@ -476,13 +485,16 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
 
 
     /**
-     *Insert an array of key=>values in the specified table
+     * Insert an array of key=>values in the specified table
+     *
      * @param string $table
      * @param array $post
      */
-    function insert ($table, array $post)
+    public function insert($table, array $post)
     {
-        die('insert');
+        die(Zend_Debug::dump($table, null, false));
+        $tableModel = $this->_findTableFromAlias($table);
+        die(Zend_Debug::dump($tableModel, null, false));
     }
 
 
@@ -551,11 +563,75 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
 
     /**
      * Build the form based on a Model or query
-     * @param $decorators
      */
-    function buildForm()
+    public function buildForm()
     {
-        die('buildForm');
+        $table = $this->_queryParts['from']['table'];
+        $columns = Doctrine::getTable($table)->getColumns();
+        //die(Zend_Debug::dump($columns, null, false));
+        return $this->buildFormElements($columns);
+    }
+    
+    public function buildFormElements($cols, $info = array())
+    {
+        $form = array();
+        
+        foreach ($cols as $column => $detail) {
+            
+            if ($detail['primary']) {
+                continue;
+            }
+            
+            $label = ucwords(str_replace('_', ' ', $column));
+            
+            switch ($detail['type']) {
+                case 'enum':
+                    $form['elements'][$column] = array('select', array('multiOptions' => $detail['values'], 'required' => ($detail['notnull'] == 1) ? false : true, 'label' => $label));
+                    break;
+                
+                case 'string':
+                case 'varchar':
+                case 'char':
+                    $length = $detail['length'];
+                    $form['elements'][$column] = array('text', array('validators' => array(array('stringLength', false, array(0, $length))), 'size' => 40, 'label' => $label, 'required' => ($detail['notnull'] == 1) ? false : true, 'value' => (! is_null($detail['default']) ? $detail['default'] : "")));
+                    break;
+                case 'date':
+                    $form['elements'][$column] = array('text', array('validators' => array(array('Date')), 'size' => 10, 'label' => $label, 'required' => ($detail['notnull'] == 1) ? false : true, 'value' => (! is_null($detail['default']) ? $detail['default'] : "")));
+                    break;
+                case 'datetime':
+                case 'timestamp':
+                    $form['elements'][$column] = array('text', array('validators' => array(array(new Zend_Validate_Date('Y-m-d H:i:s'))), 'size' => 19, 'label' => $label, 'required' => ($detail['notnull'] == 1) ? false : true, 'value' => (! is_null($detail['default']) ? $detail['default'] : "")));
+                    break;
+                
+                case 'text':
+                case 'mediumtext':
+                case 'longtext':
+                case 'smalltext':
+                    $form['elements'][$column] = array('textarea', array('label' => $label, 'required' => ($detail['NULLABLE'] == 1) ? false : true, 'filters' => array('StripTags')));
+                    break;
+                
+                case 'integer':
+                case 'int':
+                case 'bigint':
+                case 'mediumint':
+                case 'smallint':
+                case 'tinyint':
+                    $isZero = (! is_null($detail['default']) && $detail['default'] == "0") ? true : false;
+                    $form['elements'][$column] = array('text', array('validators' => array('Digits'), 'label' => $label, 'size' => 10, 'required' => ($isZero == false && $detail['notnull'] == 1) ? false : true, 'value' => (! is_null($detail['default']) ? $detail['default'] : "")));
+                    break;
+
+                case 'float':
+                case 'decimal':
+                case 'double':
+                    $form['elements'][$column] = array('text', array('validators' => array('Float'), 'size' => 10, 'label' => $label, 'required' => ($detail['notnull'] == 1) ? false : true, 'value' => (! is_null($detail['default']) ? $detail['default'] : "")));
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        //die(Zend_Debug::dump($form, null, false));
+        return $form;
     }
     
     /**
@@ -795,6 +871,22 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_Interface
         }
         
         list($alias, $field) = explode('.', $column);
+        
+        return $this->_findTableFromAlias($alias);
+    }
+    
+    /**
+     * Find the table/model based on the table alias provided
+     * 
+     * @param mixed $alias
+     */
+    private function _findTableFromAlias($alias)
+    {
+        if (!is_string($alias)) {
+            $type = gettype($alias);
+            require_once 'Bvb/Grid/Source/Doctrine/Exception.php';
+            throw new Bvb_Grid_Source_Doctrine_Exception('The $column param needs to be a string, ' . $type . ' provided');
+        }
         
         if ($this->_queryParts['from']['alias'] == $alias) {
             return $this->_queryParts['from']['table'];
