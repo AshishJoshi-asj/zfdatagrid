@@ -1,5 +1,5 @@
 <?php
-
+error_reporting(E_STRICT | E_NOTICE);
 // Define path to application directory
 defined('AP') || define('AP', realpath(dirname(__FILE__)));
 

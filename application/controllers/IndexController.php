@@ -26,6 +26,36 @@ class IndexController extends Zend_Controller_Action
         $this->view->grid = $grid->deploy();
     }
     
+    public function advancedAction()
+    {
+        $q = 'Model_Country';
+        $grid = $this->_getGrid($q);
+        
+        $grid->setGridColumns(array('code', 'name', 'continent'));
+        $grid->updateColumn('name', array('title' => 'Country'));
+        
+        $filters = new Bvb_Grid_Filters();
+        $filters->addFilter('name', array('distinct' => array('field' => 'name', 'name' => 'name')));
+        $filters->addFilter('continent', array('distinct' => array('field' => 'continent', 'name' => 'continent')));
+
+        $grid->addFilters($filters);
+        
+        $extraColumn = new Bvb_Grid_Extra_Column();
+        $extraColumn->position('right')->name('Right')->decorator("<input id='test-{{code}}' type='checkbox' name='number[]'>");
+        
+        $grid->addExtraColumns($extraColumn);
+        
+        $grid->setSqlExp(array(
+            'name' => array(
+                'functions' => array('COUNT'),
+                'value'     => 'name',
+            )
+        ));
+        
+        $this->view->grid = $grid->deploy();
+        return $this->render('index');
+    }
+    
     public function crudAction()
     {
         $q = Doctrine_Query::create()->from('Model_Crud');
