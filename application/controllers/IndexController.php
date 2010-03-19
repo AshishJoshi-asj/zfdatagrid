@@ -2,6 +2,17 @@
 
 class IndexController extends Zend_Controller_Action
 {
+    public function init()
+    {
+      // setting the controller and action name as title segments:
+      $request = Zend_Controller_Front::getInstance()->getRequest();
+      $this->view->headTitle(ucwords($request->getControllerName()))
+           ->headTitle(ucwords($request->getActionName()));
+       
+      // setting a separator string for segments:
+      $this->view->headTitle()->setSeparator(' / ');
+    }
+    
     public function indexAction()
     {
         /**
@@ -32,7 +43,7 @@ class IndexController extends Zend_Controller_Action
             ->select('co.code, co.name AS country_name, co.continent, ci.name AS city_name')
             ->from('Model_Country co')
             ->leftJoin('co.City ci');
-            
+        
         $grid = $this->_getGrid($q);
         
         $grid->setGridColumns(array('code', 'country_name', 'continent', 'city_name'));
@@ -41,13 +52,13 @@ class IndexController extends Zend_Controller_Action
         $filters = new Bvb_Grid_Filters();
         $filters->addFilter('country_name', array('distinct' => array('field' => 'name', 'name' => 'name')));
         $filters->addFilter('continent', array('distinct' => array('field' => 'continent', 'name' => 'continent')));
-        $filters->addFilter('city_name', array('search' => array('fulltext' => true, 'extra'=>'boolean')));
+        $filters->addFilter('city_name', array('search' => true));
 
         $grid->addFilters($filters);
         
         $extraColumn = new Bvb_Grid_Extra_Column();
         $extraColumn->position('right')
-                    ->name('Right')
+                    ->name('Box')
                     ->helper(array(
                         'name'   =>'formCheckbox',
                         'params' => array('toDelete')
@@ -117,7 +128,7 @@ class IndexController extends Zend_Controller_Action
         $q = Doctrine_Query::create()
             ->select('co.code, co.name AS country_name, co.continent, COUNT(ci.name) AS city_total')
             ->from('Model_Country co')
-            ->leftJoin('co.City ci')
+            ->leftJoin('co.City ci ON ci.countrycode = co.code')
             ->groupBy('co.name');
             
         $grid = $this->_getGrid($q);

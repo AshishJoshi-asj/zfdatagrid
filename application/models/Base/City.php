@@ -78,7 +78,7 @@ abstract class Model_Base_City extends Doctrine_Record
     {
         parent::setUp();
         $this->hasOne('Model_Country as Country', array(
-             'local' => 'countrycode',
-             'foreign' => 'code'));
+             'local' => 'id',
+             'foreign' => 'captial'));
     }
 }

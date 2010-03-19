@@ -22,7 +22,7 @@ Doctrine_Manager::getInstance()->bindComponent('Model_Country', 'master');
  * @property string $headofstate
  * @property integer $capital
  * @property string $code2
- * @property Doctrine_Collection $City
+ * @property Model_City $City
  * @property Doctrine_Collection $CountryLanguage
  * 
  * @package    Doctrine
@@ -192,9 +192,9 @@ abstract class Model_Base_Country extends Doctrine_Record
     public function setUp()
     {
         parent::setUp();
-        $this->hasMany('Model_City as City', array(
-             'local' => 'code',
-             'foreign' => 'countrycode'));
+        $this->hasOne('Model_City as City', array(
+             'local' => 'capital',
+             'foreign' => 'id'));
 
         $this->hasMany('Model_CountryLanguage as CountryLanguage', array(
              'local' => 'code',
