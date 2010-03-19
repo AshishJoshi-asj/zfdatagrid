@@ -172,9 +172,9 @@ Country:
       autoincrement: false
   relations:
     City:
-      local: capital
-      foreign: id
-      type: one
+      local: code
+      foreign: countrycode
+      type: many
       
 CountryLanguage:
   connection: master

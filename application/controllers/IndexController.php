@@ -28,27 +28,38 @@ class IndexController extends Zend_Controller_Action
     
     public function advancedAction()
     {
-        $q = 'Model_Country';
+        $q = Doctrine_Query::create()
+            ->select('co.code, co.name AS country_name, co.continent, ci.name AS city_name')
+            ->from('Model_Country co')
+            ->leftJoin('co.City ci');
+            
         $grid = $this->_getGrid($q);
         
-        $grid->setGridColumns(array('code', 'name', 'continent'));
-        $grid->updateColumn('name', array('title' => 'Country'));
+        $grid->setGridColumns(array('code', 'country_name', 'continent', 'city_name'));
+        $grid->updateColumn('country_name', array('title' => 'Country'));
         
         $filters = new Bvb_Grid_Filters();
-        $filters->addFilter('name', array('distinct' => array('field' => 'name', 'name' => 'name')));
+        $filters->addFilter('country_name', array('distinct' => array('field' => 'name', 'name' => 'name')));
         $filters->addFilter('continent', array('distinct' => array('field' => 'continent', 'name' => 'continent')));
+        $filters->addFilter('city_name', array('search' => array('fulltext' => true, 'extra'=>'boolean')));
 
         $grid->addFilters($filters);
         
         $extraColumn = new Bvb_Grid_Extra_Column();
-        $extraColumn->position('right')->name('Right')->decorator("<input id='test-{{code}}' type='checkbox' name='number[]'>");
+        $extraColumn->position('right')
+                    ->name('Right')
+                    ->helper(array(
+                        'name'   =>'formCheckbox',
+                        'params' => array('toDelete')
+                    ));
         
         $grid->addExtraColumns($extraColumn);
         
         $grid->setSqlExp(array(
-            'name' => array(
+            'country_name' => array(
                 'functions' => array('COUNT'),
                 'value'     => 'name',
+                'decorator' => ''
             )
         ));
         
@@ -99,6 +110,22 @@ class IndexController extends Zend_Controller_Action
         $grid->ajax();
         
         $this->view->grid = $grid->deploy();
+    }
+    
+    public function debugAction()
+    {
+        $q = Doctrine_Query::create()
+            ->select('co.code, co.name AS country_name, co.continent, COUNT(ci.name) AS city_total')
+            ->from('Model_Country co')
+            ->leftJoin('co.City ci')
+            ->groupBy('co.name');
+            
+        $grid = $this->_getGrid($q);
+        
+        $grid->updateColumn('city_total', array('searchType' => '>'));
+        
+        $this->view->grid = $grid->deploy();
+        return $this->render('index');
     }
     
     public function viewAction()
