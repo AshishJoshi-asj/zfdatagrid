@@ -179,39 +179,57 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid_DataGrid {
 
 		// prepare data
 		parent::deploy ();
-
 		if ($this->downloadData) {
-			// send first headers
-            ob_end_clean();
-			header ( 'Content-type: text/plain; charset=utf-8' . $this->charEncoding );
-			header ( 'Content-Disposition: attachment; filename="' . $this->getFileName().'"' );
+                    // send first headers
+                    ob_end_clean();
+
+                    /*if(ini_get('zlib.output_compression')) {
+                        die;
+                        ini_set('zlib.output_compression', 'Off');
+                    }*/
+                    header('Content-Description: File Transfer');
+                    header('Cache-Control: public, must-revalidate, max-age=0'); // HTTP/1.1
+                    header('Pragma: public');
+                    header('Expires: Sat, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+                    header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
+                    // force download dialog
+                    header('Content-Type: application/force-download');
+                    header('Content-Type: application/octet-stream', false);
+                    header('Content-Type: application/download', false);
+                    //header("Content-Type: application/csv");
+                    //header ( 'Content-type: text/plain; charset=utf-8' . $this->charEncoding );
+
+                    header ( 'Content-Disposition: attachment; filename="' . $this->getFileName().'"' );
+
+                    header('Content-Transfer-Encoding: binary');
 		}
 		if ($this->storeData) {
-			// open file handler
-			$this->outFile = fopen ( $this->dir . $this->getFileName(), "w" );
+                    // open file handler
+                    $this->outFile = fopen ( $this->dir . $this->getFileName(), "w" );
 		}
 
 		// export header
-		$this->csvAddData ( self::buildTitltesCsv ( parent::buildTitles () ) );
+		if (! (isset($this->options['skipHeaders']) && $this->options['skipHeaders']) ) {
+                    $this->csvAddData ( self::buildTitltesCsv ( parent::buildTitles () ) );
+		}
 		$i = 0;
 		do {
-			$i += $this->pagination;
-			$this->csvAddData ( self::buildGridCsv ( parent::buildGrid () ) );
-			$this->csvAddData ( self::buildSqlexpCsv ( parent::buildSqlExp () ) );
-			// get next data
-			$this->_select->limit ( $this->pagination, $i );
-			$stmt = $this->_db->query ( $this->_select );
-			$this->_result = $stmt->fetchAll ();
+                    $i += $this->pagination;
+                    $this->csvAddData ( self::buildGridCsv ( parent::buildGrid () ) );
+                    $this->csvAddData ( self::buildSqlexpCsv ( parent::buildSqlExp () ) );
+                    // get next data
+                    $this->_select->limit ( $this->pagination, $i );
+                    $stmt = $this->_db->query ( $this->_select );
+                    $this->_result = $stmt->fetchAll ();
 		} while ( count ( $this->_result ) );
 
 		if ($this->storeData) {
-			// close file handler
-			fclose ( $this->outFile );
+                    // close file handler
+                    fclose ( $this->outFile );
 		} else {
-			die ();
+                    die ();
 		}
 
 		return true;
 	}
-
 }
