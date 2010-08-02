@@ -1514,7 +1514,6 @@ abstract class Bvb_Grid
         }
 
         return call_user_func_array($value['function'], $toReplace);
-
     }
 
     /**
@@ -1782,13 +1781,7 @@ abstract class Bvb_Grid
      */
     protected function _resetKeys(array $array)
     {
-        $novo_array = array();
-        $i = 0;
-        foreach ($array as $value) {
-            $novo_array[$i] = $value;
-            $i ++;
-        }
-        return $novo_array;
+        return array_values($array);
     }
 
     /**
@@ -2667,12 +2660,8 @@ abstract class Bvb_Grid
      */
     public function resetColumns(array $columns)
     {
-        foreach ($columns as $column) {
-            $support = array();
-            $support[] = $this->_data['fields']['title'];
-            $support[] = $this->_data['fields']['field'];
-            $this->updateColumn($column, $support);
-        }
+        foreach ($columns as $column)
+            $this->resetColumn($column);
 
         return $this;
     }
@@ -2681,7 +2670,7 @@ abstract class Bvb_Grid
      * Defines which columns will be available to user
      * @param $columns
      */
-    public function setGridColumns (array $columns)
+    public function setGridColumns(array $columns)
     {
         $this->_gridColumns = $columns;
         return $this;
@@ -2691,7 +2680,7 @@ abstract class Bvb_Grid
      * Adds more columns to be showed
      * @param $columns
      */
-    public function addGridColumns (array $columns)
+    public function addGridColumns(array $columns)
     {
         $this->_gridColumns = array_merge($this->_gridColumns, $columns);
         return $this;
