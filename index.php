@@ -41,19 +41,21 @@ Zend_Registry::set('cache',$cache);
 $locale = new Zend_Locale ( 'en_US' );
 Zend_Registry::set ( 'locale', $locale );
 /*
-      $english = array(
-          'Name_of' => 'Barcelos',
-          'message2 => 'message2',
-          'message3' => 'message3');
+$english = array(
+    'Name_of' => 'Barcelos',
+    'message2 => 'message2',
+    'message3' => 'message3'
+);
 
-      $german = array(
-          'Fmessage1 => 'Nachricht1',
-          'message2' => 'Nachricht2',
-          'message3' => 'Nachricht3');
+$german = array(
+    'Fmessage1 => 'Nachricht1',
+    'message2' => 'Nachricht2',
+    'message3' => 'Nachricht3'
+);
 
-      $translate = new Zend_Translate('array', $english, 'en');
+$translate = new Zend_Translate('array', $english, 'en');
 
-      Zend_Registry::set('Zend_Translate',$translate);
+Zend_Registry::set('Zend_Translate',$translate);
 */
 $frontController = Zend_Controller_Front::getInstance();
 $frontController->throwExceptions(true);
@@ -61,28 +63,30 @@ $frontController->setControllerDirectory('./application/controllers');
 $frontController->setDefaultControllerName('site');
 
 /*
-      $route = new Zend_Controller_Router_Route(
-          'grid/*',
-          array(
-              'controller' => 'site',
-              'action'     => 'basic'
-          )
-      );
+$route = new Zend_Controller_Router_Route(
+    'grid/*',
+    array(
+        'controller' => 'site',
+        'action'     => 'basic'
+    )
+);
 
-      $router = $frontController->getRouter();
-      $router->addRoute('user', $route);
+$router = $frontController->getRouter();
+$router->addRoute('user', $route);
 */
 // Leave 'Database' options empty to rely on Zend_Db_Table default adapter
 $options = array(
     'jquery_path' => 'http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js',
-    'plugins' => array('Variables',
-                       'Html',
-                       'Database' => array('adapter' => array('standard' => $db)),
-                       'File' => array('base_path' => '/Library/WebServer/Documents/'),
-                       'Memory',
-                       'Time',
-                       #'Cache' => array('backend' => $cache->getBackend()),
-                       'Exception')
+    'plugins' => array(
+        'Variables',
+        'Html',
+        'Database' => array('adapter' => array('standard' => $db)),
+        'File' => array('base_path' => '/Library/WebServer/Documents/'),
+        'Memory',
+        'Time',
+        //'Cache' => array('backend' => $cache->getBackend()),
+        'Exception'
+    )
 );
 
 $debug = new ZFDebug_Controller_Plugin_Debug($options);

@@ -181,9 +181,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_SourceInterface
 
         $results = $newQuery->execute(array(), Doctrine::HYDRATE_SCALAR);
 
-        $newArray = $this->_cleanQueryResults($results);
-
-        return $newArray;
+        return $this->_cleanQueryResults($results);
     }
 
     /**

@@ -345,7 +345,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid implements Bvb_Grid_Deploy_DeployI
             $url = isset($options['url']) ?  $options['url'] : $myUrl;
             $newWindow = isset($options['newWindow']) ?  $options['newWindow'] : true;
             $this->jqgAddNavButton(
-                array( // /public/images/csv.gif
+                array(
                     'caption' => $options['caption'],
                     'buttonicon' => isset($options['cssClass']) ? $options['cssClass'] : "ui-icon-extlink",
                     'onClickButton' => isset($options['onClick'])
@@ -548,7 +548,7 @@ HTML;
             $dataRow = new stdClass();
             // collect data for cells
             $d = array();
-            foreach ( $row as $key=>$val ) {
+            foreach ($row as $key=>$val) {
                 $d[] = $val['value'];
             }
             if ($passPk) {
@@ -788,7 +788,7 @@ HTML;
                     unset($fields[$key]['class']);
                 }
                 foreach ($fields[$key] as $name=>$value) {
-                    if ( in_array($name, $skipOptions)) {
+                    if (in_array($name, $skipOptions)) {
                         continue ;
                     }
                     // standard Bvb property which is not excluded will be passed to jqGrid colModel

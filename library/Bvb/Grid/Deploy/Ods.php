@@ -26,7 +26,7 @@ class Bvb_Grid_Deploy_Ods extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
 
     protected $templateDir;
 
-    public function __construct ($options)
+    public function __construct($options)
     {
         if(!class_exists('ZipArchive'))
             throw new Bvb_Grid_Exception('Class ZipArchive not available. Check www.php.net/ZipArchive for more information');
@@ -44,14 +44,14 @@ class Bvb_Grid_Deploy_Ods extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
      * @param unknown_type $filter
      * @return unknown
      */
-    public function scan_directory_recursively ($directory, $filter = FALSE)
+    public function scan_directory_recursively($directory, $filter = FALSE)
     {
         // if the path has a slash at the end we remove it here
         $directory = rtrim($directory, '/');
         $directory_tree = array();
 
         // if the path is not valid or is not a directory ...
-        if (! file_exists($directory) || ! is_dir($directory)) {
+        if (!file_exists($directory) || !is_dir($directory)) {
             // ... we return false and exit the function
             return FALSE;
 
@@ -115,7 +115,7 @@ class Bvb_Grid_Deploy_Ods extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
      *
      * @param string $dir
      */
-    public function deldir ($dir)
+    public function deldir($dir)
     {
         $current_dir = @opendir($dir);
         while ($entryname = @readdir($current_dir)) {
@@ -135,10 +135,10 @@ class Bvb_Grid_Deploy_Ods extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
      * @param unknown_type $dirs
      * @return unknown
      */
-    public function zipPaths ($dirs)
+    public function zipPaths($dirs)
     {
         foreach ($dirs as $key => $value) {
-            if (! is_array(@$value['content'])) {
+            if (!is_array(@$value['content'])) {
                 @$file .= $value['path'];
             } else {
                 @$file .= $this->zipPaths($value['content']);
@@ -154,7 +154,7 @@ class Bvb_Grid_Deploy_Ods extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
      * @param unknown_type $dest
      * @return unknown
      */
-    public function copyDir ($source, $dest)
+    public function copyDir($source, $dest)
     {
         // Se for ficheiro
         if (is_file($source)) {
@@ -164,7 +164,7 @@ class Bvb_Grid_Deploy_Ods extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
         }
 
         // criar directorio de destino
-        if (! is_dir($dest)) {
+        if (!is_dir($dest)) {
             mkdir($dest, 0777, 1);
         }
 
@@ -180,14 +180,13 @@ class Bvb_Grid_Deploy_Ods extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
             }
         }
 
-        // sair
         $dir->close();
         return true;
     }
 
-    public function deploy ()
+    public function deploy()
     {
-        if ( ! in_array($this->_deployName, $this->_export) && !array_key_exists($this->_deployName,$this->_export) ) {
+        if (!in_array($this->_deployName, $this->_export) && !array_key_exists($this->_deployName,$this->_export)) {
             throw new Bvb_Grid_Exception($this->__("You dont' have permission to export the results to this format"));
         }
 
@@ -195,33 +194,33 @@ class Bvb_Grid_Deploy_Ods extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
 
         parent::deploy();
 
-        if (! $this->_temp['ods'] instanceof Bvb_Grid_Template_Ods_Ods) {
+        if (!$this->_temp['ods'] instanceof Bvb_Grid_Template_Ods_Ods) {
             $this->setTemplate('ods', 'ods');
         }
 
         $this->templateInfo = $this->_temp['ods']->options;
 
-        if (! isset($this->deploy['title'])) {
+        if (!isset($this->deploy['title'])) {
             $this->deploy['title'] = '';
         }
 
-        if (! isset($this->deploy['subtitle'])) {
+        if (!isset($this->deploy['subtitle'])) {
             $this->deploy['subtitle'] = '';
         }
 
-        if (! isset($this->deploy['logo'])) {
+        if (!isset($this->deploy['logo'])) {
             $this->deploy['logo'] = '';
         }
 
-        if (! isset($this->deploy['footer'])) {
+        if (!isset($this->deploy['footer'])) {
             $this->deploy['footer'] = '';
         }
 
-        if (! isset($this->deploy['save'])) {
+        if (!isset($this->deploy['save'])) {
             $this->deploy['save'] = false;
         }
 
-        if (! isset($this->deploy['download'])) {
+        if (!isset($this->deploy['download'])) {
             $this->deploy['download'] = false;
         }
 
@@ -241,11 +240,11 @@ class Bvb_Grid_Deploy_Ods extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
             $this->deploy['name'] = substr($this->deploy['name'], 0, - 5);
         }
 
-        if (! is_dir($this->deploy['dir'])) {
+        if (!is_dir($this->deploy['dir'])) {
             throw new Bvb_Grid_Exception($this->deploy['dir'] . ' is not a dir');
         }
 
-        if (! is_writable($this->deploy['dir'])) {
+        if (!is_writable($this->deploy['dir'])) {
             throw new Bvb_Grid_Exception($this->deploy['dir'] . ' is not writable');
         }
 
@@ -256,7 +255,7 @@ class Bvb_Grid_Deploy_Ods extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
 
         $this->deploy['dir'] = rtrim($this->deploy['dir'], '/') . '/' . ucfirst($this->deploy['name']) . '/';
 
-        if (! defined('APPLICATION_PATH')) {
+        if (!defined('APPLICATION_PATH')) {
             $pathTemplate = substr($this->templateInfo['dir'], 0, - 4) . '/';
         } else {
             $pathTemplate = APPLICATION_PATH . '/../' . rtrim($this->getLibraryDir(), '/') . '/' . substr($this->templateInfo['dir'], 0, - 4) . '/';

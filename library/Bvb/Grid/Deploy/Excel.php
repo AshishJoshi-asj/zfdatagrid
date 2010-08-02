@@ -20,24 +20,23 @@
 
 class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployInterface
 {
-    public function __construct ($options)
+    public function __construct($options)
     {
         $this->_setRemoveHiddenFields(true);
         parent::__construct($options);
 
-        if ( ! in_array($this->_deployName, $this->_export) && ! array_key_exists($this->_deployName, $this->_export) ) {
+        if (!in_array($this->_deployName, $this->_export) && !array_key_exists($this->_deployName, $this->_export) ) {
             throw new Bvb_Grid_Exception($this->__("You dont' have permission to export the results to this format"));
         }
     }
 
     public function deploy()
     {
-          $this->setRecordsPerPage ( 0 );
+          $this->setRecordsPerPage (0 );
 
-          parent::deploy ();
+          parent::deploy();
 
-          if(!isset($this->options['title']))
-          {
+          if(!isset($this->options['title'])) {
               $this->options['title'] = 'ZFDatagrid';
           }
 
@@ -45,7 +44,7 @@ class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployI
           $wsData = parent::_buildGrid ();
           $sql = parent::_buildSqlExp ();
 
-          if (is_array ( $wsData ) && count($wsData)>65569) {
+          if (is_array($wsData) && count($wsData)>65569) {
               throw new Bvb_Grid_Exception('Maximum number of records allowed is 65569');
           }
 
@@ -55,37 +54,35 @@ class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployI
   xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">';
 
           $xml .= '<Worksheet ss:Name="' .  $this->options['title']  . '" ss:Description="' .  $this->options['title']  . '"><ss:Table>';
-
           $xml .= '<ss:Row>';
-          foreach ( $titles as $value ) {
-               $type = ! is_numeric ($value ['value'] ) ? 'String' : 'Number';
+
+          foreach ($titles as $value ) {
+               $type = !is_numeric ($value ['value'] ) ? 'String' : 'Number';
 
                $xml .= '<ss:Cell><Data ss:Type="' . $type . '">' . $value ['value'] . '</Data></ss:Cell>';
           }
           $xml .= '</ss:Row>';
 
-          if (is_array ( $wsData )) {
-               foreach ( $wsData as $row ) {
+          if (is_array($wsData)) {
+               foreach ($wsData as $row) {
                     $xml .= '<ss:Row>';
                     $a = 1;
-                    foreach ( $row as $value ) {
+                    foreach ($row as $value) {
+                         $value ['value'] = strip_tags ($value ['value'] );
 
-                         $value ['value'] = strip_tags ( $value ['value'] );
-
-                         $type = ! is_numeric ( $value ['value'] ) ? 'String' : 'Number';
+                         $type = !is_numeric($value ['value'] ) ? 'String' : 'Number';
                          $xml .= '<ss:Cell><Data ss:Type="' . $type . '">' . $value ['value'] . '</Data></ss:Cell>';
 
                          $a ++;
                     }
                     $xml .= '</ss:Row>';
                }
-
           }
 
-          if (is_array ( $sql )) {
+          if (is_array($sql)) {
                $xml .= '<ss:Row>';
-               foreach ( $sql as $value ) {
-                    $type = ! is_numeric ( $value ['value'] ) ? 'String' : 'Number';
+               foreach ($sql as $value) {
+                    $type = !is_numeric($value['value']) ? 'String' : 'Number';
 
                     $xml .= '<ss:Cell><Data ss:Type="' . $type . '">' . $value ['value'] . '</Data></ss:Cell>';
                }
@@ -96,11 +93,11 @@ class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployI
 
           $xml .= '</Workbook>';
 
-        if (! isset($this->deploy['save'])) {
+        if (!isset($this->deploy['save'])) {
             $this->deploy['save'] = false;
         }
 
-        if (! isset($this->deploy['download'])) {
+        if (!isset($this->deploy['download'])) {
             $this->deploy['download'] = false;
         }
 
@@ -118,20 +115,20 @@ class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployI
 
         $this->deploy['dir'] = rtrim($this->deploy['dir'], '/') . '/';
 
-        if (! is_dir($this->deploy['dir']) && $this->deploy['save']==1) {
+        if (!is_dir($this->deploy['dir']) && $this->deploy['save']==1) {
             throw new Bvb_Grid_Exception($this->deploy['dir'] . ' is not a dir');
         }
 
-        if (! is_writable($this->deploy['dir']) && $this->deploy['save']==1) {
+        if (!is_writable($this->deploy['dir']) && $this->deploy['save']==1) {
             throw new Bvb_Grid_Exception($this->deploy['dir'] . ' is not writable');
         }
 
-        if ( $this->deploy['save'] == 1 ) {
+        if ($this->deploy['save'] == 1) {
             file_put_contents($this->deploy['dir'] . $this->deploy['name'] . ".xls", $xml);
         }
 
         if ($this->deploy['download'] == 1) {
-            header ( 'Content-type: application/excel' );
+            header('Content-type: application/excel');
             header('Content-Disposition: attachment; filename="' . $this->deploy['name'] . '.xls"');
             echo $xml;
         }

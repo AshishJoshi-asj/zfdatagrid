@@ -124,7 +124,7 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
     {
         $this->options = $options;
 
-        if ( ! Zend_Loader_Autoloader::autoload('OFC_Chart') ) {
+        if (!Zend_Loader_Autoloader::autoload('OFC_Chart')) {
             die("You must have Open Flash Chart installed in order to use this deploy. Please check this page for more information: http://code.google.com/p/zfdatagrid/wiki/Bvb_Grid_Deploy");
         }
 
@@ -142,11 +142,11 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
 
     public function deploy ()
     {
-        if ( ! in_array($this->_deployName, $this->_export) && !array_key_exists($this->_deployName,$this->_export) ) {
+        if (!in_array($this->_deployName, $this->_export) && !array_key_exists($this->_deployName,$this->_export)) {
             throw new Bvb_Grid_Exception($this->__("You dont' have permission to export the results to this format"));
         }
 
-        if ( $this->_filesLocation === null ) {
+        if ($this->_filesLocation === null) {
             throw new Bvb_Grid_Exception($this->__("Please set Javascript and Flash file locations using SetFilesLocation()"));
         }
 
@@ -159,13 +159,13 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
 
         $data = parent::_buildGrid();
 
-        foreach ( $data as $value ) {
-            foreach ( $value as $final ) {
+        foreach ($data as $value) {
+            foreach ($value as $final) {
                 $result[$final['field']][] = is_numeric($final['value']) ? $final['value'] : strip_tags($final['value']);
             }
         }
 
-        if ( is_string($this->_xLabels) && isset($result[$this->_xLabels]) ) {
+        if (is_string($this->_xLabels) && isset($result[$this->_xLabels])) {
             $this->_xLabels = $result[$this->_xLabels];
         }
 
@@ -174,19 +174,19 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
         $title->set_style($this->_style);
         $graph->set_title($title);
 
-        foreach ( $this->_chartOptions as $key => $value ) {
+        foreach ($this->_chartOptions as $key => $value) {
             $graph->$key($value);
         }
 
-        if ( count($this->_xLabels) > 0 ) {
+        if (count($this->_xLabels) > 0) {
             $x = new OFC_Elements_Axis_X();
             $x_axis_labels = new OFC_Elements_Axis_X_Label_Set();
-            foreach ( $this->_xAxisOptions as $key => $value ) {
+            foreach ($this->_xAxisOptions as $key => $value) {
                 $x_axis_labels->$key($value);
             }
             $x_axis_labels->set_labels($this->_xLabels);
             $x->set_labels($x_axis_labels);
-            foreach ( $this->_xLabelsOptions as $key => $value ) {
+            foreach ($this->_xLabelsOptions as $key => $value) {
                 $x->$key($value);
             }
             $graph->set_x_axis($x);
@@ -195,46 +195,46 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
         if (!empty($this->_xLegendText) && !empty($this->_xLegendStyle)) {
             $x_legend = new OFC_Elements_Legend_X($this->_xLegendText);
             $x_legend->set_style($this->_xLegendStyle);
-            $graph->set_x_legend( $x_legend );
+            $graph->set_x_legend($x_legend);
         }
 
         $min = 0;
         $max = 0;
 
-        if ( count($this->_values) == 0 ) {
+        if (count($this->_values) == 0) {
             $this->setValues(key($result));
         }
 
-        foreach ( $this->_values as $key => $value ) {
+        foreach ($this->_values as $key => $value) {
 
-            if ( is_array($value) ) {
+            if (is_array($value)) {
 
                 $support = $value;
                 sort($support);
-                if ( reset($support) < $min ) {
+                if (reset($support) < $min) {
                     $min = reset($support);
                 }
-                if ( end($support) > $max ) {
+                if (end($support) > $max) {
                     $max = end($support);
                 }
                 unset($support);
 
                 $options = $this->_chartOptionsValues[$value];
-                if ( isset($options['chartType']) ) {
+                if (isset($options['chartType'])) {
                     $this->setChartType($options['chartType']);
                 }
 
                 $bar = new $this->_type();
 
-                foreach ( $options as $key => $prop ) {
+                foreach ($options as $key => $prop) {
                     $bar->$key($prop);
                 }
                 $this->_type();
 
                 $pie = array();
 
-                if ( $this->_type == 'Pie' ) {
-                    foreach ( $value as $key => $title ) {
+                if ($this->_type == 'Pie') {
+                    foreach ($value as $key => $title) {
                         $pie[] = new OFC_Charts_Pie_Value($title, $this->_xLabels[$key]);
                     }
                     $bar->set_values($pie);
@@ -244,16 +244,16 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
 
                 $graph->add_element($bar);
 
-            } elseif ( is_string($value) && isset($result[$value]) ) {
+            } elseif (is_string($value) && isset($result[$value])) {
 
                 $options = $this->_chartOptionsValues[$value];
-                if ( isset($options['chartType']) ) {
+                if (isset($options['chartType'])) {
                     $this->setChartType($options['chartType']);
                 }
 
                 $bar = new $this->_type();
 
-                foreach ( $options as $key => $prop ) {
+                foreach ($options as $key => $prop) {
                     $bar->$key($prop);
                 }
 
@@ -261,17 +261,17 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
 
                 $support = $value;
                 sort($support);
-                if ( reset($support) < $min ) {
+                if (reset($support) < $min) {
                     $min = reset($support);
                 }
-                if ( end($support) > $max ) {
+                if (end($support) > $max) {
                     $max = end($support);
                 }
                 unset($support);
 
                 $pie = array();
-                if ( $this->_type == 'OFC_Charts_Pie' ) {
-                    foreach ( $value as $key => $title ) {
+                if ($this->_type == 'OFC_Charts_Pie') {
+                    foreach ($value as $key => $title) {
                         $pie[] = new OFC_Charts_Pie_Value($title, $this->_xLabels[$key]);
                     }
                     $bar->set_values($pie);
@@ -293,14 +293,14 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
 
         $final = $graph->toPrettyString();
 
-        if ( ! is_string($this->_chartId) ) {
+        if (!is_string($this->_chartId)) {
             $this->_chartId = 'chart_' . rand(1, 10000);
         }
 
          $script = '
         swfobject.embedSWF(
         "' . $this->_filesLocation['flash'] . '", "' . $this->_chartId . '",
-        "' . $this->_chartDimensions['x'] . '", "' . $this->_chartDimensions['y'] . '", "9.0.0", "expressInstall.swf",{"id":"' . $this->_chartId . '"},{"z-index":"1","wmode":"transparent"} );
+        "' . $this->_chartDimensions['x'] . '", "' . $this->_chartDimensions['y'] . '", "9.0.0", "expressInstall.swf",{"id":"' . $this->_chartId . '"},{"z-index":"1","wmode":"transparent"});
 
         function open_flash_chart_data(id)
         {
@@ -350,7 +350,7 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
 
     public function setValues ($values, $options = array())
     {
-        if ( ! is_string($values) ) {
+        if (!is_string($values)) {
             $name = $values[0];
         } else {
             $name = $values;
@@ -364,7 +364,7 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
 
     public function addValues ($values, $options = array())
     {
-        if ( ! is_string($values) ) {
+        if (!is_string($values)) {
             $name = $values[0];
         } else {
             $name = $values;
@@ -405,7 +405,7 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
 
     public function __toString ()
     {
-        if ( is_null($this->_deploymentContent) ) {
+        if (is_null($this->_deploymentContent)) {
             die('You must explicity call the deploy() method before printing the object');
         }
         return $this->_deploymentContent;
@@ -454,43 +454,43 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
 
     protected function _applyConfigOptions ($options)
     {
-        if ( isset($options['files']['js']) ) {
+        if (isset($options['files']['js'])) {
             $this->_filesLocation['js'] = $options['files']['js'];
         }
 
-        if ( isset($options['files']['json']) ) {
+        if (isset($options['files']['json'])) {
             $this->_filesLocation['json'] = $options['files']['json'];
         }
 
-        if ( isset($options['files']['flash']) ) {
+        if (isset($options['files']['flash'])) {
             $this->_filesLocation['flash'] = $options['files']['flash'];
         }
 
-        if ( isset($options['options']) && is_array($options['options']) ) {
+        if (isset($options['options']) && is_array($options['options'])) {
             $this->setChartOptions($options['options']);
         }
 
-        if ( isset($options['title']) && is_string($options['title']) ) {
+        if (isset($options['title']) && is_string($options['title'])) {
             $this->setTitle($options['title']);
         }
 
-        if ( isset($options['style']) && is_string($options['style']) ) {
+        if (isset($options['style']) && is_string($options['style'])) {
             $this->setTitleStyle($options['style']);
         }
 
-        if ( isset($options['type']) && is_string($options['type']) ) {
+        if (isset($options['type']) && is_string($options['type'])) {
             $this->setChartType($options['type']);
         }
 
-        if ( isset($options['dimensions']) && is_array($options['dimensions']) ) {
+        if (isset($options['dimensions']) && is_array($options['dimensions'])) {
             $this->setChartDimensions($options['dimensions']['x'], $options['dimensions']['y']);
         }
 
-        if ( isset($options['flashParams']) && is_string($options['flashParams']) ) {
+        if (isset($options['flashParams']) && is_string($options['flashParams'])) {
             $this->setFlashParams($options['flashParams']);
         }
 
-        if ( isset($options['xLegend']) && is_array($options['xLegend']) ) {
+        if (isset($options['xLegend']) && is_array($options['xLegend'])) {
             $this->setXLegend($options['xLegend']['text'], $options['xLegend']['style']);
         }
     }

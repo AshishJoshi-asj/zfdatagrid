@@ -101,7 +101,7 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
         // what if it would be loaded from config ?
         $this->deploy = $options['deploy'][$this->_deployName];
 
-         if (!in_array($this->_deployName, $this->_export) && !array_key_exists($this->_deployName, $this->_export)) {
+        if (!in_array($this->_deployName, $this->_export) && !array_key_exists($this->_deployName, $this->_export)) {
             // check if this kind of export is alowed
             throw new Bvb_Grid_Exception($this->__("You dont' have permission to export the results to this format"));
         }

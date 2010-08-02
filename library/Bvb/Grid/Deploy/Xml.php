@@ -91,15 +91,14 @@ class Bvb_Grid_Deploy_Xml extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
 
     public function deploy ()
     {
-        if ( ! in_array($this->_deployName, $this->_export) && !array_key_exists($this->_deployName,$this->_export) ) {
+        if (! in_array($this->_deployName, $this->_export) && !array_key_exists($this->_deployName,$this->_export)) {
             throw new Bvb_Grid_Exception($this->__("You dont' have permission to export the results to this format"));
         }
 
         $this->setRecordsPerPage(0);
         parent::deploy();
 
-        $grid = '';
-        $grid .= '<?xml version="1.0" encoding="' . $this->getCharEncoding() . '"?>' . "\n";
+        $grid = '<?xml version="1.0" encoding="' . $this->getCharEncoding() . '"?>' . "\n";
         $grid .= "<grid>\n";
 
         $grid .= self::buildTitltesXml(parent::_buildTitles());

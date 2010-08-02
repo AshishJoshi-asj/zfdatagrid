@@ -22,14 +22,14 @@ class Bvb_Grid_Column
 {
     public $_field;
 
-    public function __construct ($field)
+    public function __construct($field)
     {
         $this->_field['field'] = trim($field);
     }
 
-    public function __call ($name, $args)
+    public function __call($name, $args)
     {
-        if ( substr(strtolower($name), 0, 3) == 'set' || substr(strtolower($name), 0, 3) == 'add' ) {
+        if (substr(strtolower($name), 0, 3) == 'set' || substr(strtolower($name), 0, 3) == 'add') {
             $name = substr($name, 3);
             $name[0] = strtolower($name[0]);
         }
