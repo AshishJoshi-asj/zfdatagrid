@@ -20,16 +20,16 @@
 
 class OFC_Charts_Bar_Stack extends OFC_Charts_Bar
 {
-	function OFC_Charts_Bar_Stack()
+     function OFC_Charts_Bar_Stack()
     {
-		parent::OFC_Charts_Bar();
+          parent::OFC_Charts_Bar();
 
-		$this->type      = 'bar_stack';
-	}
+          $this->type      = 'bar_stack';
+     }
 
-	function append_stack( $v )
+     function append_stack( $v )
     {
-		$this->append_value( $v );
-	}
+          $this->append_value( $v );
+     }
 }
 

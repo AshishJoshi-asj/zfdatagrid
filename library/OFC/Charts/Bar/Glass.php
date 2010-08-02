@@ -21,11 +21,11 @@
 
 class OFC_Charts_Bar_Glass extends OFC_Charts_Bar
 {
-	function OFC_Charts_Bar_Glass()
+     function OFC_Charts_Bar_Glass()
     {
-		parent::OFC_Charts_Bar();
+          parent::OFC_Charts_Bar();
 
-		$this->type      = 'bar_glass';
-	}
+          $this->type      = 'bar_glass';
+     }
 }
 

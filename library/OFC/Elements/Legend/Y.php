@@ -21,11 +21,11 @@
 
 class OFC_Elements_Legend_Y extends OFC_Elements_Base
 {
-	function OFC_Elements_Legend_Y( $text='' )
-	{
+     function OFC_Elements_Legend_Y( $text='' )
+     {
         parent::OFC_Elements_Base();
 
-		$this->text = $text;
-	}
+          $this->text = $text;
+     }
 }
 

@@ -21,11 +21,11 @@
 
 class OFC_Charts_Line_Dot extends OFC_Charts_Line
 {
-	function OFC_Charts_Line_Dot()
+     function OFC_Charts_Line_Dot()
     {
         parent::OFC_Charts_Line();
 
-		$this->type      = 'line_dot';
-	}
+          $this->type      = 'line_dot';
+     }
 }
 

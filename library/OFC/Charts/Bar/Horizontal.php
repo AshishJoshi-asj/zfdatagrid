@@ -22,18 +22,18 @@
 class OFC_Charts_Bar_Horizontal
 {
 
-	function OFC_Charts_Bar_Horizontal()
+     function OFC_Charts_Bar_Horizontal()
     {
-		$this->type      = "hbar";
-		$this->colour    = "#9933CC";
-		$this->text      = "Page views";;
-		$this->{'font-size'} = 10;
-		$this->values    = array();
-	}
+          $this->type      = "hbar";
+          $this->colour    = "#9933CC";
+          $this->text      = "Page views";;
+          $this->{'font-size'} = 10;
+          $this->values    = array();
+     }
 
-	function append_value( $v )
+     function append_value( $v )
     {
-		$this->values[] = $v;
-	}
+          $this->values[] = $v;
+     }
 }
 

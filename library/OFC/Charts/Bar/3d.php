@@ -20,11 +20,11 @@
 
 class OFC_Charts_Bar_3d extends OFC_Charts_Bar
 {
-	function OFC_Charts_Bar_3d()
+     function OFC_Charts_Bar_3d()
     {
-		parent::OFC_Charts_Bar();
+          parent::OFC_Charts_Bar();
 
-		$this->type      = 'bar_3d';
-	}
+          $this->type      = 'bar_3d';
+     }
 }
 

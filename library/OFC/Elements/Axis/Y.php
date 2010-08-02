@@ -21,41 +21,41 @@
 
 class OFC_Elements_Axis_Y extends OFC_Elements_Axis
 {
-	function OFC_Elements_Axis_Y()
+     function OFC_Elements_Axis_Y()
     {
         parent::OFC_Elements_Axis();
     }
 
-	function set_grid_colour( $colour )
-	{
-		$this->{'grid-colour'} = $colour;
-	}
+     function set_grid_colour( $colour )
+     {
+          $this->{'grid-colour'} = $colour;
+     }
 
-	function set_stroke( $s )
-	{
-		$this->stroke = $s;
-	}
+     function set_stroke( $s )
+     {
+          $this->stroke = $s;
+     }
 
-	function set_tick_length( $val )
-	{
-		$this->{'tick-length'} = $val;
-	}
+     function set_tick_length( $val )
+     {
+          $this->{'tick-length'} = $val;
+     }
 
-	function set_range( $min, $max, $steps=1 )
-	{
-		$this->min = $min;
-		$this->max = $max;
-		$this->set_steps( $steps );
-	}
+     function set_range( $min, $max, $steps=1 )
+     {
+          $this->min = $min;
+          $this->max = $max;
+          $this->set_steps( $steps );
+     }
 
-	function set_offset( $off )
-	{
-		$this->offset = ($off) ? 1 : 0;
-	}
+     function set_offset( $off )
+     {
+          $this->offset = ($off) ? 1 : 0;
+     }
 
-	function set_labels( $labels )
-	{
-		$this->labels = $labels;
-	}
+     function set_labels( $labels )
+     {
+          $this->labels = $labels;
+     }
 }
 

@@ -36,73 +36,73 @@ class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployI
 
     public function deploy() {
 
-		$this->setRecordsPerPage ( 0 );
+          $this->setRecordsPerPage ( 0 );
 
-		parent::deploy ();
+          parent::deploy ();
 
-		if(!isset($this->options['title']))
-		{
-		    $this->options['title'] = 'ZFDatagrid';
-		}
+          if(!isset($this->options['title']))
+          {
+              $this->options['title'] = 'ZFDatagrid';
+          }
 
-		$titles = parent::_buildTitles ();
-		$wsData = parent::_buildGrid ();
-		$sql = parent::_buildSqlExp ();
+          $titles = parent::_buildTitles ();
+          $wsData = parent::_buildGrid ();
+          $sql = parent::_buildSqlExp ();
 
 
-		if (is_array ( $wsData ) && count($wsData)>65569) {
-		    throw new Bvb_Grid_Exception('Maximum number of records allowed is 65569');
-		}
+          if (is_array ( $wsData ) && count($wsData)>65569) {
+              throw new Bvb_Grid_Exception('Maximum number of records allowed is 65569');
+          }
 
-		$xml = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?>
+          $xml = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns:x="urn:schemas-microsoft-com:office:excel"
   xmlns="urn:schemas-microsoft-com:office:spreadsheet"
   xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">';
 
-		$xml .= '<Worksheet ss:Name="' .  $this->options['title']  . '" ss:Description="' .  $this->options['title']  . '"><ss:Table>';
+          $xml .= '<Worksheet ss:Name="' .  $this->options['title']  . '" ss:Description="' .  $this->options['title']  . '"><ss:Table>';
 
-		$xml .= '<ss:Row>';
-		foreach ( $titles as $value ) {
+          $xml .= '<ss:Row>';
+          foreach ( $titles as $value ) {
 
-			$type = ! is_numeric ($value ['value'] ) ? 'String' : 'Number';
+               $type = ! is_numeric ($value ['value'] ) ? 'String' : 'Number';
 
-			$xml .= '<ss:Cell><Data ss:Type="' . $type . '">' . $value ['value'] . '</Data></ss:Cell>';
-		}
-		$xml .= '</ss:Row>';
+               $xml .= '<ss:Cell><Data ss:Type="' . $type . '">' . $value ['value'] . '</Data></ss:Cell>';
+          }
+          $xml .= '</ss:Row>';
 
-		if (is_array ( $wsData )) {
-			foreach ( $wsData as $row ) {
+          if (is_array ( $wsData )) {
+               foreach ( $wsData as $row ) {
 
-				$xml .= '<ss:Row>';
-				$a = 1;
-				foreach ( $row as $value ) {
+                    $xml .= '<ss:Row>';
+                    $a = 1;
+                    foreach ( $row as $value ) {
 
-					$value ['value'] = strip_tags ( $value ['value'] );
+                         $value ['value'] = strip_tags ( $value ['value'] );
 
-					$type = ! is_numeric ( $value ['value'] ) ? 'String' : 'Number';
-					$xml .= '<ss:Cell><Data ss:Type="' . $type . '">' . $value ['value'] . '</Data></ss:Cell>';
+                         $type = ! is_numeric ( $value ['value'] ) ? 'String' : 'Number';
+                         $xml .= '<ss:Cell><Data ss:Type="' . $type . '">' . $value ['value'] . '</Data></ss:Cell>';
 
-					$a ++;
-				}
-				$xml .= '</ss:Row>';
-			}
+                         $a ++;
+                    }
+                    $xml .= '</ss:Row>';
+               }
 
-		}
+          }
 
-		if (is_array ( $sql )) {
-			$xml .= '<ss:Row>';
-			foreach ( $sql as $value ) {
+          if (is_array ( $sql )) {
+               $xml .= '<ss:Row>';
+               foreach ( $sql as $value ) {
 
-				$type = ! is_numeric ( $value ['value'] ) ? 'String' : 'Number';
+                    $type = ! is_numeric ( $value ['value'] ) ? 'String' : 'Number';
 
-				$xml .= '<ss:Cell><Data ss:Type="' . $type . '">' . $value ['value'] . '</Data></ss:Cell>';
-			}
-			$xml .= '</ss:Row>';
-		}
+                    $xml .= '<ss:Cell><Data ss:Type="' . $type . '">' . $value ['value'] . '</Data></ss:Cell>';
+               }
+               $xml .= '</ss:Row>';
+          }
 
-		$xml .= '</ss:Table></Worksheet>';
+          $xml .= '</ss:Table></Worksheet>';
 
-		$xml .= '</Workbook>';
+          $xml .= '</Workbook>';
 
 
         if (! isset($this->deploy['save'])) {
@@ -147,8 +147,8 @@ class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployI
             echo $xml;
         }
 
-		die ();
-	}
+          die ();
+     }
 
 }
 

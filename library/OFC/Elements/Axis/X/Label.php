@@ -20,44 +20,44 @@
 
 class OFC_Elements_Axis_X_Label extends OFC_Elements_Base
 {
-	function OFC_Elements_Axis_X_Label( $text, $colour, $size, $rotate )
-	{
+     function OFC_Elements_Axis_X_Label( $text, $colour, $size, $rotate )
+     {
         parent::OFC_Elements_Base();
 
-		$this->set_text( $text );
-		$this->set_colour( $colour );
-		$this->set_size( $size );
-		$this->set_rotate( $rotate );
-	}
+          $this->set_text( $text );
+          $this->set_colour( $colour );
+          $this->set_size( $size );
+          $this->set_rotate( $rotate );
+     }
 
-	function set_text( $text )
-	{
-		$this->text = $text;
-	}
+     function set_text( $text )
+     {
+          $this->text = $text;
+     }
 
-	function set_colour( $colour )
-	{
-		$this->colour = $colour;
-	}
+     function set_colour( $colour )
+     {
+          $this->colour = $colour;
+     }
 
-	function set_size( $size )
-	{
-		$this->size = $size;
-	}
+     function set_size( $size )
+     {
+          $this->size = $size;
+     }
 
-	function set_rotate( $rotate )
-	{
-		$this->rotate = $rotate;
-	}
+     function set_rotate( $rotate )
+     {
+          $this->rotate = $rotate;
+     }
 
-	function set_vertical()
-	{
-		$this->rotate = 'vertical';
-	}
+     function set_vertical()
+     {
+          $this->rotate = 'vertical';
+     }
 
-	function set_visible()
-	{
-		$this->visible = true;
-	}
+     function set_visible()
+     {
+          $this->visible = true;
+     }
 }
 

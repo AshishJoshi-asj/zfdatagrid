@@ -25,25 +25,25 @@ class OFC_Elements_Axis extends OFC_Elements_Base
         parent::OFC_Elements_Base();
     }
 
-	function set_colours( $colour, $grid_colour )
-	{
-		$this->set_colour( $colour );
-		$this->set_grid_colour( $grid_colour );
-	}
+     function set_colours( $colour, $grid_colour )
+     {
+          $this->set_colour( $colour );
+          $this->set_grid_colour( $grid_colour );
+     }
 
-	function set_colour( $colour )
-	{
-		$this->colour = $colour;
-	}
+     function set_colour( $colour )
+     {
+          $this->colour = $colour;
+     }
 
-	function set_grid_colour( $colour )
-	{
-		$this->{'grid-colour'} = $colour;
-	}
+     function set_grid_colour( $colour )
+     {
+          $this->{'grid-colour'} = $colour;
+     }
 
-	function set_steps( $steps=1 )
-	{
-		$this->steps = $steps;
-	}
+     function set_steps( $steps=1 )
+     {
+          $this->steps = $steps;
+     }
 }
 

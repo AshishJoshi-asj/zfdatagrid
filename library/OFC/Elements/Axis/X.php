@@ -20,59 +20,59 @@
 
 class OFC_Elements_Axis_X extends OFC_Elements_Axis
 {
-	function OFC_Elements_Axis_X()
+     function OFC_Elements_Axis_X()
     {
         parent::OFC_Elements_Axis();
     }
 
-	function set_stroke( $stroke )
-	{
-		$this->stroke = $stroke;
-	}
+     function set_stroke( $stroke )
+     {
+          $this->stroke = $stroke;
+     }
 
-	function set_tick_height( $height )
-	{
-		$this->{'tick-height'} = $height;
-	}
+     function set_tick_height( $height )
+     {
+          $this->{'tick-height'} = $height;
+     }
 
-	// $o is a boolean
-	function set_offset( $o )
-	{
-		$this->offset = ($o) ? true : false;
-	}
+     // $o is a boolean
+     function set_offset( $o )
+     {
+          $this->offset = ($o) ? true : false;
+     }
 
-	function set_3d( $val )
-	{
-		$this->{'3d'} = $val;
-	}
+     function set_3d( $val )
+     {
+          $this->{'3d'} = $val;
+     }
 
-	function set_labels( $x_axis_labels )
-	{
-		$this->labels = $x_axis_labels;
-	}
+     function set_labels( $x_axis_labels )
+     {
+          $this->labels = $x_axis_labels;
+     }
 
-	function set_range( $min, $max, $steps=1 )
-	{
-		$this->min = $min;
-		$this->max = $max;
-		$this->set_steps( $steps );
-	}
+     function set_range( $min, $max, $steps=1 )
+     {
+          $this->min = $min;
+          $this->max = $max;
+          $this->set_steps( $steps );
+     }
 
-	/**
-	 * helper function to make the examples
-	 * simpler.
-	 */
-	function set_labels_from_array( $a )
-	{
-		$x_axis_labels = new OFC_Elements_Axis_X_Label_Set();
-		$x_axis_labels->set_labels( $a );
+     /**
+      * helper function to make the examples
+      * simpler.
+      */
+     function set_labels_from_array( $a )
+     {
+          $x_axis_labels = new OFC_Elements_Axis_X_Label_Set();
+          $x_axis_labels->set_labels( $a );
 
-		$this->labels = $x_axis_labels;
+          $this->labels = $x_axis_labels;
 
-		if( isset( $this->steps ) )
+          if( isset( $this->steps ) )
         {
-			$x_axis_labels->set_steps( $this->steps );
+               $x_axis_labels->set_steps( $this->steps );
         }
-	}
+     }
 }
 

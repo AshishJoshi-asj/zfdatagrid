@@ -20,36 +20,36 @@
 
 class OFC_Elements_Axis_X_Label_Set
 {
-	function OFC_Elements_Axis_X_Label_Set()
+     function OFC_Elements_Axis_X_Label_Set()
     {
     }
 
-	function set_steps( $steps )
-	{
-		$this->steps = $steps;
-	}
+     function set_steps( $steps )
+     {
+          $this->steps = $steps;
+     }
 
-	/**
-	 * An array of [x_axis_label or string]
-	 */
-	function set_labels( $labels )
-	{
-		$this->labels = $labels;
-	}
+     /**
+      * An array of [x_axis_label or string]
+      */
+     function set_labels( $labels )
+     {
+          $this->labels = $labels;
+     }
 
-	function set_colour( $colour )
-	{
-		$this->colour = $colour;
-	}
+     function set_colour( $colour )
+     {
+          $this->colour = $colour;
+     }
 
-	function set_size( $size )
-	{
-		$this->size = $size;
-	}
+     function set_size( $size )
+     {
+          $this->size = $size;
+     }
 
-	function set_vertical()
-	{
-		$this->rotate = 'vertical';
-	}
+     function set_vertical()
+     {
+          $this->rotate = 'vertical';
+     }
 }
 

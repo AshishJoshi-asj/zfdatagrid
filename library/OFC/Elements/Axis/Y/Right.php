@@ -20,17 +20,17 @@
 
 class OFC_Elements_Axis_Y_Right extends OFC_Elements_Axis_Y
 {
-	function OFC_Elements_Axis_Y_Right()
+     function OFC_Elements_Axis_Y_Right()
     {
         parent::OFC_Elements_Axis_Y();
     }
 
-	/**
-	 * y axis right does NOT control
-	 * grid colour, the left axis does
-	 */
-	function set_grid_colour( $colour )
-	{
-	}
+     /**
+      * y axis right does NOT control
+      * grid colour, the left axis does
+      */
+     function set_grid_colour( $colour )
+     {
+     }
 }
 

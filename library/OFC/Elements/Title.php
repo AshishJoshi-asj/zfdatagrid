@@ -21,11 +21,11 @@
 
 class OFC_Elements_Title extends OFC_Elements_Base
 {
-	function OFC_Elements_Title( $text='' )
-	{
+     function OFC_Elements_Title( $text='' )
+     {
         parent::OFC_Elements_Base();
 
-		$this->text = $text;
-	}
+          $this->text = $text;
+     }
 }
 
