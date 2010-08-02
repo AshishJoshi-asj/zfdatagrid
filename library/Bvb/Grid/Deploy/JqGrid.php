@@ -56,6 +56,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid implements Bvb_Grid_Deploy_DeployI
         '{view}'   => 'ui-icon ui-icon-search',
         '{add}'    => 'ui-icon ui-icon-plus',
     );
+
     /**
      * Track if setAjax() function was called
      *
@@ -105,12 +106,14 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid implements Bvb_Grid_Deploy_DeployI
      * @var array
      */
     private $_jqgParams = array();
+
     /**
      * Bvb_Grid_Deploy_JqGrid own options to apply
      *
      * @var array
      */
     private $_bvbParams = array();
+
     /**
      * Options to apply by navGrid
      * // TODO maybe not needed
@@ -127,6 +130,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid implements Bvb_Grid_Deploy_DeployI
      * @var array
      */
     private $_postCommands = array();
+
     /**
      * List of custon buttons to be shown on navigation bar
      *
@@ -152,6 +156,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid implements Bvb_Grid_Deploy_DeployI
         $this->removeAllParams();
         $this->convertRequestParams();
     }
+
     /**
      * Call this in controller (before any output) to dispatch Ajax requests.
      *
@@ -185,11 +190,13 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid implements Bvb_Grid_Deploy_DeployI
             exit;
         }
     }
+
     public function ajax($id='')
     {
         trigger_error("Bvb_Grid_Deploy_JqGrid::ajax() is deprecated, use setAjax() instead. Function will be removed in later versions.", E_USER_DEPRECATED);
         $this->setAjax($id);
     }
+
     /**
      * Set jQuery Grid options (merging with old options)
      *
@@ -215,6 +222,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid implements Bvb_Grid_Deploy_DeployI
         }
         return $this;
     }
+
     /**
      * Set value to one parameter from jqGrid domain
      *
@@ -228,6 +236,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid implements Bvb_Grid_Deploy_DeployI
         $this->_jqgParams[$var] = $value;
         return $this;
     }
+
     /**
      * Return value of parameter from jqGrid domain
      *
@@ -240,13 +249,13 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid implements Bvb_Grid_Deploy_DeployI
     {
         return isset($this->_jqgParams[$var]) ? $this->_jqgParams[$var] : $default;
     }
+
     /**
      * Set Bvb_Grid_Deploy_JqGrid own options (merging with old options)
      *
      * @param array $options set Bvb_Grid_Deploy_JqGrid
      *
      * @return Bvb_Grid_Deploy_JqGrid
-     *
      */
     public function setBvbParams(array $options)
     {
@@ -265,6 +274,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid implements Bvb_Grid_Deploy_DeployI
         }
         return $this;
     }
+
     /**
      * Set value to one parameter from Bvb_Grid_Deploy_JqGrid domain
      *
@@ -278,6 +288,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid implements Bvb_Grid_Deploy_DeployI
         $this->_bvbParams[$var] = $value;
         return $this;
     }
+
     /**
      * Return value of parameter from Bvb_Grid_Deploy_JqGrid domain
      *
@@ -290,6 +301,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid implements Bvb_Grid_Deploy_DeployI
     {
         return isset($this->_bvbParams[$var]) ? $this->_bvbParams[$var] : $default;
     }
+
     /**
      * Will add passed javascript code inside anonymouse function.
      *
@@ -306,6 +318,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid implements Bvb_Grid_Deploy_DeployI
         $this->_jqgOnInit[] = $javaScript;
         return $this;
     }
+
     /**
      * Removes all javascript code added by calls to setJqgOnInit()
      *
@@ -317,6 +330,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid implements Bvb_Grid_Deploy_DeployI
         $this->_jqgOnInit = array();
         return $this;
     }
+
     /**
      * Add export action buttons to grid
      *
@@ -344,6 +358,7 @@ class Bvb_Grid_Deploy_JqGrid extends Bvb_Grid implements Bvb_Grid_Deploy_DeployI
         }
         return $this;
     }
+
     /**
      * Create javascript adding export button to grid navBar
      *
@@ -386,6 +401,7 @@ function() {
 JS;
         }
     }
+
     /**
      * Build grid. Will output HTML definition for grid and add js/css to view.
      *
@@ -425,6 +441,7 @@ JS;
 
         return $this;
     }
+
     /**
      * Return javascript part of grid
      *
@@ -480,6 +497,7 @@ JS;
         }
         return $js;
     }
+
     /**
      * Return html part of grid
      *
@@ -497,6 +515,7 @@ JS;
 HTML;
         return $html;
     }
+
     /**
      * Return data in JSON format
      *
@@ -552,6 +571,7 @@ HTML;
 
         return Zend_Json::encode($data);
     }
+
     /**
      * Consolidate all settings to know how to render the grid
      *
@@ -612,6 +632,7 @@ HTML;
         // add export buttons
         $this->addExportButtons($this->getExports());
     }
+
     /**
      * Encode Json that may include javascript expressions.
      *
@@ -628,6 +649,7 @@ HTML;
     {
         return Zend_Json::encode($value, false, array('enableJsonExprFinder' => true));
     }
+
     /**
      * Loads jQuery related libraries needed to display jqGrid.
      *
@@ -657,15 +679,17 @@ HTML;
 
         return $this;
     }
+
     /**
      * Return language code
-     * 
+     *
      * @return string
      */
     public function getJqgI18n()
     {
         return $this->getJqgParam('i18n', self::$defaultJqgI18n);
     }
+
     /**
      * Return URL where jqGrid library is located (it has js and css folders under it).
      *
@@ -675,6 +699,7 @@ HTML;
     {
         return self::$defaultJqGridLibPath;
     }
+
     /**
      * Add JavaScript code to be executed when jQuery ready event
      *
@@ -689,7 +714,7 @@ HTML;
         $this->getView()->jQuery()->addOnLoad($js);
         return $this;
     }
-    /////////////////////
+
     /**
      * Return Javascript which will configure jqGrid before it will be loaded.
      *
@@ -703,6 +728,7 @@ HTML;
         // TODO is there benefit to add: \njQuery.jgrid.no_legacy_api = true;
         return "jQuery.jgrid.useJSON = true;";
     }
+
     /**
      * Add action button to navigation bar
      *
@@ -715,6 +741,7 @@ HTML;
         $this->_navButtons[] = $button;
         return $this;
     }
+
     /**
      * Return colModel property for jqGrid
      *
@@ -802,6 +829,7 @@ HTML;
 
         return $model;
     }
+
     /**
      * Return ID for pager HTML element
      *
@@ -811,6 +839,7 @@ HTML;
     {
         return "jqg_pager_" . $this->getId();
     }
+
     /**
      * Return ID for pager HTML element
      *
@@ -820,6 +849,7 @@ HTML;
     {
         return "jqg_" . $this->getId();
     }
+
     /**
      * Add command to chain. See http://www.trirand.com/jqgridwiki/doku.php?id=wiki:methods.
      *
@@ -835,8 +865,8 @@ HTML;
         call_user_func_array(array($cmd, 'cmd'), $args);
         return $cmd;
     }
-    ///////////////////////////////////////////////// Following functions could go to Bvb_Grid
-    /////////////////////////////////////////////////
+
+    // Following functions could go to Bvb_Grid
     /**
      * Contains result of deploy() function.
      *
@@ -868,11 +898,13 @@ HTML;
      * @var string
      */
     protected $_id = 0;
+
     /**
      *
      * @var unknown_type
      */
     protected $_logger = null;
+
     /**
      * Set to true if you want to debug this class
      *
@@ -890,6 +922,7 @@ HTML;
         return $this->getRequest()->isXmlHttpRequest()
             || $this->getParam('_search');
     }
+
     /**
      * Return value used to build HTML element ID attributes
      *
@@ -899,6 +932,7 @@ HTML;
     {
         return $this->_id;
     }
+
     /**
      * Set value used to build HTML element ID attributes
      *
@@ -923,6 +957,7 @@ HTML;
     {
         return $this->setId($id);
     }
+
     /**
      * Get column containing id value of the row
      *
@@ -950,6 +985,7 @@ HTML;
         $this->_logger = new Zend_Log($writter);
         return $this;
     }
+
     /**
      * Log message. Per default the message will be sent to FirePHP.
      *
@@ -963,6 +999,7 @@ HTML;
         $this->_logger->log($message, $priority);
         return $this;
     }
+
     /**
      * Handle parameters send from frontend.
      *
@@ -984,7 +1021,6 @@ HTML;
         }
 
         // we try to convert jqGrid request to be Bvb ctrlParms compatible
-        //////////////////////////////////////////////////////////////////
 
         // add Zend parameters
         $this->setParam('module', $params['module']);
@@ -1015,7 +1051,6 @@ HTML;
             $this->setParam('order', $sidx . '_' . strtoupper($sord));
         }
 
-
         // filters
         // TODO it would be great to have some methods to define more complicated filters
         if (isset($params['_search']) && $params['_search']) {
@@ -1043,6 +1078,7 @@ HTML;
             }
         }
     }
+
     /**
      * Function to format action links
      *
@@ -1095,6 +1131,7 @@ HTML;
         }
         return $html;
     }
+
     /**
      * Converts an associative array to a string of tag attributes.
      *
@@ -1141,6 +1178,7 @@ HTML;
         }
         return $xhtml;
     }
+
     /**
      * Configuration magic
      *
@@ -1174,6 +1212,7 @@ HTML;
         // not a domain property
         parent::__set($var, $value);
     }
+
     /**
      * Will return actual version of this file
      *
@@ -1185,11 +1224,13 @@ HTML;
     }
     // TODO __get()
 }
+
 class JqGridCommand
 {
     protected $_cmds = array(0=>array());
     protected $_cmsStack = 0;
     protected $_grid;
+
     /**
      * Constructor
      *
@@ -1201,6 +1242,7 @@ class JqGridCommand
     {
         $this->_grid = $grid;
     }
+
     /**
      * Build javascript from all commands
      *
@@ -1219,6 +1261,7 @@ class JqGridCommand
             return implode("\n", $stacks);
         }
     }
+
     /**
      * Add command to chain. See http://www.trirand.com/jqgridwiki/doku.php?id=wiki:methods.
      *
@@ -1230,14 +1273,17 @@ class JqGridCommand
     public function cmd($command)
     {
         $params = func_get_args();
+
         // remove command from parameter list
         array_shift($params);
+
         // encode parameters
         $tmp = array();
         foreach ($params as $param) {
             $tmp[] = $this->_grid->encodeJson($param);
         }
         $params = implode(",", $tmp);
+
         // add parameter to stack
         switch ($command) {
             case "trigger":
@@ -1255,6 +1301,7 @@ class JqGridCommand
             default:
                 $this->_cmds[$this->_cmsStack][] = 'jqGrid("' . $command . '",' . $params . ')';
         }
+
         // let us be chainable
         return $this;
     }

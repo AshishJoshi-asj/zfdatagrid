@@ -18,12 +18,9 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-
 class Bvb_Grid_Formatter_Currency implements Bvb_Grid_Formatter_FormatterInterface
 {
-
     protected $_locale = null;
-
 
     public function __construct ($options = array())
     {
@@ -34,10 +31,8 @@ class Bvb_Grid_Formatter_Currency implements Bvb_Grid_Formatter_FormatterInterfa
         }
     }
 
-
     public function format ($value)
     {
-
         if ( $this->_locale === null || ! is_numeric($value) ) {
             return $value;
         }
@@ -45,5 +40,4 @@ class Bvb_Grid_Formatter_Currency implements Bvb_Grid_Formatter_FormatterInterfa
         $currency = new Zend_Currency($this->_locale);
         return $currency->toCurrency($value);
     }
-
 }

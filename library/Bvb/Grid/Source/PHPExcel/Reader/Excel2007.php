@@ -18,14 +18,10 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-
 class Bvb_Grid_Source_PHPExcel_Reader_Excel2007 extends Bvb_Grid_Source_Array
 {
-
-
     public function __construct ($file, $sheet = '', $titles = null)
     {
-
         if ( ! Zend_Loader_Autoloader::autoload('PHPExcel_Reader_Excel2007') ){
             die("You must have PHPExcel installed in order to use this deploy. Please check this page for more information: http://www.phpexcel.net ");
         }
@@ -45,7 +41,6 @@ class Bvb_Grid_Source_PHPExcel_Reader_Excel2007 extends Bvb_Grid_Source_Array
             if ( $hasContent == '' ) {
                 $empty[$key] = $key;
             }
-
         }
 
         foreach ( $result as $c => $hasContent ) {
@@ -57,7 +52,6 @@ class Bvb_Grid_Source_PHPExcel_Reader_Excel2007 extends Bvb_Grid_Source_Array
             }
 
             $result[$c] = $hasContent;
-
         }
 
         foreach ( $result as $key => $value ) {
@@ -69,11 +63,9 @@ class Bvb_Grid_Source_PHPExcel_Reader_Excel2007 extends Bvb_Grid_Source_Array
                 }
             }
 
-
             if ( $r == count($value) ) {
                 unset($result[$key]);
             }
-
         }
 
         if ( $titles === null || count($titles) != count(reset($result)) ) {
@@ -89,5 +81,4 @@ class Bvb_Grid_Source_PHPExcel_Reader_Excel2007 extends Bvb_Grid_Source_Array
         $this->_rawResult = $result;
         $this->_sourceName = 'excel';
     }
-
 }

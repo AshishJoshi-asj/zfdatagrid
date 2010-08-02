@@ -18,7 +18,6 @@
  */
 class Bvb_Grid_Formatter_Array implements Bvb_Grid_Formatter_FormatterInterface
 {
-
     // custom callback function
     protected $_callBack;
 
@@ -31,12 +30,10 @@ class Bvb_Grid_Formatter_Array implements Bvb_Grid_Formatter_FormatterInterface
     // set of fields that shouln't be displayed
     protected $_hiddenFields = array('id', 'hDateTime', 'userID');
 
-
     public function __ ($message)
     {
         return Bvb_Grid_Translator::getInstance()->__($message);
     }
-
 
     public function __construct ($options = array())
     {
@@ -58,10 +55,8 @@ class Bvb_Grid_Formatter_Array implements Bvb_Grid_Formatter_FormatterInterface
         }
     }
 
-
     protected function _shouldDisplay ($fieldName)
     {
-
         // check if it should be hidden
         // @todo: check for fields names with references. e.g. id, ab.id, ucc.id, etc.
         if ( in_array($fieldName, $this->_hiddenFields) ) {
@@ -82,10 +77,8 @@ class Bvb_Grid_Formatter_Array implements Bvb_Grid_Formatter_FormatterInterface
         return true;
     }
 
-
     public function format ($value, $indent = '')
     {
-
         // if callback function specified, return its result
         if ( is_callable($this->_callBack) ) {
             return call_user_func($this->_callBack, $value);
@@ -122,5 +115,4 @@ class Bvb_Grid_Formatter_Array implements Bvb_Grid_Formatter_FormatterInterface
         }
         return $ret;
     }
-
 }

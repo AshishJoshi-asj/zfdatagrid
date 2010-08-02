@@ -18,10 +18,8 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-
 class Bvb_Grid_Translator
 {
-
     protected static $_instance = null;
 
     /**
@@ -29,7 +27,6 @@ class Bvb_Grid_Translator
      * @var Zend_Translate
      */
     protected $_translator = null;
-
 
     public static function getInstance ()
     {
@@ -40,13 +37,11 @@ class Bvb_Grid_Translator
         return self::$_instance;
     }
 
-
     public function setTranslator (Zend_Translate $translator)
     {
         $this->_translator = $translator;
         return $this;
     }
-
 
     public function getTranslator ()
     {
@@ -58,7 +53,6 @@ class Bvb_Grid_Translator
 
         return $this->_translator;
     }
-
 
     public function __ ($message)
     {
@@ -73,7 +67,6 @@ class Bvb_Grid_Translator
         return $message;
     }
 
-
     public function isTranslated ($message)
     {
         if ( strlen($message) == 0 ) {
@@ -87,12 +80,11 @@ class Bvb_Grid_Translator
         return false;
     }
 
-
     final protected function __construct ()
-    {}
-
+    {
+    }
 
     final protected function __clone ()
-    {}
+    {
+    }
 }
-

@@ -18,17 +18,13 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-
 class Bvb_Grid_Source_Csv extends Bvb_Grid_Source_Array
 {
-
-
     protected $_dataSource;
 
     protected $_columns;
 
     protected $_separator;
-
 
     public function __construct ($dataSource, $columns = null, $separator = ',')
     {
@@ -43,18 +39,15 @@ class Bvb_Grid_Source_Csv extends Bvb_Grid_Source_Array
         while (($data = fgetcsv($handle, 1000, $separator)) !== FALSE) {
             $num = count($data);
             if ( null !== $columns ) {
-
                 $field = $columns;
 
                 for ( $c = 0; $c < $num; $c ++ ) {
-
                     if ( $c == 0 ) {
                         $final[$row]['_zfgId'] = $row;
                         $final[$row][$columns[$c]] = $data[$c];
                     } else {
                         $final[$row][$columns[$c]] = $data[$c];
                     }
-
                 }
             } else {
                 if ( $row == 0 ) {
@@ -70,7 +63,6 @@ class Bvb_Grid_Source_Csv extends Bvb_Grid_Source_Array
                         } else {
                             $final[$row - 1][$field[$c]] = $data[$c];
                         }
-
                     }
                 }
             }
@@ -83,7 +75,6 @@ class Bvb_Grid_Source_Csv extends Bvb_Grid_Source_Array
         $this->_separator = $separator;
 
         if ( $this->_columns !== null ) {
-
             array_unshift($this->_columns, 'zfgId');
 
             foreach ( $final as $key => $value ) {
@@ -103,7 +94,6 @@ class Bvb_Grid_Source_Csv extends Bvb_Grid_Source_Array
         return true;
     }
 
-
     public function insert ($table, array $post)
     {
         $fp = fopen($this->_dataSource, 'a');
@@ -112,10 +102,8 @@ class Bvb_Grid_Source_Csv extends Bvb_Grid_Source_Array
         fclose($fp);
     }
 
-
     public function update ($table, array $post, array $condition)
     {
-
         $filename = $this->_dataSource;
 
         $filesize = filesize($filename);
@@ -134,10 +122,8 @@ class Bvb_Grid_Source_Csv extends Bvb_Grid_Source_Array
 
     }
 
-
     public function delete ($table, array $condition)
     {
-
         $filename = $this->_dataSource;
 
         $filesize = filesize($filename);
@@ -151,7 +137,6 @@ class Bvb_Grid_Source_Csv extends Bvb_Grid_Source_Array
         file_put_contents($this->_dataSource, implode($file, ''));
     }
 
-
     public function getRecord ($table, array $condition)
     {
         $position = $condition['_zfgId'];
@@ -161,7 +146,6 @@ class Bvb_Grid_Source_Csv extends Bvb_Grid_Source_Array
 
         return $this->_rawResult[$position];
     }
-
 
     public function hasCrud ()
     {

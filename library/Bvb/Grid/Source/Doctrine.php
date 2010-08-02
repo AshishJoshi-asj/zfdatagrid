@@ -486,7 +486,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_SourceInterface
      *
      * @param array $value
      */
-   public function getSqlExp (array $value, $where = array())
+    public function getSqlExp (array $value, $where = array())
     {
         $return = array();
 
@@ -723,7 +723,7 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_SourceInterface
      *
      * @return array
      */
-     public function buildForm ($fields = array(), $inputsType = array())
+    public function buildForm ($fields = array(), $inputsType = array())
     {
         $table = $this->_queryParts['from']['tableModel'];
         $columns = Doctrine::getTable($table)->getColumns();
@@ -1161,11 +1161,8 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_SourceInterface
         }
     }
 
-
     public function getMassActionsIds ($table)
     {
-
         throw new Exception('Not yet Implemented');
-
     }
 }

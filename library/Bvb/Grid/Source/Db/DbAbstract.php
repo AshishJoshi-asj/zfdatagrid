@@ -20,24 +20,19 @@
 
 abstract class Bvb_Grid_Source_Db_DbAbstract
 {
-
     /**
      * Builds form elements based on field definition
      * @param $elements
      */
     public function buildFormElementsFromArray (array $elements)
     {
-
         $form = array();
 
         foreach ( $elements as $column => $detail ) {
-
-
             $label = $detail['label'];
             $required = isset($detail['required']) ? $detail['required'] : false;
             $default = isset($detail['default']) ? $detail['default'] : '';
             $length = isset($detail['length']) ? $detail['length'] : false;
-
 
             switch ($detail['type']) {
 
@@ -80,5 +75,4 @@ abstract class Bvb_Grid_Source_Db_DbAbstract
 
         return $form;
     }
-
 }

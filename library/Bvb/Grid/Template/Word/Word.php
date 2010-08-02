@@ -18,11 +18,8 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-
-
 class Bvb_Grid_Template_Word_Word implements Bvb_Grid_Template_Word_WordInterface
 {
-
     /**
      * [PT] A colspan das td's. Este valor é recebido pelo classe mão.
      *
@@ -46,13 +43,11 @@ class Bvb_Grid_Template_Word_Word implements Bvb_Grid_Template_Word_WordInterfac
      */
     public $i;
 
-
     /**
      * Options
      * @var array
      */
     public $options;
-
 
     public function globalStart ()
     {
@@ -208,7 +203,6 @@ table.MsoNormalTable
 <tr><td colspan=\"{$this->options['colspan']}\" style='border-top:none; color:#FFFFFF; border-left:solid black 1.0pt; border-bottom:solid black 1.0pt;border-right:solid black 1.0pt; padding:3px; background:#666;'> <p  style='text-align:center' class=MsoNormal><span style='font-size:10.0pt;  font-family:Helvetica; '>{$this->options['title']}<o:p></o:p></span></p>
   </td></tr>";
 
-
         return $xml;
     }
 
@@ -227,13 +221,11 @@ table.MsoNormalTable
         return "</tr>";
     }
 
-
     public function titlesLoop ()
     {
         return " <td style='border:solid black 1.0pt;background-color:black;color:#FFFFFF;padding:5px'>  <p align=center style='text-align:center'><b><span style='font-size:10.0pt;'>{{value}}<o:p></o:p></span></b></p>
   </td>";
     }
-
 
     public function noResults()
     {
@@ -241,14 +233,11 @@ table.MsoNormalTable
   </td></tr>";
     }
 
-
-
     public function hRow()
     {
         return "<tr><td colspan=\"{$this->options['colspan']}\" style='border-top:none; color:#FFFFFF; border-left:solid black 1.0pt; border-bottom:solid black 1.0pt;border-right:solid black 1.0pt; padding:3px; background:#666;'> <p  style='text-align:center' class=MsoNormal><span style='font-size:10.0pt;  font-family:Helvetica; '>{{value}}<o:p></o:p></span></p>
   </td></tr>";
     }
-
 
     public function loopStart ()
     {
@@ -257,26 +246,22 @@ table.MsoNormalTable
         return "<tr>";
     }
 
-
     public function loopEnd ()
     {
         return "</tr>";
     }
 
-
     public function loopLoop ()
     {
-
         if($this->i%2)
         {
             return "<td style='border-top:none;border-left:solid black 1.0pt;border-bottom:solid black 1.0pt; border-right:solid black 1.0pt; background:#E0E0E0;padding:3px'> <p><span><span style='font-size:8.0pt;font-family:Helvetica;'>{{value}}<o:p></o:p></span></p> </td>";
 
         }else{
             return "<td style='border-top:none;border-left:solid black 1.0pt; border-bottom:solid black 1.0pt;border-right:solid black 1.0pt; padding:3px'> <p class=MsoNormal><span style='font-size:8.0pt; font-family:Helvetica;'>{{value}}<o:p></o:p></span></p> </td>";
-
         }
-
     }
+
     public function sqlExpStart ()
     {
         return "<tr>";
@@ -292,6 +277,4 @@ table.MsoNormalTable
         return "<td  style='border-top:none;border-left:none;  border-bottom:solid black 1.0pt;border-right:solid black 1.0pt; padding:5px;'> <p><span style='font-size:8.0pt; font-family:Helvetica;'>{{value}}<o:p></o:p></span></p>
   </td>";
     }
-
 }
-

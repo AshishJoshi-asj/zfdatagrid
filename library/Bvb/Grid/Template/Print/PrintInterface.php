@@ -18,76 +18,33 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-
-
 interface  Bvb_Grid_Template_Print_PrintInterface
-
 {
-
     public function globalStart ();
-
-
 
     public function globalEnd ();
 
-
-
     public function header ();
-
-
 
     public function titlesStart ();
 
-
-
     public function titlesEnd ();
-
-
-
 
     public function titlesLoop ();
 
-
-
-
     public function noResults();
-
-
-
-
 
     public function hRow();
 
-
-
-
     public function loopStart ();
-
-
-
 
     public function loopEnd ();
 
-
-
-
     public function loopLoop ();
-
-
-
 
     public function sqlExpStart ();
 
-
-
-
     public function sqlExpEnd ();
 
-
-
-
     public function sqlExpLoop ();
-
-
 }
-

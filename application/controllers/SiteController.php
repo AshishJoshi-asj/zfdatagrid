@@ -20,9 +20,7 @@ function filterContinent ($id, $value, $select)
 
 class SiteController extends Zend_Controller_Action
 {
-
     private $_db;
-
 
     /**
      * If a action don't exist, just redirect to the basic
@@ -36,10 +34,8 @@ class SiteController extends Zend_Controller_Action
         return false;
     }
 
-
     /**
      * I think this is needed for something. can't remember
-     *
      */
     public function init ()
     {
@@ -53,13 +49,11 @@ class SiteController extends Zend_Controller_Action
 
     /**
      * Same as __call
-     *
      */
     public function indexAction ()
     {
         $this->_forward('basic');
     }
-
 
     public function formAction ()
     {
@@ -85,16 +79,13 @@ class SiteController extends Zend_Controller_Action
         $this->render('index');
     }
 
-
     /**
      * Show the source code for this controller
-     *
      */
     public function codeAction ()
     {
         $this->render('code');
     }
-
 
     /**
      * Simplify the datagrid creation process
@@ -114,14 +105,12 @@ class SiteController extends Zend_Controller_Action
         return $grid;
     }
 
-
     /**
      * A simple usage of advanced filters. Every time you change a filter, the system automatically
      *runs a query to the others filters, making sure they don't allow you to filter for a record that is not in the database
      */
     public function filtersAction ()
     {
-
         $grid = $this->grid();
 
         $grid->setSource(new Bvb_Grid_Source_Zend_Select($this->_db->select()->from('Country', array('Name', 'Continent', 'Population', 'LifeExpectancy', 'GovernmentForm', 'HeadOfState'))));
@@ -134,9 +123,7 @@ class SiteController extends Zend_Controller_Action
         $filters->addFilter('HeadOfState');
         $filters->addFilter('Population', array('render' => 'number'));
 
-
         $grid->addFilters($filters);
-
 
         $grid->addExternalFilter('new_filter', 'people');
         $grid->addExternalFilter('filter_country', 'filterContinent');
@@ -145,10 +132,8 @@ class SiteController extends Zend_Controller_Action
         $this->render('index');
     }
 
-
     public function dateAction ()
     {
-
         $grid = $this->grid();
 
         $grid->setSource(new Bvb_Grid_Source_Zend_Select($this->_db->select()->from('bugs', array('bug_status', 'status', 'date', 'time'))));
@@ -162,15 +147,12 @@ class SiteController extends Zend_Controller_Action
         $this->render('index');
     }
 
-
     /**
      * Adding extra columns to a datagrid. They can be at left or right.
      * Also notice that you can use fields values to populate the fields by surrounding the field name with {{}}
-     *
      */
     public function extraAction ()
     {
-
         $grid = $this->grid();
 
         $select = $this->_db->select()->from(array('c' => 'Country'), array('country' => 'Name', 'Continent', 'Population', 'GovernmentForm', 'HeadOfState'))->join(array('ct' => 'City'), 'c.Capital = ct.ID', array('city' => 'Name'));
@@ -193,15 +175,12 @@ class SiteController extends Zend_Controller_Action
 
         $grid->addExtraColumns($right, $left);
 
-
         $this->view->pages = $grid->deploy();
         $this->render('index');
     }
 
-
     public function csvAction ()
     {
-
         $grid = $this->grid();
         $grid->setSource(new Bvb_Grid_Source_Csv('media/files/grid.csv'));
         $grid->setSqlExp(array('Population' => array('functions' => array('SUM'), 'value' => 'Population')));
@@ -211,28 +190,22 @@ class SiteController extends Zend_Controller_Action
         $form->setAdd(1)->setEdit(1)->setDelete(1)->setAddButton(1);
         #$form->addElement('text','my');
 
-
-
         $grid->setForm($form);
 
         $this->view->pages = $grid->deploy();
         $this->render('index');
     }
 
-
     public function jsonAction ()
     {
-
         $grid = $this->grid();
         $grid->setSource(new Bvb_Grid_Source_Json('media/files/json.json', 'rows'));
         $this->view->pages = $grid->deploy();
         $this->render('index');
     }
 
-
     public function feedAction ()
     {
-
         $grid = $this->grid();
         $grid->setSource(new Bvb_Grid_Source_Xml('http://zfdatagrid.com/feed/', 'channel,item'));
 
@@ -247,7 +220,6 @@ class SiteController extends Zend_Controller_Action
         $this->render('index');
     }
 
-
     /**
      * The 'most' basic example.
      */
@@ -255,18 +227,15 @@ class SiteController extends Zend_Controller_Action
     {
         $grid = $this->grid();
 
-
         $this->view->pages = $grid->deploy();
         $this->render('index');
     }
-
 
     /**
      * The 'most' basic example.
      */
     public function basicAction ()
     {
-
         $grid = $this->grid();
         $select = $this->_db->select()->from('Country', array('Name', 'Continent', 'Population', 'LocalName', 'GovernmentForm'));
         #$grid->setSource(new Bvb_Grid_Source_Zend_Select($select));
@@ -294,7 +263,6 @@ class SiteController extends Zend_Controller_Action
         $this->render('index');
     }
 
-
     public function multiAction ()
     {
         $grid = $this->grid('a');
@@ -312,10 +280,8 @@ class SiteController extends Zend_Controller_Action
         $this->render('index');
     }
 
-
     public function detailAction ()
     {
-
         $grid = $this->grid();
         $select = $this->_db->select()->from('Country');
         $grid->query($select);
@@ -331,28 +297,23 @@ class SiteController extends Zend_Controller_Action
 
     public function columnsAction ()
     {
-
         $grid = $this->grid();
         $select = $this->_db->select()->from('Country', array('Name', 'Continent', 'Population', 'LocalName', 'GovernmentForm'));
         #$grid->setSource(new Bvb_Grid_Source_Zend_Select($select));
         $grid->query($select);
-
 
         $rows = new Bvb_Grid_Extra_Rows();
         $rows->addRow('beforeHeader', array('', array('colspan' => 1, 'class' => 'myclass', 'content' => 'my content'), array('colspan' => 2, 'class' => 'myotherclass', 'content' => 'some '), array('colspan' => 1, 'class' => 'myclass', 'content' => 'flowers:) ')));
         $rows->addRow('beforePagination', array(array('colspan' => 5, 'content' => "This is an extra row added before pagination")));
         $grid->addExtraRows($rows);
 
-
         $this->view->pages = $grid->deploy();
 
         $this->render('index');
     }
 
-
     public function conditionalAction ()
     {
-
         $grid = $this->grid();
         $select = $this->_db->select()->from('Country');
         $grid->query($select);
@@ -360,7 +321,6 @@ class SiteController extends Zend_Controller_Action
         $grid->setAjax('barcelos');
         $grid->setClassCellCondition('Population', "'{{Population}}' > 200000", "red", 'green');
         $grid->setClassRowCondition("'{{Population}}' > 20000", "green", 'red');
-
 
         $grid->setNumberRecordsPerPage(15);
         $grid->setPaginationInterval(array(10 => 10, 20 => 20, 50 => 50, 100 => 100));
@@ -374,10 +334,8 @@ class SiteController extends Zend_Controller_Action
         $this->render('index');
     }
 
-
     public function massAction ()
     {
-
         if ( $this->getRequest()->isPost() ) {
             echo "<pre>";
             print_r($this->_getAllParams());
@@ -387,7 +345,6 @@ class SiteController extends Zend_Controller_Action
         $grid = $this->grid();
         $select = $this->_db->select()->from('Country');
         $grid->query($select);
-
 
         $grid->setMassActions(array(array('url' => $grid->getUrl(), 'caption' => 'Remove (Nothing will happen)', 'confirm' => 'Are you sure?'), array('url' => $grid->getUrl() . '/nothing/happens', 'caption' => 'Some other action', 'confirm' => 'Another confirmation message?')));
 
@@ -409,7 +366,7 @@ class SiteController extends Zend_Controller_Action
         $source = new Bvb_Grid_Source_Array($array, array('name', 'age', 'sex'));
         $source->setPrimaryKey(array('age'));
 
-         $grid->setDetailColumns(array('age','name'));
+        $grid->setDetailColumns(array('age','name'));
 
         $grid->setSource($source);
 
@@ -419,7 +376,6 @@ class SiteController extends Zend_Controller_Action
 
         $this->render('index');
     }
-
 
     /**
      * The 'most' basic example.
@@ -437,7 +393,6 @@ class SiteController extends Zend_Controller_Action
         $this->render('index');
     }
 
-
     /**
      * The 'most' basic example.
      */
@@ -448,13 +403,10 @@ class SiteController extends Zend_Controller_Action
         $grid->setSource(new Bvb_Grid_Source_PHPExcel_Reader_Excel2007(getcwd() . '/1.xlsx', 'Sheet1'));
         $this->view->pages = $grid->deploy();
         $this->render('index');
-
     }
-
 
     public function joinsAction ()
     {
-
         $grid = $this->grid();
         $select = $this->_db->select()->from(array('c' => 'Country'), array('country' => 'Name', 'Code', 'Continent', 'Population', 'GovernmentForm', 'HeadOfState'))->join(array('ct' => 'City'), 'c.Capital = ct.ID', array('city' => 'Name'));
         $grid->query($select);
@@ -464,15 +416,12 @@ class SiteController extends Zend_Controller_Action
         $form->setFieldsBasedOnQuery(true);
         $grid->setForm($form);
 
-
         $this->view->pages = $grid->deploy();
         $this->render('index');
     }
 
-
     public function unionAction ()
     {
-
         $grid = $this->grid();
 
         $sql1 = $this->_db->select()->from('Country', array('Continent', 'Code'))->limit(12);
@@ -486,13 +435,11 @@ class SiteController extends Zend_Controller_Action
         print_r($t);
         die();
 
-
         $grid->query($select);
 
         $this->view->pages = $grid->deploy();
         $this->render('index');
     }
-
 
     /**
      * Using a model
@@ -504,7 +451,6 @@ class SiteController extends Zend_Controller_Action
         $grid->setColumnsHidden(array('bug_id', 'time', 'verified_by'));
 
         $grid->updateColumn('date', array('format' => array('date', array('date_format' => "d-MM-Y"))));
-
 
         $form = new Bvb_Grid_Form('My_Form');
 
@@ -520,10 +466,8 @@ class SiteController extends Zend_Controller_Action
         $this->render('index');
     }
 
-
     /**
      * This demonstrates how easy it is for us to use our own templates (Check the grid function at the page top)
-     *
      */
     public function templateAction ()
     {
@@ -534,14 +478,11 @@ class SiteController extends Zend_Controller_Action
         $this->render('index');
     }
 
-
     /**
      * This example allow you to create an horizontal row, for every distinct value from a field
-     *
      */
     public function hrowAction ()
     {
-
         $grid = $this->grid();
         $grid->setSource(new Bvb_Grid_Source_Zend_Select($this->_db->select()->from('Country', array('Name', 'Continent', 'Population', 'LifeExpectancy', 'GovernmentForm', 'HeadOfState'))->limit(10)));
         $grid->setNoFilters(1);
@@ -558,7 +499,6 @@ class SiteController extends Zend_Controller_Action
 
         $grid->setSqlExp(array('Population' => array('functions' => array('SUM'))));
 
-
         $extra = new Bvb_Grid_Extra_Column();
         $extra->position('right')->name('Right')->decorator("<input class='input_p'type='text' value=\"{{Population}}\" size=\"3\" name='number[]'>");
 
@@ -567,19 +507,15 @@ class SiteController extends Zend_Controller_Action
 
         $grid->addExtraColumns($extra, $esquerda);
 
-
         $this->view->pages = $grid->deploy();
         $this->render('index');
     }
 
-
     public function ofcAction ()
     {
-
         $this->view->graphs = $allowedGraphs = array('line', 'bar', 'bar_glass', 'bar_3d', 'bar_filled', 'pie', 'mixed');
 
         $type = $this->_getParam('type');
-
 
         if ( ! in_array($type, $allowedGraphs) ) {
             $type = 'bar_glass';
@@ -589,7 +525,6 @@ class SiteController extends Zend_Controller_Action
 
         $grid = $this->grid();
         $grid->setExport(array('ofc'));
-
 
         if ( $type == 'pie' ) {
             $grid->addValues('Population', array('set_colours' => array('#000000', '#999999', '#BBBBBB', '#FFFFFF')));
@@ -611,14 +546,11 @@ class SiteController extends Zend_Controller_Action
         $this->render('index');
     }
 
-
     /**
      * If you don't like to work with array when adding columns, you can work by dereferencing objects
-     *
      */
     public function columnAction ()
     {
-
         $grid = $this->grid();
         $grid->setSource(new Bvb_Grid_Source_Zend_Select($this->_db->select()->from(array('c' => 'Country'), array('Country' => 'Name', 'Continent', 'Population', 'GovernmentForm', 'HeadOfState'))->join(array('ct' => 'City'), 'c.Capital = ct.ID', array('Capital' => 'Name'))));
         $grid->setNumberRecordsPerPage(15);
@@ -646,5 +578,4 @@ class SiteController extends Zend_Controller_Action
         $this->view->pages = $grid->deploy();
         $this->render('index');
     }
-
 }

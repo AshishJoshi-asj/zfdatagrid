@@ -20,7 +20,6 @@
 
 class Bvb_Grid_Formatter_Date implements Bvb_Grid_Formatter_FormatterInterface
 {
-
     protected $locale = null;
 
     protected $date_format = null;
@@ -64,5 +63,4 @@ class Bvb_Grid_Formatter_Date implements Bvb_Grid_Formatter_FormatterInterface
         }
         return $date->toString($this->date_format, $this->type, $this->locale);
     }
-
 }

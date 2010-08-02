@@ -18,8 +18,6 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-
-
 class Bvb_Grid_Extra_Column
 {
     public   $_field;
@@ -29,5 +27,4 @@ class Bvb_Grid_Extra_Column
         $this->_field[$name] = $args[0];
         return $this;
     }
-
 }

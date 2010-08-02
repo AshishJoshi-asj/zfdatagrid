@@ -2,7 +2,6 @@
 
 /**
  *
- *
  * LICENSE
  *
  * This source file is subject to the GNU General Public License 2.0
@@ -19,22 +18,18 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-
 class My_Template_Table_Outside extends Bvb_Grid_Template_Table_Table
 {
-
     public $ic;
 
     public $insideLoop;
 
     public $go = 0;
 
-
     public function globalStart()
     {
         return "<table id=\"newGrid\" width=\"100%\"  align=\"center\" cellspacing=\"1\" >";
     }
-
 
     public function loopStart($values)
     {
@@ -42,12 +37,9 @@ class My_Template_Table_Outside extends Bvb_Grid_Template_Table_Table
         return "<tr  >";
     }
 
-
     public function loopLoop()
     {
         $class = $this->i % 2 ? "alt" : "";
         return "<td  class=\"$class {{class}}\" >{{value}}&nbsp;</td>";
     }
-
 }
-

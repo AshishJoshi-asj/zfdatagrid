@@ -18,10 +18,8 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-
 class Bvb_Grid_Filters_Render_Table_Number extends Bvb_Grid_Filters_Render_RenderAbstract
 {
-
     public function getChilds ()
     {
         return array('from', 'to');
@@ -36,12 +34,10 @@ class Bvb_Grid_Filters_Render_Table_Number extends Bvb_Grid_Filters_Render_Rende
     {
         $this->removeAttribute('id');
 
-
         if(!$this->hasAttribute('style'))
         $this->setAttribute('style','width:50px !important;');
 
         return '<span>'.$this->__('From:')."</span>".$this->getView()->formText($this->getFieldName().'[from]', $this->getDefaultValue('from'), array_merge($this->getAttributes(),array('id'=>'filter_'.$this->getFieldName().'_from')))
         ."<br><span>".$this->__('To:')."</span>".$this->getView()->formText($this->getFieldName().'[to]', $this->getDefaultValue('to'), array_merge($this->getAttributes(),array('id'=>'filter_'.$this->getFieldName().'_to')));
     }
-
 }

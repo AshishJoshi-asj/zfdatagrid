@@ -20,7 +20,6 @@
 
 class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInterface
 {
-
     public static $url;
 
     /**
@@ -30,13 +29,11 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
      */
     protected $_deploymentContent = null;
 
-
     /**
      * Chart Type
      * @var string
      */
     protected $_type = 'Bar';
-
 
     /**
      * Labels for X Axis
@@ -51,7 +48,6 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
      * Options for x Labels
      * @var unknown_type
      */
-
     protected $_xLabelsOptions = array();
 
     /**
@@ -59,7 +55,6 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
      * @var array
      */
     protected $_typeArgs = array();
-
 
     /**
      * Values to show
@@ -91,13 +86,11 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
      */
     protected $_chartOptions = array();
 
-
     /**
      * Char Dimensions
      * @var array
      */
     protected $_chartDimensions = array('x' => 200, 'y' => 120);
-
 
     /**
      * Chart Id
@@ -129,7 +122,6 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
     */
     public function __construct ($options)
     {
-
         $this->options = $options;
 
         if ( ! Zend_Loader_Autoloader::autoload('OFC_Chart') ) {
@@ -138,7 +130,6 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
 
         parent::__construct($options);
     }
-
 
     /**
      * To use multiples instances per page
@@ -207,7 +198,6 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
             $graph->set_x_legend( $x_legend );
         }
 
-
         $min = 0;
         $max = 0;
 
@@ -229,14 +219,12 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
                 }
                 unset($support);
 
-
                 $options = $this->_chartOptionsValues[$value];
                 if ( isset($options['chartType']) ) {
                     $this->setChartType($options['chartType']);
                 }
 
                 $bar = new $this->_type();
-
 
                 foreach ( $options as $key => $prop ) {
                     $bar->$key($prop);
@@ -257,7 +245,6 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
                 $graph->add_element($bar);
 
             } elseif ( is_string($value) && isset($result[$value]) ) {
-
 
                 $options = $this->_chartOptionsValues[$value];
                 if ( isset($options['chartType']) ) {
@@ -302,7 +289,6 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
         $y = new OFC_Elements_Axis_Y();
         $y->set_range($min, $max, ceil($max / 4));
 
-
         $graph->add_y_axis($y);
 
         $final = $graph->toPrettyString();
@@ -310,7 +296,6 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
         if ( ! is_string($this->_chartId) ) {
             $this->_chartId = 'chart_' . rand(1, 10000);
         }
-
 
          $script = '
         swfobject.embedSWF(
@@ -349,13 +334,11 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
         return $this;
     }
 
-
     public function setXLabels ($labels, $options = array())
     {
         $this->_xLabels = $labels;
         $this->_xLabelsOptions = $options;
     }
-
 
     public function setChartType ($type, $args = array())
     {
@@ -364,7 +347,6 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
         $this->_typeArgs = $args;
         return $this;
     }
-
 
     public function setValues ($values, $options = array())
     {
@@ -380,7 +362,6 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
         return $this;
     }
 
-
     public function addValues ($values, $options = array())
     {
         if ( ! is_string($values) ) {
@@ -394,12 +375,10 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
         return $this;
     }
 
-
     public function getValues ($name)
     {
         return isset($this->_values[$name]) ? $this->_values[$name] : false;
     }
-
 
     public function setChartDimensions ($x, $y)
     {
@@ -407,13 +386,11 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
         return $this;
     }
 
-
     public function setTitle ($title)
     {
         $this->_title = $title;
         return $this;
     }
-
 
     public function setTitleStyle ($style)
     {
@@ -421,12 +398,10 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
         return $this;
     }
 
-
     public function setChartOptions (array $options = array())
     {
         $this->_chartOptions = $options;
     }
-
 
     public function __toString ()
     {
@@ -436,19 +411,16 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
         return $this->_deploymentContent;
     }
 
-
     public function setChartId ($id)
     {
         $htis->_id = $id;
         return $this;
     }
 
-
     public function getChartId ()
     {
         return $this->_chartId;
     }
-
 
     public function setFilesLocation (array $locations)
     {
@@ -456,12 +428,10 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
         return $this;
     }
 
-
     public function getFilesLocation ()
     {
         return $this->_filesLocation;
     }
-
 
     public function setFlashParams ($flashParams)
     {
@@ -484,7 +454,6 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
 
     protected function _applyConfigOptions ($options)
     {
-
         if ( isset($options['files']['js']) ) {
             $this->_filesLocation['js'] = $options['files']['js'];
         }
@@ -525,9 +494,4 @@ class Bvb_Grid_Deploy_Ofc extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
             $this->setXLegend($options['xLegend']['text'], $options['xLegend']['style']);
         }
     }
-
 }
-
-
-
-

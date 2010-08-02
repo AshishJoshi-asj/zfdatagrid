@@ -20,7 +20,6 @@
 
 abstract class Bvb_Grid_Filters_Render_RenderAbstract implements Bvb_Grid_Filters_Render_RenderInterface
 {
-
     protected $_defaultValue;
 
     protected $_view;
@@ -35,7 +34,6 @@ abstract class Bvb_Grid_Filters_Render_RenderAbstract implements Bvb_Grid_Filter
 
     protected $_select;
 
-
     /**
      * @return the $_view
      */
@@ -44,18 +42,15 @@ abstract class Bvb_Grid_Filters_Render_RenderAbstract implements Bvb_Grid_Filter
         return $this->_view;
     }
 
-
     public function setTranslator ($translate)
     {
         $this->_translator = $translate;
     }
 
-
     public function getTranslator ()
     {
         return $this->_translator;
     }
-
 
     public function __ ($name)
     {
@@ -63,7 +58,6 @@ abstract class Bvb_Grid_Filters_Render_RenderAbstract implements Bvb_Grid_Filter
 
         return $name;
     }
-
 
     /**
      * @return the $_attributes
@@ -73,12 +67,10 @@ abstract class Bvb_Grid_Filters_Render_RenderAbstract implements Bvb_Grid_Filter
         return $this->_attributes;
     }
 
-
     public function getAttribute ($name)
     {
         return isset($this->_attributes[$name]) ? $this->_attributes[$name] : null;
     }
-
 
     /**
      * @param $_view the $_view to set
@@ -88,7 +80,6 @@ abstract class Bvb_Grid_Filters_Render_RenderAbstract implements Bvb_Grid_Filter
         $this->_view = $_view;
     }
 
-
     /**
      * @param $_attributes the $_attributes to set
      */
@@ -97,7 +88,6 @@ abstract class Bvb_Grid_Filters_Render_RenderAbstract implements Bvb_Grid_Filter
         $this->_attributes = $_attributes;
         return $this;
     }
-
 
     public function setAttribute ($name, $value)
     {
@@ -110,7 +100,6 @@ abstract class Bvb_Grid_Filters_Render_RenderAbstract implements Bvb_Grid_Filter
         return isset($this->_attributes[$name])?true:false;
     }
 
-
     public function removeAttribute ($name)
     {
         if ( isset($this->_attributes[$name]) ) {
@@ -120,19 +109,16 @@ abstract class Bvb_Grid_Filters_Render_RenderAbstract implements Bvb_Grid_Filter
         return $this;
     }
 
-
     public function setValues (array $options)
     {
         $this->_values = $options;
         return $this;
     }
 
-
     public function getValues ()
     {
         return $this->_values;
     }
-
 
     public function setDefaultValue ($value, $field = '')
     {
@@ -144,7 +130,6 @@ abstract class Bvb_Grid_Filters_Render_RenderAbstract implements Bvb_Grid_Filter
         return $this;
     }
 
-
     public function getDefaultValue ($name = '')
     {
         if ( $name != '' ) {
@@ -153,25 +138,21 @@ abstract class Bvb_Grid_Filters_Render_RenderAbstract implements Bvb_Grid_Filter
         return $this->_defaultValue;
     }
 
-
     public function setFieldName ($name)
     {
         $this->_fieldName = $name;
         return $this;
     }
 
-
     public function getFieldName ()
     {
         return $this->_fieldName;
     }
 
-
     public function normalize ($value, $part = '')
     {
         return $value;
     }
-
 
     public function setSelect ($select)
     {
@@ -179,18 +160,15 @@ abstract class Bvb_Grid_Filters_Render_RenderAbstract implements Bvb_Grid_Filter
         return $this;
     }
 
-
     public function getSelect ()
     {
         return $this->_select;
     }
 
-
     public function hasConditions ()
     {
         return true;
     }
-
 
     public function buildQuery (array $filter)
     {

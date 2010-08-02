@@ -18,22 +18,17 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-
-
 class Bvb_Grid_Template_Wordx_Wordx
 {
-
     public $colSpan;
 
     public $wordOptions;
 
     public $options;
 
-
     public function __construct ($options = array())
     {
         $this->wordOptions = $options;
-
     }
 
     public function info()
@@ -48,8 +43,6 @@ class Bvb_Grid_Template_Wordx_Wordx
 
         return $pdf;
     }
-
-
 
     public function globalStart ()
     {
@@ -96,8 +89,6 @@ class Bvb_Grid_Template_Wordx_Wordx
 </w:document>';
     }
 
-
-
     public function logo()
     {
     	$arrayLogo = explode("/",@$this->options['logo']);
@@ -107,11 +98,8 @@ class Bvb_Grid_Template_Wordx_Wordx
 </Relationships>';
     }
 
-
-
     public function header()
     {
-
         if (isset($this->options ['logo']) && is_file ( $this->options ['logo'] ))
         {
          $arrayLogo = explode("/",@$this->options['logo']);
@@ -120,7 +108,6 @@ class Bvb_Grid_Template_Wordx_Wordx
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
 <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/'.end($arrayLogo).'"/>
 </Relationships>';
-
 
             $header = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:hdr xmlns:mv="urn:schemas-microsoft-com:mac:vml"
@@ -230,9 +217,7 @@ class Bvb_Grid_Template_Wordx_Wordx
 	</w:p>
 </w:hdr>';
 
-
         }else{
-
 
             $header = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:hdr xmlns:mv="urn:schemas-microsoft-com:mac:vml"
@@ -291,11 +276,8 @@ class Bvb_Grid_Template_Wordx_Wordx
 
         }
 
-
         return $header;
     }
-
-
 
     public function titlesStart ()
     {
@@ -309,8 +291,6 @@ class Bvb_Grid_Template_Wordx_Wordx
     {
         return '</w:tr>';
     }
-
-
 
     public function titlesLoop ()
     {
@@ -339,9 +319,6 @@ class Bvb_Grid_Template_Wordx_Wordx
 				</w:tc>';
     }
 
-
-
-
     public function noResults()
     {
         return '<w:tr w:rsidR="0034373E">
@@ -364,10 +341,8 @@ class Bvb_Grid_Template_Wordx_Wordx
 			</w:tr>';
     }
 
-
     public function hRow ()
     {
-
         return '<w:tr w:rsidR="0034373E">
 				<w:tc>
 					<w:tcPr>
@@ -388,8 +363,6 @@ class Bvb_Grid_Template_Wordx_Wordx
 			</w:tr>';
     }
 
-
-
     public function loopStart ()
     {
         return '<w:tr w:rsidR="006C2FDC">
@@ -397,7 +370,6 @@ class Bvb_Grid_Template_Wordx_Wordx
 					<w:cnfStyle w:val="000000100000" />
 				</w:trPr>';
     }
-
 
     public function loopEnd ()
     {
@@ -421,8 +393,6 @@ class Bvb_Grid_Template_Wordx_Wordx
 				</w:tc>';
     }
 
-
-
     public function sqlExpStart ()
     {
         return '<w:tr w:rsidR="006C2FDC" w:rsidTr="0034373E">
@@ -431,14 +401,10 @@ class Bvb_Grid_Template_Wordx_Wordx
 				</w:trPr>';
     }
 
-
-
     public function sqlExpEnd ()
     {
         return '</w:tr>';
     }
-
-
 
     public function sqlExpLoop ()
     {
@@ -460,12 +426,8 @@ class Bvb_Grid_Template_Wordx_Wordx
 				</w:tc>';
     }
 
-
-
     public function footer()
     {
-
-
         return  '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:ftr xmlns:mv="urn:schemas-microsoft-com:mac:vml"
 	xmlns:mo="http://schemas.microsoft.com/office/mac/office/2008/main"
@@ -556,6 +518,4 @@ class Bvb_Grid_Template_Wordx_Wordx
 	</w:p>
 </w:ftr>';
     }
-
 }
-

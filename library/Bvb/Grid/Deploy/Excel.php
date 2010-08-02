@@ -18,24 +18,20 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployInterface {
-
-
+class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployInterface
+{
     public function __construct ($options)
     {
-
         $this->_setRemoveHiddenFields(true);
         parent::__construct($options);
-
 
         if ( ! in_array($this->_deployName, $this->_export) && ! array_key_exists($this->_deployName, $this->_export) ) {
             throw new Bvb_Grid_Exception($this->__("You dont' have permission to export the results to this format"));
         }
     }
 
-
-    public function deploy() {
-
+    public function deploy()
+    {
           $this->setRecordsPerPage ( 0 );
 
           parent::deploy ();
@@ -48,7 +44,6 @@ class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployI
           $titles = parent::_buildTitles ();
           $wsData = parent::_buildGrid ();
           $sql = parent::_buildSqlExp ();
-
 
           if (is_array ( $wsData ) && count($wsData)>65569) {
               throw new Bvb_Grid_Exception('Maximum number of records allowed is 65569');
@@ -63,7 +58,6 @@ class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployI
 
           $xml .= '<ss:Row>';
           foreach ( $titles as $value ) {
-
                $type = ! is_numeric ($value ['value'] ) ? 'String' : 'Number';
 
                $xml .= '<ss:Cell><Data ss:Type="' . $type . '">' . $value ['value'] . '</Data></ss:Cell>';
@@ -72,7 +66,6 @@ class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployI
 
           if (is_array ( $wsData )) {
                foreach ( $wsData as $row ) {
-
                     $xml .= '<ss:Row>';
                     $a = 1;
                     foreach ( $row as $value ) {
@@ -92,7 +85,6 @@ class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployI
           if (is_array ( $sql )) {
                $xml .= '<ss:Row>';
                foreach ( $sql as $value ) {
-
                     $type = ! is_numeric ( $value ['value'] ) ? 'String' : 'Number';
 
                     $xml .= '<ss:Cell><Data ss:Type="' . $type . '">' . $value ['value'] . '</Data></ss:Cell>';
@@ -103,7 +95,6 @@ class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployI
           $xml .= '</ss:Table></Worksheet>';
 
           $xml .= '</Workbook>';
-
 
         if (! isset($this->deploy['save'])) {
             $this->deploy['save'] = false;
@@ -135,11 +126,9 @@ class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployI
             throw new Bvb_Grid_Exception($this->deploy['dir'] . ' is not writable');
         }
 
-
         if ( $this->deploy['save'] == 1 ) {
             file_put_contents($this->deploy['dir'] . $this->deploy['name'] . ".xls", $xml);
         }
-
 
         if ($this->deploy['download'] == 1) {
             header ( 'Content-type: application/excel' );
@@ -147,11 +136,6 @@ class Bvb_Grid_Deploy_Excel extends Bvb_Grid  implements Bvb_Grid_Deploy_DeployI
             echo $xml;
         }
 
-          die ();
-     }
-
+        die ();
+    }
 }
-
-
-
-

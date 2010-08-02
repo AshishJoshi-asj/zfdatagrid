@@ -18,13 +18,10 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-
 class Bvb_Grid_Source_Json extends Bvb_Grid_Source_Array
 {
-
     public function __construct ($array, $loop = null, $columns = null)
     {
-
         $array = trim($array);
 
         if ($array[0] != '{') {
@@ -65,7 +62,4 @@ class Bvb_Grid_Source_Json extends Bvb_Grid_Source_Array
 
         return $this;
     }
-
-
-
 }

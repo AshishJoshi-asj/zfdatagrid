@@ -18,13 +18,9 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-
-
 class Bvb_Grid_Template_Odt_Odt
 {
-
     public $options;
-
 
     public $colSpan;
 
@@ -32,18 +28,13 @@ class Bvb_Grid_Template_Odt_Odt
 
     public $i = 0;
 
-
     public function __construct($options = array())
     {
-
         $this->odtOptions = $options;
-
     }
-
 
     public function info()
     {
-
         $pdf = array ('logo' => 'public/images/logo.png', 'title' => 'DataGrid Zend Framework', 'subtitle' => 'Easy and powerfull - (Demo document)', 'footer' => 'Downloaded from: http://www.petala-azul.com ' );
 
         $pdf = array_merge ( $pdf, $this->odtOptions );
@@ -51,10 +42,8 @@ class Bvb_Grid_Template_Odt_Odt
         return $pdf;
     }
 
-
     public function globalStart()
     {
-
         return '<?xml version="1.0" encoding="UTF-8"?>
 <office:document-content
 	xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
@@ -206,27 +195,21 @@ class Bvb_Grid_Template_Odt_Odt
 		table:number-columns-repeated="' . $this->options['colspan']. '" />';
     }
 
-
     public function globalEnd()
     {
-
         return '</table:table><text:p text:style-name="Standard" />
 		</office:text>
 	</office:body>
 </office:document-content>';
     }
 
-
     public function header()
     {
-
         if (isset($this->options ['logo']) && is_file ( $this->options ['logo'] ))
         {
-
-            if(strpos($this->options['logo'],'/')!==false)
-            {
+            if(strpos($this->options['logo'],'/')!==false) {
                 $arrayLogo = explode("/",$this->options['logo']);
-            }else{
+            } else {
                 $arrayLogo = array($this->options['logo']);
             }
 
@@ -599,9 +582,7 @@ class Bvb_Grid_Template_Odt_Odt
 	</office:master-styles>
 </office:document-styles>';
 
-
         } else {
-
 
             $header = '<?xml version="1.0" encoding="UTF-8"?>
 <office:document-styles
@@ -957,41 +938,31 @@ class Bvb_Grid_Template_Odt_Odt
 		</style:master-page>
 	</office:master-styles>
 </office:document-styles>';
-
         }
-
 
         return $header;
     }
 
-
     public function titlesStart()
     {
-
         return '<table:table-row>';
     }
 
-
     public function titlesEnd()
     {
-
         return '</table:table-row>';
     }
 
-
     public function titlesLoop()
     {
-
         return '<table:table-cell table:style-name="Table1.D1"
 			office:value-type="string">
 			<text:p text:style-name="P4"><![CDATA[{{value}}]]> </text:p>
 		</table:table-cell>';
     }
 
-
     public function noResults()
     {
-
         $return = '
 	<table:table-row>
 		<table:table-cell table:style-name="Table1.D2"
@@ -1007,13 +978,10 @@ class Bvb_Grid_Template_Odt_Odt
         $return .= '</table:table-row>';
 
         return $return;
-
     }
-
 
     public function hRow()
     {
-
         $return = '<table:table-row>
 		<table:table-cell table:style-name="Table1.D2"
 			table:number-columns-spanned="' .  $this->options['colspan']. '" office:value-type="string">
@@ -1030,71 +998,48 @@ class Bvb_Grid_Template_Odt_Odt
         return $return;
     }
 
-
     public function loopStart()
     {
-
         $this->i ++;
 
         return '<table:table-row>';
     }
 
-
     public function loopEnd()
     {
-
         return '</table:table-row>';
     }
 
-
     public function loopLoop()
     {
-
-
-        if ($this->i % 2)
-        {
-
-
+        if ($this->i % 2) {
             return '<table:table-cell table:style-name="Table1.A2"
 			office:value-type="string">
 			<text:p text:style-name="Table_20_Contents"><![CDATA[{{value}}]]></text:p>
 		</table:table-cell>';
-
-        } else
-        {
-
+        } else {
             return '<table:table-cell table:style-name="Table1.A3"
 			office:value-type="string">
 			<text:p text:style-name="Table_20_Contents"><![CDATA[{{value}}]]></text:p>
 		</table:table-cell>';
-
         }
-
     }
-
 
     public function sqlExpStart()
     {
-
         return '<table:table-row>';
     }
 
-
     public function sqlExpEnd()
     {
-
         return '</table:table-row>';
     }
 
-
     public function sqlExpLoop()
     {
-
         return '<table:table-cell table:style-name="Table1.A2"
 			office:value-type="string">
 			<text:p text:style-name="Table_20_Contents"><![CDATA[{{value}}]]></text:p>
 		</table:table-cell>';
     }
-
-
 }

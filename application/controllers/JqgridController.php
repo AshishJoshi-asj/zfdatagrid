@@ -2,8 +2,6 @@
 
 class JqgridController extends Zend_Controller_Action
 {
-
-
     public function init ()
     {
         $this->db = Zend_Registry::get('db');
@@ -23,14 +21,12 @@ class JqgridController extends Zend_Controller_Action
         $this->_config = new Zend_Config_Ini('./application/grids/grid.ini', 'production');
     }
 
-
     /**
      * Show the source code for this controller
-     *
      */
     public function codeAction ()
-    {}
-
+    {
+    }
 
     public function doAction ()
     {
@@ -38,32 +34,28 @@ class JqgridController extends Zend_Controller_Action
         die();
     }
 
-
     public function indexAction ()
     {
         // construct JqGrid and let it configure
         $grid1 = new Bvb_Grid_Deploy_JqGrid($this->_config);
         $this->configG1($grid1, $this->_getParam('onlyFromPolynesia', 'false') === 'true');
 
-
         // pass grids to view and deploy() them there
         $this->view->g1 = $grid1->deploy();
     }
-
 
     public function exportAction ()
     {
         // construct JqGrid and let it configure
         $grid1 = Bvb_Grid::factory('Bvb_Grid_Deploy_JqGrid', $this->_config, '', // this is the defualt grid class used to render on page
-array('csv' => array($this, 'configG1PostCsv'))// do post config for Csv export
-);
+            array('csv' => array($this, 'configG1PostCsv'))// do post config for Csv export
+        );
         $this->configG1($grid1, $this->_getParam('onlyFromPolynesia', 'false') === 'true');
         // pass grids to view and deploy() them there
         $this->view->g1 = $grid1->deploy();
 
         $this->render('index');
     }
-
 
     /**
      * This will run if we will export to Csv before deploy() and ajax() functions
@@ -74,14 +66,12 @@ array('csv' => array($this, 'configG1PostCsv'))// do post config for Csv export
         $grid->updateColumn('_action', array('hide' => true));
     }
 
-
     public function g1ActionBar ($id)
     {
         $helper = new Zend_View_Helper_Url();
         $actions = array(array('href' => $helper->url(array('action' => 'do', 'what' => 'view', 'id' => $id)), 'caption' => 'View', 'class' => '{view}'), array('href' => $helper->url(array('action' => 'do', 'what' => 'edit', 'id' => $id)), 'caption' => 'Edit', 'class' => '{edit} fixedClass'), array('href' => $helper->url(array('action' => 'do', 'what' => 'delete', 'id' => $id)), 'caption' => 'Delete', 'class' => '{delete}'), array('onclick' => new Zend_Json_Expr('alert("you clicked on ID: "+jQuery(this).closest("tr").attr("id"));'), 'caption' => 'Alert Me'));
         return Bvb_Grid_Deploy_JqGrid::formatterActionBar($actions);
     }
-
 
     public function configG1 ($grid, $onlyFromPolynesia = false)
     {
@@ -97,7 +87,7 @@ array('csv' => array($this, 'configG1PostCsv'))// do post config for Csv export
         ////////////////// and for jqg array see http://www.trirand.com/jqgridwiki/doku.php?id=wiki:colmodel_options
         $grid->updateColumn('ID', array('title' => '#ID', 'hide' => true));
         $grid->updateColumn('_action', array('search' => false, // this will disable search on this field
-'order' => 1, 'title' => 'Action', 'width' => 100, 'class' => 'bvb_action bvb_first', 'callback' => array('function' => array($this, 'g1ActionBar'), 'params' => array('{{ID}}')), 'jqg' => array('fixed' => true, 'search' => false)));
+            'order' => 1, 'title' => 'Action', 'width' => 100, 'class' => 'bvb_action bvb_first', 'callback' => array('function' => array($this, 'g1ActionBar'), 'params' => array('{{ID}}')), 'jqg' => array('fixed' => true, 'search' => false)));
         $grid->updateColumn('Name', array('title' => 'City name', 'width' => 260));
         $grid->updateColumn('CountryCode', array('title' => 'Country code', 'searchType' => "="));
         $grid->updateColumn('District', array('title' => 'District (ucase)', 'callback' => array('function' => create_function('$text', 'return strtoupper($text);'), 'params' => array('{{District}}'))));
@@ -115,24 +105,21 @@ array('csv' => array($this, 'configG1PostCsv'))// do post config for Csv export
         $grid->setExport(array(// define parameters for csv export, see Bvb_Grid::getExports
         'csv' => array('caption' => 'Csv')));
         $grid->setJqgParams(array('caption' => 'jqGrid Example', 'forceFit' => true, 'viewrecords' => false, // show/hide record count right bottom in navigation bar
-'rowList' => array(10, 15, 50), // show row number per page control in navigation bar
-'altRows' => true)// rows will alternate color
-);
+            'rowList' => array(10, 15, 50), // show row number per page control in navigation bar
+            'altRows' => true)// rows will alternate color
+        );
         $grid->setJqgParam('viewrecords', true); // yet another way to set jqGrid property viewrecords
         $grid->jqgViewrecords = true; // yet another way to set jqGrid property viewrecords
-
 
         $grid->setBvbParams(array('id' => 'ID'));
         $grid->setBvbParam('id', 'ID'); // another way to set own Bvb_Grid_Deploy_JqGrid parameter
         $grid->bvbId = 'ID'; // yet another way to set own Bvb_Grid_Deploy_JqGrid parameter
-
 
         $grid->bvbOnInit = 'console.log("this message will not be logged because of call to bvbClearOnInit().");';
         $grid->bvbClearOnInit();
         $grid->bvbSetOnInit('console.log("jqGrid initiated ! If data are remote they are not loaded at this point.");');
 
         //$grid->bvbFirstDataAsLocal = false; // how will grid receive first data ?
-
 
         ////////////////// 5. set ajax ID and process response if requested
         $grid->ajax(get_class($grid));

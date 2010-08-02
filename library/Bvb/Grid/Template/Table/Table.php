@@ -18,10 +18,8 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-
 class Bvb_Grid_Template_Table_Table
 {
-
     public $hasExtraRow = 0;
 
     public $hasFilters = 1;
@@ -34,72 +32,60 @@ class Bvb_Grid_Template_Table_Table
 
     public $export;
 
-
     public function globalStart ()
     {
         return "<table class=\"borders\" align=\"center\" cellspacing=\"0\" cellpadding=\"0\">".PHP_EOL;
     }
-
 
     public function globalEnd ()
     {
         return "</table>".PHP_EOL;
     }
 
-
     public function extra ()
     {
         return "    <tr>".PHP_EOL."     <td class=\"querySupport\" colspan=\"{$this->options['colspan']}\"><div style=\"text-align:right;\">{{value}}</div></td></tr>";
     }
-
 
     public function titlesStart ()
     {
         return "    <tr>";
     }
 
-
     public function titlesEnd ()
     {
         return "    </tr>".PHP_EOL;
     }
-
 
     public function titlesLoop ()
     {
         return "    <th>{{value}}</th>".PHP_EOL;
     }
 
-
     public function filtersStart ()
     {
         return "    <tr>".PHP_EOL;
     }
-
 
     public function filtersEnd ()
     {
         return "    </tr>".PHP_EOL;
     }
 
-
     public function noResults ()
     {
         return "      <td  colspan=\"{$this->options['colspan']}\" class=\"noRecords\">{{value}}</div>".PHP_EOL;
     }
-
 
     public function filtersLoop ()
     {
         return "        <td class=\"subtitulo\" >{{value}}</td>".PHP_EOL;
     }
 
-
     public function hRow ($values)
     {
         return "        <td  colspan=\"{$this->options['colspan']}\" class=\"hbar\"><div>{{value}}</div></td>".PHP_EOL;
     }
-
 
     public function loopStart ($class)
     {
@@ -113,16 +99,13 @@ class Bvb_Grid_Template_Table_Table
         return "    <tr $class>".PHP_EOL;
     }
 
-
     public function loopEnd ()
     {
         return "    </tr>".PHP_EOL;
     }
 
-
     public function formMessage ($ok = false)
     {
-
         if ( $ok ) {
             $class = "";
         } else {
@@ -131,30 +114,25 @@ class Bvb_Grid_Template_Table_Table
         return "<div class=\"alerta$class\">{{value}}</div>";
     }
 
-
     public function loopLoop ()
     {
         return "        <td class=\"{{class}} \" style=\"{{style}}\" >{{value}}</td>".PHP_EOL;
     }
-
 
     public function sqlExpStart ()
     {
         return "    <tr>".PHP_EOL;
     }
 
-
     public function sqlExpEnd ()
     {
         return "    </tr>".PHP_EOL;
     }
 
-
     public function sqlExpLoop ()
     {
         return "     <td class=\"sum {{class}}\">{{value}}</td>".PHP_EOL;
     }
-
 
     public function pagination ()
     {
@@ -165,34 +143,28 @@ class Bvb_Grid_Template_Table_Table
         </td>".PHP_EOL."</tr>".PHP_EOL;
     }
 
-
     public function images ($url)
     {
         return array('asc' => "<img src=\"" . $url . "arrow_up.gif\" border=\"0\">", 'desc' => "<img src=\"" . $url . "arrow_down.gif\" border=\"0\">", 'delete' => "<img src=\"" . $url . "delete.png\" border=\"0\">", 'detail' => "<img src=\"" . $url . "detail.png\" border=\"0\">", 'edit' => "<img src=\"" . $url . "edit.png\"  border=\"0\">");
     }
-
 
     public function detail ()
     {
         return "    <tr>".PHP_EOL."     <td class='detailLeft'>{{field}}</td><td class='detailRight'>{{value}}</td>".PHP_EOL."</tr>".PHP_EOL;
     }
 
-
     public function detailEnd ()
     {
         return "    <tr>".PHP_EOL. "     <td colspan='2'><a href='{{url}}'>{{return}}</a></td>".PHP_EOL."    </tr>".PHP_EOL;
     }
-
 
     public function detailDelete ()
     {
         return "<tr><td colspan='2'>{{button}}</td></tr>".PHP_EOL;
     }
 
-
     public function export ($exportDeploy, $images, $url, $gridId)
     {
-
         $exp = '';
         foreach ( $exportDeploy as $export ) {
 
@@ -222,23 +194,18 @@ class Bvb_Grid_Template_Table_Table
         return $exp;
     }
 
-
     public function scriptOnAjaxOpen ($element)
     {
         return "document.getElementById(ponto).innerHTML= '<div style=\"width:'+(document.getElementById('" . $element . "').offsetWidth - 2)+'px;height:'+(document.getElementById('" . $element . "').offsetHeight - 2)+'px;\" class=\"gridLoading\">&nbsp;</div>'";
     }
-
 
     public function scriptOnAjaxResponse ($element)
     {
         return 'document.getElementById(ponto).innerHTML=xmlhttp.responseText';
     }
 
-
     public function scriptOnAjaxStateChange ($element)
     {
         return '';
     }
-
 }
-

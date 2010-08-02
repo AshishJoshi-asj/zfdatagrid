@@ -18,13 +18,10 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-
 class Bvb_Grid_Source_Xml extends Bvb_Grid_Source_Array
 {
-
     public function __construct ($url, $loop, $columns = null)
     {
-
         if (strstr($url, '<?xml')) {
             $xml = simplexml_load_string($url);
         } else {
@@ -63,6 +60,5 @@ class Bvb_Grid_Source_Xml extends Bvb_Grid_Source_Array
 
         unset($columns);
         unset($xml);
-
     }
 }

@@ -18,10 +18,8 @@
  * @author     Bento Vilas Boas <geral@petala-azul.com >
  */
 
-
 class Bvb_Grid_Template_Print_Print implements Bvb_Grid_Template_Print_PrintInterface
 {
-
     public $i;
 
     /**
@@ -30,11 +28,8 @@ class Bvb_Grid_Template_Print_Print implements Bvb_Grid_Template_Print_PrintInte
      */
     public $options = array();
 
-
     public function globalStart ()
     {
-
-
         $return = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=" . $this->options['charEncoding']. "\" />
         </head><body onload='window.print()';>";
         $return .= "<table  border=1 cellspacing=0 cellpadding=0 width='100%'
@@ -43,10 +38,8 @@ class Bvb_Grid_Template_Print_Print implements Bvb_Grid_Template_Print_PrintInte
         return $return;
     }
 
-
     public function header ()
     {
-
         if (isset($this->options ['logo']) && is_file ( $this->options ['logo'] )){
             $img = "<img align=\"left\" src=\"" . $this->options['logo'] . "\" border=\"0\">";
         } else {
@@ -60,12 +53,10 @@ class Bvb_Grid_Template_Print_Print implements Bvb_Grid_Template_Print_PrintInte
   </td></tr>";
     }
 
-
     public function globalEnd ()
     {
         return "</table></div></body></html>";
     }
-
 
     public function titlesStart ()
     {
@@ -77,14 +68,12 @@ class Bvb_Grid_Template_Print_Print implements Bvb_Grid_Template_Print_PrintInte
         return "</tr>";
     }
 
-
     public function titlesLoop ()
     {
         return " <td style='border:solid black 1.0pt;background-color:black;color:#FFFFFF;padding:5px'>
           <p align=center style='text-align:center'><b><span style='font-size:10.0pt;'>{{value}}<o:p></o:p></span></b></p>
   </td>";
     }
-
 
     public function loopStart ()
     {
@@ -93,33 +82,24 @@ class Bvb_Grid_Template_Print_Print implements Bvb_Grid_Template_Print_PrintInte
         return "<tr>";
     }
 
-
-
     public function loopEnd ()
     {
         return "</tr>";
     }
 
-
-
     public function loopLoop ()
     {
-
-
         if ($this->i % 2) {
             return "<td style='border-top:none;border-left:solid black 1.0pt;border-bottom:solid black 1.0pt;
              border-right:solid black 1.0pt; background:#E0E0E0;padding:3px'> <p><span>
              <span style='font-size:8.0pt;font-family:Helvetica;'>{{value}}<o:p></o:p></span></p> </td>";
-
         } else {
             return "<td style='border-top:none;border-left:solid black 1.0pt; border-bottom:solid black 1.0pt;
             border-right:solid black 1.0pt; padding:3px'> <p class=MsoNormal><span style='font-size:8.0pt;
   font-family:Helvetica;'>{{value}}<o:p></o:p></span></p>
   </td>";
         }
-
     }
-
 
     public function hRow ()
     {
@@ -144,14 +124,10 @@ class Bvb_Grid_Template_Print_Print implements Bvb_Grid_Template_Print_PrintInte
         return "<tr>";
     }
 
-
-
     public function sqlExpEnd ()
     {
         return "</tr>";
     }
-
-
 
     public function sqlExpLoop ()
     {
@@ -159,7 +135,4 @@ class Bvb_Grid_Template_Print_Print implements Bvb_Grid_Template_Print_PrintInte
         padding:5px;'> <p><span style='font-size:8.0pt; font-family:Helvetica;'>{{value}}<o:p></o:p></span></p>
   </td>";
     }
-
-
 }
-

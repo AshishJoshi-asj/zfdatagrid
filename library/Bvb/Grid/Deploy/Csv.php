@@ -68,7 +68,6 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
      */
     function __construct($options)
     {
-
         parent::__construct($options);
 
         // default pagination, should be adjusted based on data processed to improve speed
@@ -106,7 +105,6 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
             // check if this kind of export is alowed
             throw new Bvb_Grid_Exception($this->__("You dont' have permission to export the results to this format"));
         }
-
     }
 
     /**
@@ -118,10 +116,8 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
      */
     function buildTitltesCsv($titles)
     {
-
         $grid = '';
         foreach ($titles as $title) {
-
             $grid .= '"' . $title ['value'] . '",';
         }
 
@@ -137,10 +133,8 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
      */
     function buildSqlexpCsv($sql)
     {
-
         $grid = '';
         if (is_array($sql)) {
-
             foreach ($sql as $exp) {
                 $grid .= '"' . $exp ['value'] . '",';
             }
@@ -158,10 +152,8 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
      */
     function buildGridCsv($grids)
     {
-
         $grid = '';
         foreach ($grids as $value) {
-
             foreach ($value as $final) {
                 $grid .= '"' . $final ['value'] . '",';
             }
@@ -207,14 +199,9 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
         parent::deploy();
 
         if ($this->actionEnabled('download')) {
-
             // send first headers
             ob_end_clean();
 
-            /* if(ini_get('zlib.output_compression')) {
-              die;
-              ini_set('zlib.output_compression', 'Off');
-              } */
             header('Content-Description: File Transfer');
             header('Cache-Control: public, must-revalidate, max-age=0'); // HTTP/1.1
             header('Pragma: public');
@@ -224,11 +211,7 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
             header('Content-Type: application/force-download');
             header('Content-Type: application/octet-stream', false);
             header('Content-Type: application/download', false);
-            //header("Content-Type: application/csv");
-            //header ( 'Content-type: text/plain; charset=utf-8' . $this->charEncoding );
-
             header('Content-Disposition: attachment; filename="' . $this->getFileName() . '"');
-
             header('Content-Transfer-Encoding: binary');
         }
         if ($this->actionEnabled('store')) {
@@ -306,5 +289,4 @@ class Bvb_Grid_Deploy_Csv extends Bvb_Grid implements Bvb_Grid_Deploy_DeployInte
     {
         return isset($this->deploy[$action])?$this->deploy[$action]:false;
     }
-
 }
