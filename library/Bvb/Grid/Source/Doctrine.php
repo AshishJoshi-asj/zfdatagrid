@@ -1214,13 +1214,4 @@ class Bvb_Grid_Source_Doctrine implements Bvb_Grid_Source_SourceInterface
     {
         throw new Exception('Not yet Implemented');
     }
-
-    /**
-     * @todo Implement
-     * @see library/Bvb/Grid/Source/Bvb_Grid_Source_SourceInterface::getAutoCompleteForFilter()
-     */
-    public function getAutoCompleteForFilter( $term, $field, $specialKey='', $output = 'json')
-    {
-        throw new Exception('Not yet Implemented');
-    }
 }
