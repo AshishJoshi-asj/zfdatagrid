@@ -36,7 +36,7 @@ class Bug
     private $next;
 
     /**
-     * @ManyToOne(targetEntity="Account", inversedBy="bugsToReview")
+     * @ManyToOne(targetEntity="Account")
      * @JoinColumn(name="assigned_to", referencedColumnName="Id")
      */
     private $assignedTo;

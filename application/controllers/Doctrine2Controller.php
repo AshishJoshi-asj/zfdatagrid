@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Doctrine2 Controller.
  *
@@ -9,7 +8,6 @@
  */
 class Doctrine2Controller extends Zend_Controller_Action
 {
-
     /**
      *
      * @var \Doctrine\ORM\EntityManager
@@ -23,7 +21,7 @@ class Doctrine2Controller extends Zend_Controller_Action
     public function init()
     {
         Zend_Dojo::enableView($this->view);
-
+        
         $this->view->url = Zend_Registry::get('config')->site->url;
         $this->view->action = $this->getRequest()->getActionName();
         header('Content-Type: text/html; charset=ISO-8859-1');
@@ -46,32 +44,7 @@ class Doctrine2Controller extends Zend_Controller_Action
         $grid->setColumnsHidden(array('code'));
 
         $script = "$(document).ready(function() {";
-        foreach ($grid->getVisibleFields() as $name) {
-            $script .= "$(\"input#filter_$name\").autocomplete({focus: function(event, ui) {document.getElementById('filter_$name').value = ui.item.value }, source: '{$grid->getAutoCompleteUrlForFilter($name)}'});\n";
-        }
-        $script .= "});";
-        $grid->getView()->headScript()->appendScript($script);
-
-        $this->view->pages = $grid->deploy();
-
-        $this->renderScript('site/index.phtml');
-    }
-
-    public function accountAction()
-    {
-        $em = $this->em;
-        $grid = $this->grid();
-        $qb = $em->getRepository('\My\Entity\Account')->createQueryBuilder('c');
-        $qb->select('c.name', 'SIZE(c.bugsToReview) AS bugsToReview');
-
-        $grid->setUseKeyEventsOnFilters(true);
-
-        $source = new Bvb_Grid_Source_Doctrine2($qb, $em);
-
-        $grid->setSource($source);
-
-        $script = "$(document).ready(function() {";
-        foreach ($grid->getVisibleFields() as $name) {
+        foreach($grid->getVisibleFields() as $name) {
             $script .= "$(\"input#filter_$name\").autocomplete({focus: function(event, ui) {document.getElementById('filter_$name').value = ui.item.value }, source: '{$grid->getAutoCompleteUrlForFilter($name)}'});\n";
         }
         $script .= "});";
